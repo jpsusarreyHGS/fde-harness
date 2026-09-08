@@ -1,0 +1,30 @@
+# Vocabulary audit — {{CLIENT_NAME}}
+
+Every organisation names the same real-world thing differently by function — **and frequently at different grains**, which is why integrations break weekly and nobody can find the cause.
+
+**Their words are the asset.** Do not normalise into industry-standard terms without logging it as a decision with a named approver.
+
+<!-- table:vocabulary-audit.terms role=register id=Term -->
+
+| Term | Said by (role) | Context | Apparent meaning | **Grain — one row is one what?** | Conflicts with | Date |
+|---|---|---|---|---|---|---|
+
+<!-- table:vocabulary-audit.divergences role=register id=Concept -->
+
+## Divergences
+
+Where two functions use different words for the same thing. **Both become synonyms**; the canonical choice is a logged decision, not the modeller's preference.
+
+| Concept | Function A calls it | Function B calls it | Same thing? | Same grain? | Canonical choice | Approved by |
+|---|---|---|---|---|---|---|
+
+<!-- table:vocabulary-audit.grain-mismatches role=register id=Word -->
+
+## Grain mismatches
+
+**Same word at different grains is two terms.** Naming them apart is often the single most valuable thing the engagement delivers — the client has been having a recurring argument nobody could resolve because both sides were right about different things.
+
+A G1 criterion is the canonical grain **chosen and defended**, with source-system grain mismatches identified as the cause of whatever breaks weekly.
+
+| Word | Meaning A (grain) | Meaning B (grain) | Systems involved | What breaks because of it | New names | Decided by |
+|---|---|---|---|---|---|---|

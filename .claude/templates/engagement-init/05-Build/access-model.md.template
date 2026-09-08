@@ -1,0 +1,56 @@
+# Access model — {{CLIENT_NAME}}
+
+The record of design for access and permissions. Derived from `../03-Systems/ontology/personas.md`.
+
+## Roles
+
+| Role | Source of truth | Session-derived | Notes |
+|---|---|---|---|
+| | IdP group / app role | yes | |
+
+**Role comes from the authenticated session only** — never from client input, a header, or a request body. This is not configurable.
+
+## Matrix
+
+| Role | Object | Read | Create | Modify | Approve | Close |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+## Write allow-list
+
+| Write id | Object | Roles permitted | Approver role | Reversible | Provenance | Use case |
+|---|---|---|---|---|---|---|
+| | | | | | stamped | UC- |
+
+## Two-phase write
+
+Every write follows this path. Drawing or building it differently breaks the security model.
+
+1. Agent proposes → signed, expiring proposal token. **Nothing has changed yet.**
+2. Named approver role reviews, with the context needed to decide — not just the proposed action.
+3. Approval re-binds the template **from scratch** from `{templateId, params}` and **re-checks the role** before executing.
+4. Execution is audited: who, what, when, what they saw.
+
+## Approval path load
+
+An approval path that becomes a bottleneck will be routed around, and a gate that is routed around is worse than no gate because it is still on the architecture diagram.
+
+| Write | Expected volume | Approvers available | Target latency | Measured latency |
+|---|---|---|---|---|
+| | | | | |
+
+## Impersonation tests
+
+One authorisation-denied test per role per write, run by the `evaluator`.
+
+| Role | Attempted | Expected | Test case | Result |
+|---|---|---|---|---|
+| | | denied + audited | | |
+
+## Audit
+
+| Path | Audited | Degrades to | Retention |
+|---|---|---|---|
+| reads | yes | logs | |
+| writes | yes | logs | |
+| denials | yes | logs | |

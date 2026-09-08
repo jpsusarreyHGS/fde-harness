@@ -1,0 +1,42 @@
+# Stage gate 2 — Build readiness — {{CLIENT_NAME}}
+
+Between stages `06` and `07`. The bootcamp's Week 2 bar. The system runs live against a **held-out slice it has never seen**.
+
+<!-- table:stage-gate-2.decision role=kv -->
+
+| Item | Value |
+|---|---|
+| Recommendation | READY · READY WITH CAVEATS · NOT READY |
+| Held-out slice used | |
+| Assessed | |
+| Decided | |
+| Decided by | |
+
+<!-- table:stage-gate-2.criteria role=labels key=Criterion -->
+
+## Criteria
+
+| Criterion | Standard | Status | Evidence | To close | Owner |
+|---|---|---|---|---|---|
+| **The system works** | Meets the acceptance threshold on the held-out slice with **zero silent failures** — everything below confidence routes to the gate | | | | |
+| **The evidence exists** | Eval report with a failure taxonomy · audit trail demonstrable on **any run the reviewer picks** · regression gate **blocks a deliberately broken change** | | | | |
+| **The judgment is defensible** | Allocation grid **survives challenge** · the **declines are argued convincingly** · the cost envelope is **arithmetic rather than hope** | | | | |
+
+Three of these are adversarial and must be rehearsed, not assumed: *any run the reviewer picks*, *a deliberately broken change*, and *survives challenge*.
+
+<!-- table:stage-gate-2.behaviours role=labels key=Behaviour -->
+
+## Behaviours
+
+| Behaviour | Observed | Where |
+|---|---|---|
+| Shipped at least one thing in under a day and closed the loop with a real user | | |
+| **Protected the pilot charter under scope pressure without damaging the sponsor relationship** | | |
+| Made an explicit fold-in / discard call on every artefact — **nothing labelled "temporary"** | | |
+
+<!-- table:stage-gate-2.caveats role=register id=Caveat -->
+
+## Caveats the operator would be accepting
+
+| Caveat | Consequence if it bites | Accepted by |
+|---|---|---|

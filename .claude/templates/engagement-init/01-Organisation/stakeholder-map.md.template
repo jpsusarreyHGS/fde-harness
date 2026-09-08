@@ -1,0 +1,42 @@
+# Stakeholder map — {{CLIENT_NAME}}
+
+The **five roles** every engagement needs. An unnamed role is an open question, not a blank cell.
+
+<!-- table:stakeholder-map.five-roles role=labels key=Role -->
+
+| Role | Name | What they give you | Engaged? | Notes |
+|---|---|---|---|---|
+| Executive sponsor | {{SPONSOR}} | Budget, mandate, the definition of success that will actually be judged | | Confirm they control the budget — often they don't |
+| Process owner | | The official workflow and the authority to change it | | If nobody owns it end to end, that is your first finding |
+| The operator | | The real workflow, including everything undocumented | | Ask the process owner who does the work daily. Then go sit with them |
+| **The exception holder** | | The routing rules that exist in exactly one person's head | | "When it's ambiguous, who decides?" **The most valuable name you'll get** |
+| The systems gatekeeper | | Access, data, integration reality, what is immovable | | Engage early — **access latency is the top schedule risk** |
+
+<!-- table:stakeholder-map.others role=register id=Role -->
+
+## Other stakeholders
+
+| Role | Name | Function | Interest | Engaged? |
+|---|---|---|---|---|
+
+<!-- table:stakeholder-map.decision-rights role=register id=Decision -->
+
+## Decision rights
+
+Who signs off what, in order. **A path with an unnamed step will stall at that step**, and you will not find out until it stalls. Must be *defensible* at G1 — you could state these to the sponsor and they would agree.
+
+| Decision | Approver role | Escalation | Typical latency |
+|---|---|---|---|
+
+<!-- table:stakeholder-map.labour role=kv -->
+
+## Labour representation
+
+Drives the monitoring constraint — see `skills-practice/evidence-handling`.
+
+| Item | Value |
+|---|---|
+| Works council / union present | {{LABOUR}} |
+| Consultation required for observation | |
+| Consultation status | |
+| Contact | |

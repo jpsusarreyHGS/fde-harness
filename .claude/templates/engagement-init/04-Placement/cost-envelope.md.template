@@ -1,0 +1,29 @@
+# Cost envelope — {{CLIENT_NAME}}
+
+Projected **before** the budget conversation. At G2 the bar is that this is **arithmetic rather than hope** — so show the arithmetic.
+
+<!-- table:cost-envelope.rows role=register id=Workflow -->
+
+| Workflow | Volume assumed | Inference | Compute | Storage | Connector calls | **Human gate** | Total per txn | Manual cost per txn | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+
+**Human-gate load is the line teams forget**, and on approval-heavy workflows it dominates. Count reviewer minutes per transaction at the target autonomy rung, not at rung 5.
+
+A per-transaction cost above the manual cost it replaces is a **finding**. Finding it here costs an afternoon; finding it after the build costs the engagement's credibility.
+
+<!-- table:cost-envelope.assumptions role=register id=Assumption -->
+
+## Assumptions behind the arithmetic
+
+| Assumption | Value | Source | Sensitivity if wrong |
+|---|---|---|---|
+
+<!-- table:cost-envelope.scaling role=kv -->
+
+## At scale
+
+| Item | Value |
+|---|---|
+| Volume at which economics break even | |
+| Volume at which human-gate load needs more reviewers | |
+| Largest single cost driver | |

@@ -1,6 +1,6 @@
 # Client vocabulary — {{CLIENT_NAME}}
 
-**Verbatim, before normalisation.** Appended as terms are encountered in the field. Becomes `02-Design/glossary.md`.
+**Verbatim, before normalisation.** Appended as terms are encountered in the field. Becomes `03-Systems/ontology/glossary.md`.
 
 Do not normalise the client's language into yours. Where two functions use different words for the same thing, or the same word at different grains, **the divergence is the finding** — record both.
 

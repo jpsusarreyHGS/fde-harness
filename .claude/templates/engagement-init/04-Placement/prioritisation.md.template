@@ -1,0 +1,44 @@
+# Prioritisation — {{CLIENT_NAME}}
+
+**Two axes.** Rank candidates, take the top-right quadrant first, and deliver the whole matrix — **including the declines** — to the client.
+
+- **Value at stake** = volume x time per instance x loaded cost, plus risk and revenue effect
+- **Feasibility** = data availability, API coverage, verifiability, exception density, political resistance. Take the **lowest** factor, not the average — feasibility is a chain and it breaks at its weakest link
+
+<!-- table:prioritisation.rows role=register id=Rank -->
+
+| Rank | Workflow | Value at stake | Feasibility | Quadrant | Weakest feasibility factor | Blocker | Blocker owner |
+|---|---|---|---|---|---|---|---|
+
+## Value working
+
+**Show the arithmetic.** The first question will be where the number came from.
+
+<!-- table:prioritisation.value-working role=register id=Workflow -->
+
+| Workflow | Instances/month | Mins per instance | Loaded hourly cost | Risk effect | Revenue effect | Value at stake | Measured or assumed? |
+|---|---|---|---|---|---|---|---|
+
+Use conservative inputs. A defensible number beats an impressive one — the impressive one gets challenged, and then the whole matrix is in question.
+
+## Feasibility working
+
+<!-- table:prioritisation.feasibility-working role=register id=Workflow -->
+
+| Workflow | Data availability | API coverage (verified) | Verifiability | Exception density | Political resistance | Lowest | Notes |
+|---|---|---|---|---|---|---|---|
+
+**Score API coverage as verified, not as documented** — the two differ. Score access as *provisioned*: "possible" is not "agreed", and "agreed" is not "provisioned".
+
+## The recommendation
+
+Two sentences a sponsor can repeat upward without you in the room.
+
+>
+
+## Declines delivered to the client
+
+<!-- table:prioritisation.declines role=register id=Workflow -->
+
+| Workflow | Recommendation | Argument | Client response |
+|---|---|---|---|

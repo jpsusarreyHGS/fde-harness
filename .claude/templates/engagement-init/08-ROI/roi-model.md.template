@@ -1,0 +1,58 @@
+# Engagement ROI model — {{CLIENT_NAME}}
+
+Enter the figures from the operating map. **Use conservative inputs — a defensible number beats an impressive one.**
+
+A G3 criterion is a **measured** outcome, not a projected one. Baselines were captured in stage 04 while the current state was still observable; this model populates with **actuals** against them.
+
+<!-- table:roi-model.inputs role=labels key=Input -->
+
+## Inputs
+
+| # | Input | Baseline (stage 04) | Actual (measured) | Source | Measured / modelled / assumed |
+|---|---|---|---|---|---|
+| 1 | Instances per month | | | | |
+| 2 | Minutes per instance (today) | | | | |
+| 3 | % handled without a human | | | | |
+| 4 | Loaded hourly cost | | | | |
+| 5 | Error rate today (%) | | | | |
+| 6 | Error rate after (%) | | | | |
+| 7 | Cost per error | | | | |
+| 8 | Build cost (one-off) | | | | |
+| 9 | Run cost per month | | | | |
+
+**Label every number.** An unlabelled figure will be read as measured.
+
+<!-- table:roi-model.outputs role=labels key=Output -->
+
+## Outputs
+
+| Output | Value | Arithmetic |
+|---|---|---|
+| Hours recovered / month | | |
+| Net benefit / month | | |
+| Payback period | | |
+| Year-one net | | |
+
+<!-- table:roi-model.counter-metrics role=register id=Counter-metric -->
+
+## Counter-metrics
+
+What must **not** get worse. A pilot that improves throughput and quietly degrades quality has not succeeded, and without a counter-metric nobody notices until a customer does.
+
+| Counter-metric | Baseline | Acceptable floor | Actual | Owner |
+|---|---|---|---|---|
+
+**Never drop these from the readout because they are unflattering.** Their absence is what a sceptical CFO looks for.
+
+<!-- table:roi-model.attribution role=kv -->
+
+## Attribution
+
+Agreed with the sponsor **before** the measurement window, not after.
+
+| Item | Value |
+|---|---|
+| Basis | shadow-mode agreement · control group · before/after |
+| Confounders named | |
+| Agreed with sponsor | |
+| Date agreed | |

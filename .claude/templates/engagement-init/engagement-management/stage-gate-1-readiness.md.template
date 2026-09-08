@@ -1,0 +1,61 @@
+# Stage gate 1 — Discovery readiness — {{CLIENT_NAME}}
+
+Between stages `03` and `04`. The bootcamp's Week 1 bar. **A gate is a stop, not a status update.** This memo recommends; the operator decides.
+
+<!-- table:stage-gate-1.decision role=kv -->
+
+| Item | Value |
+|---|---|
+| Recommendation | READY · READY WITH CAVEATS · NOT READY |
+| Assessed | |
+| Decided | |
+| Decided by | |
+
+**Code never sets `passed`.** A person does, with a name.
+
+<!-- table:stage-gate-1.criteria role=labels key=Criterion -->
+
+## Criteria
+
+Evidence must cite **rows or facts**, not just a filename.
+
+| Criterion | Status | Evidence | To close | Owner |
+|---|---|---|---|---|
+| Operating map + exception inventory at standard — all nine elements, exceptions with frequency and rule holder | | | | |
+| Stakeholder map — **five roles identified correctly**, decision rights defensible | | | | |
+| Readiness scorecard — **the data landmines found** | | | | |
+| Draft ontology — **canonical grain chosen and defended**; grain mismatches identified as the cause of what breaks weekly | | | | |
+| Evidence-handling terms signed; monitoring constraint checked | | | | |
+
+<!-- table:stage-gate-1.behaviours role=labels key=Behaviour -->
+
+## Behaviours
+
+Artefacts alone do not pass this gate.
+
+| Behaviour | Observed | Where |
+|---|---|---|
+| Chose **observation over interview**, unprompted, at least once | | |
+| **Treated resistance as information** — went and watched instead of persuading | | |
+| **Correctly identified at least one thing that should not be built** | | |
+| Can state the sponsor's real problem **in one sentence that is not what they asked for** | | |
+
+The last one is the sharpest test in the gate. If the team can only restate the request, discovery has not happened yet.
+
+<!-- table:stage-gate-1.anti-patterns role=labels key=Check -->
+
+## Anti-pattern check
+
+| Check | Confirmed |
+|---|---|
+| Not all green on first pass — on a real engagement that means it was written from intent, not evidence | |
+| "Partial" used only with a stated remainder and an owner | |
+| Readiness scorecard checked twice: possible ≠ agreed ≠ **provisioned** | |
+| Evidence cites rows, not filenames | |
+
+<!-- table:stage-gate-1.caveats role=register id=Caveat -->
+
+## Caveats the operator would be accepting
+
+| Caveat | Consequence if it bites | Accepted by |
+|---|---|---|

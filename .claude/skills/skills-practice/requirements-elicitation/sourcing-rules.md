@@ -2,7 +2,7 @@
 
 ## What counts as a source
 
-A source is a **specific, retrievable piece of evidence**: an `EV-` row in the observation log, an `EX-` row in the exception register, or a file under `01-Discovery/evidence/` with a stable name.
+A source is a **specific, retrievable piece of evidence**: an `EV-` row in the observation log, an `EX-` row in the exception register, or a file under `02-Workflow/evidence/` with a stable name.
 
 These do not count as sources:
 

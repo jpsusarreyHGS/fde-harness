@@ -21,7 +21,7 @@ Scan the source for:
 - **Named individuals.** Roles are fine; names usually are not. The exception register in particular tends to name the holder of an undocumented rule, and surfacing that person to their management can look like surfacing a workaround they are responsible for.
 - **Raw observation rows.** `observation-log.md` is internal by default. A client readout gets the synthesis, not the timestamps.
 - **Internal scoring commentary.** Qualification reasoning that says a stakeholder is unengaged is true, useful, and not a deliverable.
-- **Anything under the redaction term** in `01-Discovery/evidence-handling-terms.md`.
+- **Anything under the redaction term** in `00-Setup/evidence-handling-terms.md`.
 
 If you find something, **stop and ask** — do not silently redact, because the operator may want it there, and do not silently render, because they may not.
 
@@ -31,17 +31,17 @@ With no argument, render:
 
 | Source | Deliverable folder |
 |---|---|
-| `01-Discovery/current-state-workflow.md` | `01-Discovery/` |
-| `01-Discovery/use-case-qualification.md` | `01-Discovery/` |
-| `01-Discovery/readiness-gate.md` | `01-Discovery/` |
-| `02-Design/glossary.md` | `02-Design/` |
-| `02-Design/personas.md` | `02-Design/` |
-| `02-Design/competency-questions.md` | `02-Design/` |
-| `02-Design/use-cases.md` | `02-Design/` |
-| `03-Architecture/architecture.md` | `03-Architecture/` |
-| `03-Architecture/architecture-diagram.md` | `03-Architecture/` |
-| `engagement-management/roadmap.md` | `01-Discovery/` |
-| latest `05-Evals/runs/*.md` | `05-Evals/` |
+| `02-Workflow/operating-map.md` | `02-Workflow/` |
+| `04-Placement/prioritisation.md` | `02-Workflow/` |
+| `engagement-management/stage-gate-1-readiness.md` | `02-Workflow/` |
+| `03-Systems/ontology/glossary.md` | `03-Systems/ontology/` |
+| `03-Systems/ontology/personas.md` | `03-Systems/ontology/` |
+| `03-Systems/ontology/competency-questions.md` | `03-Systems/ontology/` |
+| `05-Build/spec.md` | `03-Systems/ontology/` |
+| `05-Build/architecture.md` | `05-Build/` |
+| `05-Build/architecture-diagram.md` | `05-Build/` |
+| `engagement-management/roadmap.md` | `02-Workflow/` |
+| latest `06-Evals/runs/*.md` | `06-Evals/` |
 
 With an argument, accept any of those names or **any in-engagement relative path** — resolved under `engagements/<slug>/`, rendered to the matching phase folder.
 

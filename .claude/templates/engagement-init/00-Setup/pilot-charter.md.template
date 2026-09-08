@@ -1,0 +1,42 @@
+# Pilot charter — {{CLIENT_NAME}}
+
+The contract. Protected under scope pressure **without damaging the sponsor relationship** — a G2 behaviour.
+
+<!-- table:pilot-charter.identity role=kv -->
+
+| Item | Value |
+|---|---|
+| Client | {{CLIENT_NAME}} |
+| Sponsor | {{SPONSOR}} |
+| Started | {{DATE}} |
+| Pilot window | |
+| Charter agreed | |
+| Agreed by | |
+
+## Scope
+
+{{SCOPE}}
+
+## Non-goals
+
+**The load-bearing half.** A scope statement with no non-goals has not been bounded, it has been described. If nothing here would disappoint anyone, the boundary is not drawn where the argument is.
+
+{{NON_GOALS}}
+
+<!-- table:pilot-charter.acceptance role=register id=Id -->
+
+## Acceptance criteria
+
+Agreed with the client, and **seen by them**. An unseen criterion is not agreed, and it will be renegotiated at the moment it matters most.
+
+| Id | Criterion | How it is measured | Threshold | Seen by client |
+|---|---|---|---|---|
+
+<!-- table:pilot-charter.out-of-scope-requests role=register id=Date -->
+
+## Requests declined against this charter
+
+Scope creep almost never arrives as a scope request — it arrives as a small helpful addition during a working session. Log it anyway.
+
+| Date | Request | Asked by | Verdict | Routed to |
+|---|---|---|---|---|

@@ -1,0 +1,28 @@
+# Fold-in or discard — {{CLIENT_NAME}}
+
+**Every hack goes into production and stays there.** If it makes someone's life easier it will run for years, and you will own it.
+
+At ship time, **every artefact gets an explicit call**: fold it into the core offering, or discard it by a **named date**. "Temporary" is not a state — it is a story we tell ourselves on the way to supporting something for a decade.
+
+A G2 behaviour and a G3 criterion. **Nothing may be labelled "temporary".**
+
+<!-- table:fold-in-or-discard.rows role=register id=Artefact -->
+
+| Artefact | What it is | Call | Discard by (date) | Owner | Folded into | Decided by |
+|---|---|---|---|---|---|---|
+
+`Call` is exactly one of `fold-in` or `discard`. There is no third value.
+
+<!-- table:fold-in-or-discard.audit role=kv -->
+
+## Audit
+
+| Item | Value |
+|---|---|
+| Artefacts in the engagement | |
+| Calls made | |
+| Anything still unlabelled | |
+| Reviewed by | |
+| Date | |
+
+An unlabelled artefact at G3 is a gate failure, not an oversight.

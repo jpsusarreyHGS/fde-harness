@@ -1,87 +1,91 @@
 ---
 name: autonomy-ladder
-description: The four autonomy rungs for an FDE-delivered workflow and the measurement each one requires — shadow, suggest, act-with-approval, act-with-audit. Covers shadow-mode comparison, agreement-rate thresholds, divergence clustering, and why a rung is a measurement rather than a phase name. Read before setting or claiming an autonomy level, or designing a human gate.
+description: Stage 07 — shipping into production. The five rungs a system is walked up, each with an explicit exit criterion, plus adoption as part of the deployment and the fold-in-or-discard call at ship time. Read before setting or claiming an autonomy level, designing a human gate, or planning a rollout.
 ---
 
 # The autonomy ladder
 
-## The premise
+## Never flip a switch
 
-"Phase 2 will be autonomous" is a plan. "This workflow agreed with the analyst on 94% of 210 live cases over three weeks, with divergence clustered on two exception types" is a decision you can defend.
+Walk the system up in stages, with an **explicit exit criterion at each rung** — and walk it up in person where you can, because guiding someone through this is far easier when you have sat next to them.
 
-**A rung is a measurement, not a phase name.** The whole point of the ladder is to replace a negotiation about confidence with a number. Once a rung has a threshold written down, delivery pressure cannot move it — and delivery pressure will try, usually late, usually with a demo as the evidence.
-
-## The four rungs
-
-| Rung | The system… | Earned by |
+| Rung | The system… | Exit when |
 |---|---|---|
-| **Shadow** | runs alongside the human on live traffic and acts on nothing | being deployed and logging both sides |
-| **Suggest** | proposes; the human does the work | agreement at or above the shadow threshold, sustained over the stated window |
-| **Act with approval** | acts only after a named role approves | suggest-rung accuracy, plus a working approval path with audit |
-| **Act with audit** | acts; every action logged and reversible | approval-rung accuracy, plus a proven rollback and a monitored error budget |
+| **1 · Controlled environment** | Runs against real data in a sandbox | Eval results are **stable across representative volume** |
+| **2 · Shadow mode** | Runs in production alongside the human, output compared, **nothing actioned** | Agreement rate is acceptable **and disagreements are understood** |
+| **3 · Human approval on every action** | Agent proposes, human approves | Approval has **become a formality** and the rejection rate is low **and explicable** |
+| **4 · Autonomous with exception routing** | Acts within confidence thresholds, escalates outside them | Escalation volume is **stable and monitored** |
+| **5 · Autonomous with monitoring** | Full production | Metrics, KPIs and SLAs instrumented, and **someone named owns it** |
 
-Note what is **not** on this ladder: unattended action with no audit and no rollback. That is not a rung, and an engagement that is asked for it should treat the request as a finding.
+Note what is not on this ladder: unattended action with no monitoring and no named owner. A request for that is a finding, not a rung.
 
-## Shadow mode
+## The exit criteria are the point
 
-Shadow mode is the instrument the whole ladder depends on, and it is the one thing in this space with no adequate off-the-shelf answer: run the agent alongside the human on live traffic, act on nothing, log both, compute agreement.
+A rung is a **measurement against its own exit criterion**, not a phase name. "Phase 2 will be autonomous" is a plan; "agreed with the analyst on 94% of 210 live cases over three weeks, disagreements clustered on two exception types" is a decision you can defend.
 
-Requirements for a shadow run to count:
+Set the thresholds at architecture time, **before any measurement exists**, into `05-Build/architecture.md`. Delivery pressure will try to move them later — usually late, usually with a demo as the evidence.
+
+**A demo is not a measurement. A stakeholder's confidence is not a measurement. Elapsed time is not a measurement.**
+
+## Rung 2 in detail — shadow mode
+
+Shadow mode is the instrument the whole ladder depends on and the one thing here with no adequate off-the-shelf answer: run alongside the human on live traffic, act on nothing, log both, compute agreement.
+
+For a shadow run to count:
 
 - **Live traffic, not replay.** A replayed dataset measures the dataset.
 - **The human does not see the agent's output.** If they do, you are measuring influence, not agreement.
-- **Both sides logged with the case id**, so disagreements are inspectable case by case.
-- **A stated window and a stated sample size**, fixed before the run starts. Choosing the window after seeing the data is how a threshold gets met.
+- **Both sides logged against the case id**, so disagreements are inspectable one by one.
+- **A stated window and sample size, fixed before the run starts.** Choosing the window after seeing the data is how a threshold gets met.
 
-## Thresholds
+### Understanding the disagreements matters more than the rate
 
-Set per engagement in `03-Architecture/architecture.md` at architect time, **before any measurement exists.** Defaults, to be adjusted by risk:
+The rung-2 exit criterion is agreement **and disagreements understood** — both halves.
 
-| Transition | Default threshold | Minimum sample |
-|---|---|---|
-| Shadow → Suggest | 90% agreement | 100 cases, 2 weeks |
-| Suggest → Act with approval | 95% agreement, zero P0 in the window | 200 cases, 3 weeks |
-| Act with approval → Act with audit | 98% agreement, proven rollback, error budget monitored | 500 cases, 4 weeks |
+- 92% clustered on one exception type is a **fixable gap**: a missing rule, probably already in the exception register, possibly a day's work.
+- 92% scattered randomly is a **capability ceiling**: no amount of iteration will move it.
 
-**Raise these for high-consequence workflows.** Where a wrong answer has regulatory, financial or safety consequence, the ladder may correctly stop at act-with-approval permanently. A workflow that never reaches the top rung is not a failed workflow.
+These look identical in a summary metric and demand opposite decisions. **Always categorise before reporting the rate.**
 
-## Divergence clustering matters more than the rate
+## Rung 3 — the gate is infrastructure, not policy
 
-**Report divergence categories, not just the agreement rate.** This is the single most important interpretive rule in this skill.
+At approval-on-every-action the approval path is a system:
 
-92% agreement where the 8% clusters on one exception type is a **fixable gap** — you have found a missing rule, probably one already sitting in the exception register, and closing it may take a day.
-
-92% scattered randomly across case types is a **capability ceiling** — the workflow may not be suitable at this rung at all, and no amount of iteration will move it.
-
-These look identical in a summary metric and require completely different decisions. Always categorise the disagreements before reporting the rate.
-
-## The human gate is infrastructure
-
-At act-with-approval, the approval path is a system, not a policy:
-
-- A review queue with the context needed to decide, not just the proposed action
+- A review queue carrying **the context needed to decide**, not just the proposed action
 - A named approver **role**, resolved from the authenticated session
 - An audit record of who approved what, when, and what they saw
-- A measured approval latency — an approval path that becomes a bottleneck will be routed around, and a gate that is routed around is worse than no gate because it is still on the architecture diagram
+- A **measured approval latency** — a path that becomes a bottleneck will be routed around, and a gate that is routed around is worse than no gate because it is still on the architecture diagram
 
-Design for the load. Approval-heavy workflows are where human-gate cost dominates unit economics, which is why qualification projects it.
+The exit criterion is that approval has become a formality. If rejections stay frequent, the system is not ready; if rejections are rare but **inexplicable**, that is worse — nobody knows why it works.
+
+## Adoption is part of the deployment
+
+**A working system with no users is a failed engagement.**
+
+- Hand-hold the first cohort personally.
+- **Watch the first week of real usage the same way you watched the original workflow.** The tells that identified the opportunity will also tell you where the new system is failing people.
+- **Treat resistance as information rather than obstruction.** When someone insists a system does not work and cannot articulate why, go and watch them use it. There is almost always a real requirement underneath that nobody thought to ask about.
+
+Record this in `07-Production/adoption.md`.
+
+## Before you leave — nothing is temporary
+
+**Every hack goes into production and stays there.** If it makes someone's life easier it will run for years, and you will own it.
+
+Make an explicit call at ship time on **every artefact**: fold it into the core offering, or discard it by a **named date**. Record both in `07-Production/fold-in-or-discard.md`.
+
+"Temporary" is not a state — it is a story we tell ourselves on the way to supporting something for a decade. The bootcamp certifies this behaviour: "made an explicit fold-in / discard call on every artefact — nothing labelled 'temporary'."
 
 ## The ledger
 
-Every measurement goes to `05-Evals/autonomy-ledger.md`:
+`07-Production/autonomy-ledger.md`, append-only:
 
-| Date | Workflow | Rung | Sample | Window | Agreement | Divergence clusters | P0 count | Decision | Decided by |
-|---|---|---|---|---|---|---|---|---|---|
+| Date | Workflow | Rung | Exit criterion | Sample | Window | Agreement | Disagreement pattern | Understood? | Decision | Decided by |
 
-**Never write a rung into the ledger without the measurement columns filled.** A ledger row with an asserted rung is the artefact this entire skill exists to prevent, and once it is written down it will be cited.
+**A row with an empty measurement renders as "asserted, not measured" — deliberately, and in red.**
 
 ## What a rung does not license
 
-A rung is measured per workflow, on the traffic it was measured on. It does not transfer to:
+A rung is measured per workflow, on the traffic it was measured on. It does **not** transfer to a different workflow however similar, to the same workflow after a model / prompt / ontology / data change (**that is a re-measurement trigger**), to a materially higher volume, or to another client.
 
-- A different workflow, however similar
-- The same workflow after a model, prompt, ontology or data change — **that is a regression trigger**
-- A volume materially above the measured window
-- A new client, ever
-
-State this boundary in the eval report. A rung read as broader than it is, is the failure mode with the worst consequences on this list.
+State this boundary in the eval report. A rung read as broader than it is, is the most consequential misreading available here.

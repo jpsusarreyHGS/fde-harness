@@ -1,6 +1,6 @@
 ---
 name: ontology-first-delivery
-description: The practice's ontology-first delivery method — why the domain model comes before the build, what promotion from discovery to ontology requires, the discovery-to-ontology artefact contract, competency questions as the ontology's acceptance test, and the governed-template invariant that keeps an agent safe over a client graph. Read before any modelling, promotion, or design of the 02-Design contract layer.
+description: The practice's ontology-first delivery method — why the domain model comes before the build, what promotion from discovery to ontology requires, the discovery-to-ontology artefact contract, competency questions as the ontology's acceptance test, and the governed-template invariant that keeps an agent safe over a client graph. Read before any modelling, promotion, or design of the 03-Systems/ontology contract layer.
 ---
 
 # Ontology-first delivery
@@ -22,7 +22,7 @@ observe → capture vocabulary verbatim → source requirements → promote enti
 
 **Never draft an entity from a blank page.** An entity with no requirement behind it is a guess about the client's business dressed up as a design artefact, and it will be defended in review because it is written down.
 
-If you find yourself modelling something you cannot trace to a `REQ-`, park it in `ontology-intake/ontology-backlog.md` with a note on what evidence would justify it. The backlog is not a rejection — it is where a candidate waits for the observation that earns it.
+If you find yourself modelling something you cannot trace to a `REQ-`, park it in `03-Systems/ontology/backlog.md` with a note on what evidence would justify it. The backlog is not a rejection — it is where a candidate waits for the observation that earns it.
 
 ## The discovery-to-ontology contract
 
@@ -31,13 +31,13 @@ The reference implementation is `Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`
 | Discovery artefact | Contract file | Becomes |
 |---|---|---|
 | `chronicle/memory/client-vocabulary.md` | `glossary.md` | Approved terms, synonyms, owners |
-| `01-Discovery/stakeholder-map.md` | `personas.md` | Roles + permission matrix → the app's role module |
-| `01-Discovery/open-questions.md` + observed asks | `competency-questions.md` | One governed read template per question |
-| `01-Discovery/use-case-qualification.md` | `use-cases.md` | Flows + the write allow-list → governed write templates |
-| `01-Discovery/system-landscape.md` | `source-systems.md` | Field mappings + identity rules → the ingestion pipelines |
-| `01-Discovery/exception-register.md` | `shapes/` + golden sets | Validation constraints + eval cases |
+| `01-Organisation/stakeholder-map.md` | `personas.md` | Roles + permission matrix → the app's role module |
+| `02-Workflow/open-questions.md` + observed asks | `competency-questions.md` | One governed read template per question |
+| `04-Placement/prioritisation.md` | `use-cases.md` | Flows + the write allow-list → governed write templates |
+| `03-Systems/systems-inventory.md` | `source-systems.md` | Field mappings + identity rules → the ingestion pipelines |
+| `02-Workflow/exception-register.md` | `shapes/` + golden sets | Validation constraints + eval cases |
 
-Assemble these in `02-Design/` in dependency order, then promote. `promotion-rules.md` carries the mechanics; `reference-architecture.md` carries the repo's structure and conventions.
+Assemble these in `03-Systems/ontology/` in dependency order, then promote. `promotion-rules.md` carries the mechanics; `reference-architecture.md` carries the repo's structure and conventions.
 
 ## Competency questions are the acceptance test
 

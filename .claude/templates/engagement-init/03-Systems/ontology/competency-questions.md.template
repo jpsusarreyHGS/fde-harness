@@ -1,0 +1,29 @@
+# Competency questions — {{CLIENT_NAME}}
+
+**The ontology's acceptance test.** One question, one governed read template, named for the `CQ-` id. Coverage is therefore countable rather than asserted.
+
+Rules:
+
+- **Every question names the persona who asks it and the evidence that they ask it.** A question nobody asked is a query you wrote for yourself — cut it.
+- **"Answerable" means you ran it.** Not that the entities exist and it should work. Coverage claimed without execution is the most common way an ontology passes a gate it should have failed.
+- A question the model cannot answer is either a **modelling gap** or a **data gap**, and which one must be stated. They have different remedies and different costs.
+
+<!-- table:competency-questions.rows role=register id=Id -->
+
+| Id | Question | Asked by | Evidence they ask it | Entities needed | Status | Template | Gap type |
+|---|---|---|---|---|---|---|---|
+
+## Coverage
+
+Derived at derive time — **do not maintain by hand.**
+
+
+<!-- table:competency-questions.cut role=register id=Question -->
+
+## Cut questions
+
+Questions considered and removed, with the reason. Recording these stops them being re-proposed every design session.
+
+| Question | Why cut |
+|---|---|
+| | nobody asks it / out of scope / answerable elsewhere |

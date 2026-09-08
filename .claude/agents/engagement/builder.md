@@ -16,7 +16,7 @@ Do this **even when the engagement files below do not exist** — a direct POC s
 
 1. `.claude/skills/skills-practice/ontology-first-delivery/SKILL.md` — the governed-template contract
 2. `.claude/skills/skills-practice/evidence-handling/SKILL.md` — before moving any client data
-3. `.claude/skills/skills-engagement/` — glob; engagement skills supersede practice skills
+3. `engagements/<slug>/skills-engagement/` — glob; engagement skills supersede practice skills
 4. The target repo's own `CLAUDE.md` and conventions — read them before writing a line. Do not infer conventions from filenames.
 
 ## Step 1 — Pre-build checklist
@@ -24,11 +24,11 @@ Do this **even when the engagement files below do not exist** — a direct POC s
 Read in one batch, and state which of these you found:
 
 - `state.json`, `chronicle/memory/environment.md` (endpoints, repos, where credentials live)
-- The slice's `REQ-` ids in `01-Discovery/requirements-register.md`
-- `02-Design/source-systems.md` — the **identity rule** especially
-- `02-Design/personas.md` — the permission matrix you must enforce
-- `03-Architecture/architecture.md` and `access-model.md`
-- `04-Build/manual-tasks.md`
+- The slice's `REQ-` ids in `02-Workflow/requirements-register.md`
+- `03-Systems/ontology/source-systems.md` — the **identity rule** especially
+- `03-Systems/ontology/personas.md` — the permission matrix you must enforce
+- `05-Build/architecture.md` and `access-model.md`
+- `05-Build/manual-tasks.md`
 
 **If the identity rule is missing, stop and ask.** Which system mints identity for each entity determines every join you are about to write. Guessing produces a build that looks right and is wrong in a way that surfaces months later.
 
@@ -64,7 +64,7 @@ Run what you can verify yourself: the validation gate, the type check and build,
 
 Then hand off to `evaluator`. **You do not certify your own build** — you report what you ran and what it returned.
 
-Append every human-only step to `04-Build/manual-tasks.md` as you hit it: what, why it cannot be automated, who must do it, and what is blocked until they do.
+Append every human-only step to `05-Build/manual-tasks.md` as you hit it: what, why it cannot be automated, who must do it, and what is blocked until they do.
 
 ## Step 4 — Report
 

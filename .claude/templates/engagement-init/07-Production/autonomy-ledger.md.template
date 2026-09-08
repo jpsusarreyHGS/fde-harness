@@ -1,0 +1,48 @@
+# Autonomy ledger — {{CLIENT_NAME}}
+
+**Never flip a switch.** Five rungs, each with an explicit exit criterion. Append-only.
+
+<!-- table:autonomy-ladder.rungs role=labels key=Rung -->
+
+| Rung | The system… | Exit when |
+|---|---|---|
+| 1 · Controlled environment | Runs against real data in a sandbox | Eval results stable across representative volume |
+| 2 · Shadow mode | Runs in production alongside the human, nothing actioned | Agreement acceptable **and disagreements understood** |
+| 3 · Human approval on every action | Agent proposes, human approves | Approval has become a formality, rejection rate low **and explicable** |
+| 4 · Autonomous with exception routing | Acts within confidence thresholds, escalates outside them | Escalation volume stable and monitored |
+| 5 · Autonomous with monitoring | Full production | Metrics, KPIs, SLAs instrumented, **someone named owns it** |
+
+<!-- table:autonomy-ledger.measurements role=register id=Date -->
+
+## Measurements
+
+| Date | Workflow | Rung | Exit criterion | Sample | Window | Agreement | Disagreement pattern | Understood? | Decision | Decided by |
+|---|---|---|---|---|---|---|---|---|---|---|
+
+**A row with an empty measurement renders as "asserted, not measured" — in red, deliberately.** A demo is not a measurement. A stakeholder's confidence is not a measurement. Elapsed time is not a measurement.
+
+## Why the disagreement pattern matters more than the rate
+
+92% clustered on one exception type is a **fixable gap** — a missing rule, probably already in the exception register, possibly a day's work. 92% scattered randomly is a **capability ceiling** — no amount of iteration will move it. They look identical in a summary metric and demand opposite decisions.
+
+<!-- table:autonomy-ledger.thresholds role=labels key=Transition -->
+
+## Thresholds for this engagement
+
+Set at architecture time, **before any measurement exists**, so delivery pressure cannot move them later.
+
+| Transition | Threshold | Min sample | Window |
+|---|---|---|---|
+| 1 → 2 | | | |
+| 2 → 3 | | | |
+| 3 → 4 | | | |
+| 4 → 5 | | | |
+
+<!-- table:autonomy-ledger.boundary role=register id=Workflow -->
+
+## What each rung does not license
+
+A rung is measured per workflow, on the traffic it was measured on. It does not transfer to another workflow, to a materially higher volume, to another client, or across a model / prompt / ontology / data change — **that is a re-measurement trigger**.
+
+| Workflow | Rung | Measured on | Re-measurement triggered by |
+|---|---|---|---|

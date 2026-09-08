@@ -1,0 +1,32 @@
+# Library contribution — {{CLIENT_NAME}}
+
+**Every engagement returns something to the pattern library at close.** The bootcamp makes it a certification requirement: at least one contribution, **accepted by the library owner**.
+
+An engagement that compounds nothing is staffing, not a practice.
+
+The fixed question: **what did we generalise, and where did it land?**
+
+<!-- table:library-contribution.rows role=register id=Contribution -->
+
+| Contribution | Type | What it generalises | Client details stripped? | Landed at | Accepted by | Date |
+|---|---|---|---|---|---|---|
+
+`Type` is one of `recipe` · `template` · `skill` · `eval-pack` · `reference-architecture` · `scenario-finding`.
+
+**Nothing is promoted with client details intact.** Generalisation means stripping names, volumes, system identifiers, and anything that would let a reader identify the account. If a pattern cannot be generalised without losing what made it useful, leave it in the engagement and say so — a useful pattern that identifies a client is a liability, not an asset.
+
+<!-- table:library-contribution.candidates role=register id=Candidate -->
+
+## Candidates considered
+
+| Candidate | Why not promoted | Revisit when |
+|---|---|---|
+
+<!-- table:library-contribution.cross-account role=register id=Pattern -->
+
+## Cross-account patterns
+
+Where the same workaround, connector, rule or module has now been built on more than one engagement — a productisation candidate.
+
+| Pattern | Engagements seen on | Effort each time | Productisation case |
+|---|---|---|---|

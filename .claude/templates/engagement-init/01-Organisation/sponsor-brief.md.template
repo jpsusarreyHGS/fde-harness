@@ -1,0 +1,43 @@
+# Sponsor brief — {{CLIENT_NAME}}
+
+<!-- table:sponsor-brief.identity role=kv -->
+
+| Item | Value |
+|---|---|
+| Sponsor | {{SPONSOR}} |
+| Controls the budget? | |
+| Personally measured on this? | |
+| Date briefed | |
+
+## Their success sentence, verbatim
+
+Capture their actual words. A G1 criterion is stating their **real** problem in one sentence that is **not** the thing they asked for — and you can only do that from their own language.
+
+> ""
+
+## The seven questions
+
+<!-- table:sponsor-brief.questions role=labels key=Question -->
+
+| Question | Answer | What you were listening for |
+|---|---|---|
+| What are you trying to accomplish? | | The goal, not the artefact. Can they state an outcome without describing a feature? |
+| What happens after you have the solution? | | If they can't answer, the request is a proxy for something else |
+| How is this being solved today? | | There is always a current solution, even if it's a spreadsheet and someone's memory |
+| What happens if we do nothing? | | Separates real urgency from ambient AI pressure. Often surfaces the actual fear |
+| Who else can do this work? | | Key-person risk masquerading as an efficiency request |
+| What have you already committed to, and to whom? | | What promise you're standing inside before recommending a timeline |
+| What would make this a failure even if the technology worked? | | Political constraints nobody would volunteer |
+
+## The restatement
+
+<!-- table:sponsor-brief.restatement role=kv -->
+
+| Item | Value |
+|---|---|
+| What they asked for | |
+| **The real problem, one sentence** | |
+| Agreed with sponsor? | |
+| Date agreed | |
+
+If the restatement is just the request in different words, discovery has not happened yet.

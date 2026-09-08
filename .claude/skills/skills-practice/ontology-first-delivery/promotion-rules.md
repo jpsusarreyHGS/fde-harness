@@ -12,7 +12,7 @@ A candidate may be promoted only when all of these hold:
 4. **Its identity rule is known** — which source system mints it, and which systems merely reference it.
 5. **At least one competency question needs it.** An entity no question touches is not yet load-bearing.
 
-A candidate failing any of these stays in `ontology-intake/ontology-backlog.md` with the failing precondition named. That note is what makes the backlog useful rather than a graveyard.
+A candidate failing any of these stays in `03-Systems/ontology/backlog.md` with the failing precondition named. That note is what makes the backlog useful rather than a graveyard.
 
 ## The identity rule
 
@@ -39,7 +39,7 @@ The most common failure is promoting an entity at the grain of the source table 
 
 ## The promotion log
 
-Every write into the ontology repo gets a row in `ontology-intake/promotion-log.md`:
+Every write into the ontology repo gets a row in `03-Systems/ontology/promotion-log.md`:
 
 | Date | What | Source ids | Repo path | Commit | Approved by |
 |---|---|---|---|---|---|

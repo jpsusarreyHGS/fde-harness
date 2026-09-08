@@ -1,0 +1,37 @@
+# Allocation grid — {{CLIENT_NAME}}
+
+Every step of the operating map assigned to **exactly one** of four categories, **with a written reason**. The reason is the artefact — an allocation without one will not survive the challenge at G2.
+
+**Deterministic is the default.** Reach for model judgement only where the input genuinely varies.
+
+| Category | Belongs here |
+|---|---|
+| `deterministic` | Rules, thresholds, lookups, transformations, routing on structured fields |
+| `model-judgement` | Classification of unstructured input, extraction from messy documents, summarisation, ambiguous categorisation |
+| `human-gate` | Approval before an irreversible or externally visible action |
+| `leave-alone` | Too risky, insufficient ROI, already automated, or about to be replaced. **A legitimate and frequently correct answer** |
+
+<!-- table:allocation-grid.rows role=register id=Id -->
+
+| Id | Step # | Step | Category | **Reason** | Blast radius | 2am call? | Owner when we leave | Volume | Fast-fix trade-off |
+|---|---|---|---|---|---|---|---|---|---|
+
+A `Reason` cell reading "makes sense" has not been done.
+
+## The declines
+
+**Identifying something that should not be built is a deliverable.** At G2 the bar is that the declines are *argued convincingly* — so write the argument, not the verdict.
+
+<!-- table:allocation-grid.declines role=register id=Id -->
+
+| Id | Step | Why we recommend against automating it | What we recommend instead | Argued to |
+|---|---|---|---|---|
+
+## Tensions
+
+Where two driving questions point in different directions. A step with high blast radius **and** high volume is exactly the interesting case — averaging it into a single verdict destroys the finding.
+
+<!-- table:allocation-grid.tensions role=register id=Id -->
+
+| Id | Step | Tension | How resolved | Decided by |
+|---|---|---|---|---|

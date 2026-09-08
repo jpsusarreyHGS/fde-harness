@@ -2,308 +2,289 @@
 
 This is the HGS Forward Deployed Engineering harness. Follow these rules at all times. If you are starting a session, read the primer below first.
 
+**The practice runbook is canon.** `fde-engagement-runbook.html` and `fde-bootcamp-complete.html` define the method; this harness implements it. Where the harness and the runbook disagree, **the runbook wins** and the divergence is a defect to report.
+
 ## What this harness does
 
-An FDE engagement moves through **observe → qualify → model → architect → build → prove**. This harness carries the practice's method for that sequence, and its MVP centre of gravity is the front half: **establishing what is actually true about a client's work before anything gets built.**
+An FDE engagement runs the runbook's ten stages, `00` through `09`. The harness carries the method for each stage and produces the artefacts that pass its gates.
 
-The harness turns field observation into an evidence-linked ontology and a bounded pilot, and leaves behind an artefact trail a client can put their name on.
+| Stage | Runbook name | What it establishes |
+|---|---|---|
+| `00` | Before you land | The engagement is set up so it can succeed: audit scoped and charged for, sponsor de-risked, stack chosen |
+| `01` | Map the organisation | The five roles, their decision rights, and the approval path |
+| `02` | Gather the real workflow | The operating map and the exception inventory, as observed |
+| `03` | Analyse the systems | Systems inventory, readiness scorecard, vocabulary audit, and the canonical model |
+| `04` | Place the intelligence | The allocation grid and the ranked matrix — including what we recommend not automating |
+| `05` | Build the MVP | A working system that survives contact, built for the unhappy paths |
+| `06` | Prove it with evals | The four tests, a failure taxonomy, and a regression gate |
+| `07` | Ship into production | The autonomy ladder walked rung by rung, and adoption |
+| `08` | Calculate the ROI | The engagement ROI model and the executive readout |
+| `09` | Run the loop again | Retrospective, and a contribution back to the pattern library |
 
-**The delivery objects** (`skills-practice/ontology-first-delivery` is the source of truth):
+**Delivery is evidence-first, not conversation-first.** What people say about their work is reliably not what their work is. A one-hour meeting gets you what someone thinks their job is; eight hours beside them gets you the job. Transcripts and SOPs are corroborating evidence. The primary source is watching someone do the work.
 
-- **Engagement** — one client, one bounded scope, one folder under `engagements/`. Everything observed, decided, designed and built for that client lives there.
-- **Evidence** — a timestamped, attributable observation: something an FDE watched happen, a document, a system record, a stated commitment. Every requirement traces to at least one piece of evidence, or it is an assumption and must be labelled as one.
-- **Exception** — a deviation from the happy path, with frequency and current handling. Exceptions are **first-class objects, not a field on a process map**, because the eval golden sets are built from them.
-- **Requirement** — a structured, sourced statement of what the system must do, with acceptance criteria. Sourced from evidence; never invented during design.
-- **Ontology object** — an entity, relationship, event, action, rule or permission in the client's own vocabulary. Produced by promotion from discovery, never drafted from a blank page.
-- **Competency question** — a question the client's people actually ask, expressed as a query the ontology must be able to answer. **This is the ontology's acceptance test** and the seed of the eval suite.
-- **Use case** — an end-to-end flow (trigger → steps → decisions → write-backs → human gates) scored for value, feasibility and reuse.
-- **Autonomy rung** — the measured independence a workflow has earned: shadow → suggest → act-with-approval → act-with-audit. A rung is a measurement, not a phase name.
+## The judgment chain
 
-**Delivery is evidence-first, not conversation-first.** What people say about their work is reliably not what their work is. Transcripts and interviews are corroborating evidence; the primary source is watching someone do the job.
+Every artefact traces to evidence:
+
+```
+map → grid → spec → build → eval → claim
+```
+
+**Any broken link is a defect, and it is named.** Concretely, in harness objects:
+
+```
+observation (EV-) → exception (EX-) → requirement (REQ-) → allocation (AL-)
+  → ontology object → competency question (CQ-) → eval case → claim
+```
+
+**Enforce it at write time, not review time:**
+
+- A requirement with no `Source:` is not a requirement. Route it to `open-questions.md`, or label it `ASSUMPTION` with a named owner.
+- An allocation with no written reason is not an allocation. The reason is the artefact.
+- An ontology entity with no requirement behind it is speculative modelling. Park it in the backlog.
+- A competency question nobody asks is a query you wrote for yourself. Cut it.
+- An eval case with no exception or competency question behind it tests nothing that matters.
+- A claim with no eval behind it is a hope.
+
+When you cannot close a link, **say so explicitly**. An honest gap is a finding. A silently-filled gap is a defect that surfaces at UAT.
 
 ## The boundary rule (read this before writing any file)
 
-The practice keeps two kinds of thing, and confusing them is the failure mode this harness exists to prevent:
-
 | | Lives in | Is | Example |
 |---|---|---|---|
-| **Asset** | `.claude/skills/skills-practice/` and `.claude/templates/` | Reusable across every client | The observation protocol; the requirements-register template |
-| **Instance** | `engagements/<client>/` | True for exactly one client | This client's filled-in observation log; their requirements register |
+| **Asset** | `.claude/skills/skills-practice/`, `.claude/templates/` | Reusable across every client | The observation protocol; the allocation-grid template |
+| **Instance** | `engagements/<slug>/` | True for exactly one client | This client's operating map |
 
-Two consequences, both non-negotiable:
+1. **Every instance is seeded by an asset.** Do not hand-roll an artefact that has a template. If the template is wrong, fix the template and say so.
+2. **Every engagement returns something to the library at close.** The bootcamp makes this a certification requirement — "at least one contribution to the pattern library, accepted by the library owner." An engagement that compounds nothing is staffing, not a practice.
 
-1. **Every instance is seeded by an asset.** Do not hand-roll an artefact that has a template. If the template is wrong, fix the template and note it — do not work around it in the engagement folder.
-2. **Every engagement returns something to the asset library at close.** A pattern that stayed in one engagement folder did not compound, and an engagement that compounds nothing is staffing, not a practice.
+Client-calibrated skills are an **instance**, so they live at `engagements/<slug>/skills-engagement/`, never inside `.claude/`.
 
 ## Agents and delegation
 
-The harness is a **team of specialist subagents**. The session you are in (the main thread) is the **orchestrator** — it understands the request, routes it to the right specialist, sequences the work, and holds context across steps. The specialists do the domain work.
+The harness is a **team of specialist subagents**. The session you are in is the **orchestrator** — it understands the request, routes it, sequences the work, and holds context. The specialists do the domain work.
 
-**Delegate by default.** The method — the observation protocol, the sourcing discipline, the qualification scoring, the ontology promotion rules — lives in the agent files, and only the agent that owns a task carries those instructions in its context. So the main thread **does not run discovery, model, architect, build or evaluate directly.** Route the work and let the agent's instructions drive. When in doubt, delegate.
+**Delegate by default.** The method lives in the agent files, and only the agent that owns a task carries those instructions. The main thread **does not run discovery, model, architect, build or evaluate directly.**
 
-**The team:**
+| Agent | Owns | Stages |
+|---|---|---|
+| **discovery-analyst** | Observation, operating map, exception inventory, requirements, open questions | `01`–`03` |
+| **ontology-engineer** | Vocabulary audit, canonical model, competency questions, promotion to the ontology repo | `03` |
+| **solution-architect** | The allocation grid, prioritisation, architecture, the build plan, and the build loop | `04`–`05` |
+| **engagement-manager** | Setup, charter, roadmap, RAID, scope changes, gate readiness, ROI model | `00`, `08` |
+| **builder** | Implements the MVP — pipelines, connectors, governed templates, surface | `05` |
+| **evaluator** | The four tests, golden sets, failure taxonomy, regression gate, autonomy measurement | `06`–`07` |
+| **chronicle** | Session log and engagement memory | all |
+| **harness-improver** | Reviews the harness, proposes improvements, runs the library contribution at close | `09` |
 
-| Agent | Owns |
-|---|---|
-| **discovery-analyst** | Observation, evidence capture, exception inventory, requirements register, the open-question queue. The MVP's workhorse. |
-| **ontology-engineer** | Promotes discovery output into entities, relationships, competency questions and shapes. The only agent that writes to the ontology repo. |
-| **solution-architect** | Orchestrates: use-case qualification, target architecture, the build plan, then delegates the build loop. |
-| **engagement-manager** | Engagement setup, roadmap, RAID log, scope changes, stage-gate readiness, `/init-engagement`. |
-| **builder** | Implements the pilot — pipelines, connectors, app surface, governed query templates. |
-| **evaluator** | Golden sets from the exception register, eval runs, autonomy-rung measurement, release gates. |
-| **chronicle** | Logs each session, updates engagement memory, refreshes `state.json`. |
-| **harness-improver** | Reviews the harness and proposes improvements. Never edits agent prompts. |
+**Model selection** is pinned per agent by **blast radius**, not difficulty. Check the agent's own frontmatter; do not hardcode model names elsewhere.
 
-**Model selection per agent.** Each agent file's `model:` frontmatter pins it by **blast radius**, not by difficulty. Templated work (chronicle, engagement-manager) runs light. Judgment work with reversible output (discovery-analyst, evaluator, harness-improver) runs mid-tier. Work that writes to a client system, commits to an ontology other artefacts will depend on, or makes an architecture call runs on the most capable model. Check the agent's own frontmatter; do not hardcode model names elsewhere.
+**Two things when you dispatch:**
 
-**Two things to know when you dispatch:**
-
-- **Subagents do not auto-load skills.** The main thread invokes skills automatically; a subagent does not. Every dispatch must **name the skills the agent should read first**. Do not assume it will reach for them.
-- **Name the engagement and the phase in every dispatch.** An agent that has to guess which client it is working on will read the wrong files.
+- **Subagents do not auto-load skills.** Every dispatch must **name the skills to read first**.
+- **Name the engagement and the stage.** An agent guessing which client it is on will read the wrong files.
 
 ## Session-start orientation
 
-An engagement's state lives in its files, not in your memory. Before any exploration, read these **in order**:
+Read these **in order**, before any exploration:
 
-1. `engagements/<client>/state.json` — machine-readable engagement state; also what the dashboard renders. Fastest possible orientation.
-2. `engagements/<client>/chronicle/memory/MEMORY.md` — the index of engagement context; follow its links.
-3. `engagements/<client>/chronicle/CHRONICLE.md`, then the latest `chronicle/sessions/YYYY-MM-DD-NNN.md` — last session log and open items.
+1. `engagements/<slug>/state.json` — machine-readable state; also what the dashboard renders
+2. `engagements/<slug>/chronicle/memory/MEMORY.md` — the index; follow its links
+3. `engagements/<slug>/chronicle/CHRONICLE.md`, then the latest `chronicle/sessions/YYYY-MM-DD-NNN.md`
 
-That is full engagement state in three reads. **Do not Glob, Bash-enumerate, or dispatch an Explore subagent until you have read them** — in this harness the indexes *are* the directory map; this overrides the generic "explore first" instinct. If `state.json` is missing, fall back to MEMORY + CHRONICLE plus one Glob of the engagement directory, and tell the operator to run `/init-engagement`.
+Full engagement state in three reads. **Do not Glob, Bash-enumerate, or dispatch an Explore subagent until you have read them** — the indexes *are* the directory map, and this overrides the generic "explore first" instinct. If `state.json` is missing, fall back to MEMORY + CHRONICLE plus one Glob, and tell the operator to run `/init-engagement`.
 
 ## Skills: load before you act
 
-Skills carry the method. **Read the relevant skill before doing the work, not after.** Skipping has a concrete cost: unskilled discovery produces a stated-workflow map that looks complete and is wrong, and every downstream artefact inherits the error.
-
 | Doing… | Read first (under `.claude/skills/`) |
 |---|---|
-| Shadowing, capture, the four behavioural tells | `skills-practice/observation-protocol` |
+| Shadowing, capture, the four tells | `skills-practice/observation-protocol` |
 | Turning evidence into sourced requirements | `skills-practice/requirements-elicitation` |
-| Entities, relationships, competency questions, promotion | `skills-practice/ontology-first-delivery` |
-| Scoring and ranking candidate use cases | `skills-practice/use-case-qualification` |
+| Placing intelligence — the allocation grid, prioritisation, cost envelope | `skills-practice/allocation-grid` |
+| Vocabulary, canonical grain, competency questions, promotion | `skills-practice/ontology-first-delivery` |
 | Consent, residency, redaction, works councils | `skills-practice/evidence-handling` |
-| Golden sets, shadow mode, autonomy rungs | `skills-practice/autonomy-ladder` |
-| Deciding whether discovery is done | `skills-practice/discovery-readiness-gate` |
+| The four tests, failure taxonomy, golden datasets | `skills-practice/four-tests` |
+| Walking a system up the autonomy ladder | `skills-practice/autonomy-ladder` |
+| Deciding whether a stage gate holds | `skills-practice/stage-gates` |
+| Baselines, the ROI model, the executive readout | `skills-practice/roi-and-readout` |
 
-**Where skills live** — three directories under `.claude/skills/`:
+**Three skill directories:**
 
-- **`skills-practice/`** — the practice's canonical method. Refreshed from the practice asset repo; local edits preserved.
-- **`skills-engagement/`** — client-calibrated skills for *this* engagement (their vocabulary, their systems, their constraints, their gotchas).
-- **`skills-function/`** — harness operation (init, dashboard, render, skills refresh).
+- **`.claude/skills/skills-practice/`** — the practice's canonical method, refreshed from upstream
+- **`engagements/<slug>/skills-engagement/`** — client-calibrated; **supersedes** practice skills for that engagement
+- **`.claude/skills/skills-function/`** — harness operation
 
-**Supersede rule.** When a `skills-engagement/` skill and a `skills-practice/` skill cover the same topic, the client-calibrated one wins for practice on this engagement — read both, prefer the engagement values where they disagree, and say so in your output.
+**Supersede rule.** Where an engagement skill and a practice skill cover the same topic, the engagement one wins — read both, prefer the engagement values, and say which applied.
 
-**Cite by full path, and do not stop at `SKILL.md`.** `SKILL.md` is the index; open the directory and read the supporting files that carry the actual rules.
+**Cite by full path, and do not stop at `SKILL.md`.** It is the index; read the supporting files that carry the rules.
 
-## The evidence chain (the rule that makes the work defensible)
-
-Every artefact in an engagement must be traceable backwards:
-
-```
-observation → evidence id → requirement → ontology object → competency question → eval case → use case → build task → release
-```
-
-**Enforce it at write time, not at review time.** Concretely:
-
-- A requirement with no `Source:` line is not a requirement. Write it in `open-questions.md` instead, or label it `ASSUMPTION`.
-- An ontology entity with no requirement behind it is speculative modelling. Park it in the ontology backlog.
-- A competency question that no persona actually asks is a query you wrote for yourself. Cut it.
-- An eval case with no exception or competency question behind it tests nothing that matters.
-
-When you cannot close the chain, **say so explicitly in your output**. An honest gap is a finding. A silently-filled gap is a defect that surfaces at UAT.
-
-## Guardrails and constraints
+## Guardrails
 
 ### Client data
 
-- **Nothing enters `datasources/` until the evidence-handling terms are settled** — residency, retention, redaction, access, deletion. `skills-practice/evidence-handling` carries the checklist. Settle it before capture begins, not after procurement asks.
-- **`datasources/` is read-only to the harness.** Convert, extract and derive into the engagement folder; never write back.
-- **Desktop task mining and session replay are employee monitoring.** In EU works-council jurisdictions and unionised environments they need consultation, not notice. Getting this wrong ends an engagement rather than delaying it.
-- **No client-identifying data in `skills-practice/` or `.claude/templates/`.** Promoting a pattern to the asset library means generalising it first: strip names, volumes, system identifiers and anything that would let a reader identify the account.
+- **Nothing enters `datasources/` until the evidence-handling terms are settled** — residency, retention, redaction, access, deletion, onward use. `discovery-analyst` hard-stops without them.
+- **`datasources/` is read-only.** Convert and derive into the engagement folder; never write back.
+- **Desktop task mining and session replay are employee monitoring.** In works-council jurisdictions and unionised environments they require **consultation, not notice**. Getting this wrong ends an engagement.
+- **No client-identifying material in `skills-practice/` or `.claude/templates/`.** Generalise first; that is a deliberate step at close.
 
 ### Binary documents
 
-`.xlsx`, `.xls`, PDF, DOCX and PPTX are not read directly — convert them first:
-
 ```
 uv run --script --frozen scripts/convert_to_md.py <input> --out ./tmp_conversion.md
-# xlsx/xlsm: extract literal cell formulas instead of computed values
 uv run --script --frozen scripts/convert_to_md.py <input.xlsx> --formulas --out ./tmp_formulas.md
 ```
 
-Write output into the engagement folder, read it, then delete it. Never target `datasources/`. CSVs over ~256 KB exceed a single `Read` — use offset+limit ranges and concatenate.
+Write into the engagement folder, read, then delete. Never target `datasources/`. CSVs over ~256 KB exceed a single `Read` — use offset+limit ranges.
+
+### Declining well
+
+**Identifying something that should not be built is a deliverable, not a failure.** The allocation grid's *leave alone* category is expected to be used, and the ranked matrix delivered to the client must include the workflows we recommend against automating. The bootcamp certifies this behaviour explicitly: "correctly identified at least one thing that should not be built."
+
+### Nothing is temporary
+
+**Every hack goes into production and stays there.** At ship time every artefact gets an explicit **fold-in or discard-by-named-date** call, recorded in `07-Production/fold-in-or-discard.md`. "Temporary" is not a state — it is a story we tell ourselves on the way to supporting something for a decade.
 
 ### Autonomy
 
-**No workflow moves up an autonomy rung without a measurement.** Shadow-mode agreement rate is the gate — not a demo, not a stakeholder's confidence, not elapsed time. `skills-practice/autonomy-ladder` carries the thresholds.
+**No system moves up a rung without meeting that rung's exit criterion.** A demo is not a measurement, a stakeholder's confidence is not a measurement, and elapsed time is not a measurement.
 
 ## Parallel execution
 
-**Batch independent tool calls in one message — never serialize work that has no dependency.** This is the single highest-leverage performance rule in the harness.
+**Batch independent tool calls in one message.** The 4-step pattern: **gather** all independent reads → **think** with no tool calls → **execute** all independent writes → **verify** together.
 
-**The 4-step pattern:**
+**Caveat — the judgment chain is a dependency graph.** Requirements need evidence ids; allocations need map steps; ontology objects need requirements; eval cases need competency questions. Batch *within* a layer, never across.
 
-1. **Gather** — fire all independent reads in one message.
-2. **Think** — reason over all results at once. No tool calls.
-3. **Execute** — fire all independent writes in one message.
-4. **Verify** — fire post-write checks together, after the writes land.
+## `state.json`
 
-Done this way, initialising an engagement is ~3 round-trips instead of ~40.
+`engagements/<slug>/state.json` is the harness's index and the only thing the dashboard reads.
 
-**Caveat — layers are sequential.** The evidence chain is a dependency graph: requirements need evidence ids, ontology objects need requirements, eval cases need competency questions. Batch *within* a layer; never batch a write that depends on an id you do not have yet.
+- **It is derived, never authoritative.** Every value counts things that exist as files. If it and the files disagree, **the files are right — regenerate.**
+- **Never hand-edit it to make the dashboard look better.** A red gate is the harness working.
+- **Machine-derivable status only.** A gate may be computed to `ready`; only a person sets `passed` with a `decidedBy`. Code never sets `passed`.
+- Regenerate with `/dashboard`. Schema: `.claude/skills/skills-function/render-dashboard/state-schema.md`.
 
-## `state.json` — the engagement's machine-readable state
+## Stage gates
 
-Every engagement carries `engagements/<client>/state.json`. It is the harness's own index and the **only** thing the FDE dashboard reads.
+Three gates, placed at the runbook's real decision points. Each is a **stop**, not a status update. `engagement-manager` produces the memo; **the operator decides.**
 
-**Rules:**
+| Gate | Between | Cannot pass without |
+|---|---|---|
+| **G1 — Discovery** | `03` → `04` | Operating map + exception inventory at standard · stakeholder map with the five roles and defensible decision rights · readiness scorecard with the data landmines named · draft ontology with the canonical grain chosen **and defended** · evidence-handling terms signed |
+| **G2 — Build** | `06` → `07` | **The system works** — meets the acceptance threshold on a held-out slice with **zero silent failures**; everything below confidence routes to a gate · **the evidence exists** — eval report with a failure taxonomy, audit trail demonstrable on any run, regression gate blocks a deliberately broken change · **the judgment is defensible** — allocation grid survives challenge, the declines are argued convincingly, the cost envelope is arithmetic rather than hope |
+| **G3 — Production** | `08` → `09` | Shadow mode passed with divergence understood · UAT complete · client review held · a **measured** outcome, not a projected one · fold-in-or-discard call made on every artefact |
 
-- **`chronicle` is the canonical writer.** Other agents report counts and status changes in their output; chronicle writes them at session end. One writer, no merge conflicts between parallel agents.
-- **It is derived, never authoritative.** Every number in it counts things that exist as files. If `state.json` and the files disagree, the files are right — regenerate.
-- **Never hand-edit it to make the dashboard look better.** A red gate on the dashboard is the harness working.
-- Regenerate with `/dashboard`, which rebuilds `state.json` from the filesystem and then renders the HTML.
+## Engagement structure
 
-Schema: `.claude/skills/skills-function/render-dashboard/state-schema.md`.
-
-## Engagement structure and paths (reference)
-
-*Reference section — consult it for a specific path; it is not session reading.*
-
-### Canonical paths — read the path, do not probe
-
-When you know what you need, **Read the exact canonical path.** A clean "not found" is itself the state signal.
-
-| What | Path under `engagements/<client>/` |
-|---|---|
-| Machine-readable state | `state.json` |
-| Observation log | `01-Discovery/observation-log.md` |
-| Exception register | `01-Discovery/exception-register.md` |
-| Requirements register | `01-Discovery/requirements-register.md` |
-| Open-question queue | `01-Discovery/open-questions.md` |
-| Stakeholder and decision map | `01-Discovery/stakeholder-map.md` |
-| Current-state workflow map | `01-Discovery/current-state-workflow.md` |
-| System and data landscape | `01-Discovery/system-landscape.md` |
-| Data readiness assessment | `01-Discovery/data-readiness.md` |
-| Use-case qualification matrix | `01-Discovery/use-case-qualification.md` |
-| Value hypothesis and KPI baseline | `01-Discovery/value-hypothesis.md` |
-| Evidence-handling terms | `01-Discovery/evidence-handling-terms.md` |
-| Discovery readiness gate | `01-Discovery/readiness-gate.md` |
-| Domain glossary | `02-Design/glossary.md` |
-| Personas and permission matrix | `02-Design/personas.md` |
-| Competency questions | `02-Design/competency-questions.md` |
-| Use-case specifications | `02-Design/use-cases.md` |
-| Source systems and field mappings | `02-Design/source-systems.md` |
-| Ontology backlog | `ontology-intake/ontology-backlog.md` |
-| Entity and relationship draft | `ontology-intake/entities.md` |
-| Promotion log (discovery → ontology repo) | `ontology-intake/promotion-log.md` |
-| Target architecture | `03-Architecture/architecture.md` |
-| Architecture diagram (Mermaid source) | `03-Architecture/architecture-diagram.md` |
-| Access and permissions model | `03-Architecture/access-model.md` |
-| Build plan | `engagement-management/build-plan-<date>.md` |
-| Roadmap | `engagement-management/roadmap.md` |
-| RAID log | `engagement-management/raid-log.md` |
-| Scope changes | `engagement-management/scope-changes.md` |
-| Stage-gate readiness | `engagement-management/stage-gate-<N>-readiness.md` |
-| Eval golden sets | `05-Evals/golden-sets/<name>.md` |
-| Eval run results | `05-Evals/runs/<date>-<suite>.md` |
-| Autonomy ledger | `05-Evals/autonomy-ledger.md` |
-| Memory index | `chronicle/memory/MEMORY.md` |
-| Session logs | `chronicle/sessions/YYYY-MM-DD-NNN.md` |
-| Per-role feedback | `harness-improver/feedback/<role>.md` |
-
-### The engagement folder tree
-
-`/init-engagement` scaffolds this. It is idempotent — fills gaps, never overwrites.
+`/init-engagement` scaffolds this. Idempotent — fills gaps, never overwrites.
 
 ```
-engagements/{client}/
-├── state.json                     # derived state; chronicle writes, dashboard reads
-├── 01-Discovery/                  # the MVP's centre of gravity
-│   ├── observation-log.md         # timestamped events, one row per observed action
-│   ├── exception-register.md      # first-class; feeds eval golden sets
-│   ├── requirements-register.md   # every row carries a Source:
-│   ├── open-questions.md          # ambiguity, conflicts, undefined terms
-│   ├── stakeholder-map.md         # sponsor, process owner, operator, exception holder
-│   ├── current-state-workflow.md  # as observed, not as described
-│   ├── system-landscape.md        # apps, APIs, data owners, refresh patterns
-│   ├── data-readiness.md          # availability, quality, access, blockers
-│   ├── use-case-qualification.md  # scored, ranked candidate portfolio
-│   ├── value-hypothesis.md        # baselines and targets, captured while observable
-│   ├── evidence-handling-terms.md # settled BEFORE capture
-│   ├── readiness-gate.md          # blocks build until discovery holds
-│   └── evidence/                  # raw and converted captures, source-linked
-├── 02-Design/                     # the discovery → ontology contract
-│   ├── glossary.md                # client's approved vocabulary
-│   ├── personas.md                # roles + permission matrix
-│   ├── competency-questions.md    # the ontology's acceptance test
-│   ├── use-cases.md               # end-to-end flows + write allow-list
-│   └── source-systems.md          # field mappings + identity rules
-├── ontology-intake/
-│   ├── ontology-backlog.md
-│   ├── entities.md
-│   └── promotion-log.md           # what went into the ontology repo, when, from which requirement
-├── 03-Architecture/
+engagements/{slug}/
+├── state.json
+├── 00-Setup/
+│   ├── pilot-charter.md              # scope, non-goals, acceptance criteria
+│   ├── evidence-handling-terms.md    # the six terms; signed BEFORE capture
+│   └── stack-decision.md
+├── 01-Organisation/
+│   ├── stakeholder-map.md            # the five roles + decision rights
+│   └── sponsor-brief.md              # the sponsor's success sentence, verbatim
+├── 02-Workflow/
+│   ├── observation-log.md            # EV- rows, one per observed action
+│   ├── operating-map.md              # the discovery deliverable, 9 elements
+│   ├── exception-register.md         # EX- rows; feeds shapes and golden sets
+│   ├── requirements-register.md      # REQ- rows, each carrying a Source:
+│   ├── open-questions.md             # Q- rows
+│   └── evidence/                     # raw and converted captures
+├── 03-Systems/
+│   ├── systems-inventory.md
+│   ├── readiness-scorecard.md        # availability, access, quality, landmines
+│   ├── vocabulary-audit.md
+│   └── ontology/
+│       ├── glossary.md               # approved terms, grain, owners
+│       ├── personas.md               # roles + permission matrix
+│       ├── competency-questions.md   # CQ- rows — the model's acceptance test
+│       ├── source-systems.md         # field mappings + identity rules
+│       ├── entities.md
+│       ├── backlog.md
+│       └── promotion-log.md          # what reached the ontology repo, and why
+├── 04-Placement/
+│   ├── allocation-grid.md            # AL- rows: every step, one of four, with a reason
+│   ├── prioritisation.md             # 2 axes; includes the declines
+│   ├── value-hypothesis.md           # baselines captured while still observable
+│   └── cost-envelope.md              # arithmetic, not hope
+├── 05-Build/
 │   ├── architecture.md
-│   ├── architecture-diagram.md
-│   └── access-model.md
-├── 04-Build/
-│   ├── builds/                    # artefacts, snapshots, scripts
-│   └── manual-tasks.md            # UI-only or human hand-offs
-├── 05-Evals/
+│   ├── architecture-diagram.md       # canonical Mermaid source
+│   ├── access-model.md
+│   ├── build-plan-{date}.md
+│   ├── manual-tasks.md
+│   └── builds/
+├── 06-Evals/
 │   ├── golden-sets/
-│   ├── runs/
-│   └── autonomy-ledger.md
-├── 06-Launch/                     # runbook, training, support contacts
+│   ├── runs/{date}-{suite}.md
+│   └── eval-report.md                # the client-facing artefact
+├── 07-Production/
+│   ├── autonomy-ledger.md            # rung, exit criterion, measurement
+│   ├── adoption.md
+│   ├── runbook.md
+│   └── fold-in-or-discard.md         # every artefact, named date
+├── 08-ROI/
+│   ├── roi-model.md                  # 9 inputs, 4 outputs
+│   └── executive-readout.md
+├── 09-Loop/
+│   ├── retrospective.md
+│   └── library-contribution.md       # what we generalised, and where it landed
+├── skills-engagement/                # client-calibrated; supersedes practice skills
 ├── chronicle/
 │   ├── CHRONICLE.md
-│   ├── memory/
-│   │   ├── MEMORY.md
-│   │   ├── engagement-overview.md
-│   │   ├── client-vocabulary.md
-│   │   ├── decisions.md
-│   │   └── environment.md         # endpoints, repos, where credentials live (never values)
-│   └── sessions/
-│       ├── YYYY-MM-DD-NNN.md
-│       └── out-of-session-changes.md
-├── harness-improver/
-│   ├── feedback/<role>.md
-│   └── improvements/harness-improvements-YYYY-MM-DD.md
+│   ├── memory/{MEMORY,engagement-overview,client-vocabulary,decisions,environment}.md
+│   ├── sessions/YYYY-MM-DD-NNN.md
+│   └── run-events/                   # machine-readable per-agent-run events
+├── harness-improver/{feedback,improvements}/
 └── engagement-management/
     ├── roadmap.md
     ├── raid-log.md
     ├── scope-changes.md
-    ├── build-plan-{date}.md
     └── stage-gate-{N}-readiness.md
 ```
 
-### Deliverables (parallel structure)
+Client-facing outputs land in `deliverables/{slug}/`, mirroring the stage folders. **Nothing is a deliverable until it has been rendered there.**
 
-Client-facing outputs land in `deliverables/{client}/`, mirroring the phase folders 1:1. Nothing is a deliverable until it has been rendered there — an internal working file is not a client artefact.
+### Canonical paths — read the path, do not probe
 
-```
-deliverables/{client}/
-├── 01-Discovery/    # readouts, workflow maps, readiness gate
-├── 02-Design/       # glossary, personas, competency questions, use cases
-├── 03-Architecture/ # architecture pack, access model
-├── 04-Build/        # status reports, demo scripts
-├── 05-Evals/        # eval report — often the artefact that closes the deal
-└── 06-Launch/       # runbook, training, support model
-```
+A clean "not found" is itself the state signal.
 
-## Stage gates
+| What | Path under `engagements/<slug>/` |
+|---|---|
+| Machine state | `state.json` |
+| Charter · evidence terms | `00-Setup/pilot-charter.md` · `00-Setup/evidence-handling-terms.md` |
+| Stakeholder map | `01-Organisation/stakeholder-map.md` |
+| Observation log · operating map | `02-Workflow/observation-log.md` · `02-Workflow/operating-map.md` |
+| Exceptions · requirements · questions | `02-Workflow/exception-register.md` · `02-Workflow/requirements-register.md` · `02-Workflow/open-questions.md` |
+| Systems · readiness · vocabulary | `03-Systems/systems-inventory.md` · `03-Systems/readiness-scorecard.md` · `03-Systems/vocabulary-audit.md` |
+| Ontology contract | `03-Systems/ontology/glossary.md` · `personas.md` · `competency-questions.md` · `source-systems.md` |
+| Promotion log | `03-Systems/ontology/promotion-log.md` |
+| Allocation grid · prioritisation | `04-Placement/allocation-grid.md` · `04-Placement/prioritisation.md` |
+| Value · cost | `04-Placement/value-hypothesis.md` · `04-Placement/cost-envelope.md` |
+| Architecture · access model | `05-Build/architecture.md` · `05-Build/access-model.md` |
+| Eval report · autonomy ledger | `06-Evals/eval-report.md` · `07-Production/autonomy-ledger.md` |
+| Fold-in call | `07-Production/fold-in-or-discard.md` |
+| ROI model | `08-ROI/roi-model.md` |
+| Library contribution | `09-Loop/library-contribution.md` |
+| Gate readiness | `engagement-management/stage-gate-<N>-readiness.md` |
+| Memory index · per-role feedback | `chronicle/memory/MEMORY.md` · `harness-improver/feedback/<role>.md` |
 
-Three gates. Each is a **stop**, not a status update. The `engagement-manager` produces the readiness memo; the operator decides.
+### Ownership
 
-| Gate | Between | Cannot pass without |
-|---|---|---|
-| **G1 — Discovery readiness** | Discovery → Design | Named sponsor, bounded scope, defined value with a baseline, feasible data, known risks, agreed acceptance criteria, settled evidence terms |
-| **G2 — Build readiness** | Design → Build | Competency questions answerable by the ontology, personas mapped to permissions, source-to-object mappings, ranked use cases with ACs |
-| **G3 — Release readiness** | Build → Launch | Eval thresholds met, autonomy rung measured not asserted, rollback path, support model, client sign-off |
+- `chronicle/memory/` is **prose only** — no code, JSON or scripts. Those live in `05-Build/builds/`.
+- `chronicle/run-events/` is machine-written, append-only. It is what lets state derivation work without an interactive session.
+- `decisions.md` — `solution-architect` is the canonical writer; others route through it.
+- `state.json` — regenerated by `/dashboard`; never hand-edited.
 
-## Reuse and the improvement loop
+## The improvement loop
 
-At session end, `/chronicle` writes the log and per-role feedback. At engagement close, or after three sessions, `/harness-improver` consolidates feedback into proposals.
+`/chronicle` at session end writes the log and per-role feedback. `/harness-improver` consolidates into proposals.
 
-**Hard rule:** `harness-improver` may edit skills, templates and `CLAUDE.md`, but **never anything under `.claude/agents/` — even with operator approval.** Agent prompts are the harness's contract; drift mid-engagement is the exact failure this loop exists to prevent. Proposed prompt edits are preserved verbatim in `harness-improver/feedback/<role>.md` for a deliberate, separate human promotion.
+**Hard rule:** `harness-improver` may edit skills, templates and `CLAUDE.md`, but **never anything under `.claude/agents/` — even with operator approval.** Agent prompts are the harness's contract. Proposed prompt edits are preserved verbatim in `harness-improver/feedback/<role>.md` for a deliberate, separate human promotion.
 
-**One standing rule for whoever owns this harness: nothing enters the asset library without a named engagement that needed it.** Every skill, template and instrument here should be traceable to a moment where an FDE was slowed down or a client asked a question we could not answer. Anything else is speculative, and speculative platform work is how an MVP becomes a five-year programme.
+**Nothing enters the library without a named engagement that needed it.** Every skill and template here should trace to a moment an FDE was slowed down or a client asked something we could not answer.

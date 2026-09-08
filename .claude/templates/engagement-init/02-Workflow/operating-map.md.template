@@ -1,0 +1,114 @@
+# Operating map — {{CLIENT_NAME}}
+
+**The discovery deliverable.** Discovery ends with a document, not a conversation. All nine elements, per in-scope workflow.
+
+**As observed, not as described.** Where an element is supported only by Stated evidence, mark it `[STATED - unverified]` **in the element itself**, not in a footnote. A reader must see at a glance which parts were watched.
+
+<!-- table:operating-map.scope role=kv -->
+
+| Item | Value |
+|---|---|
+| Workflow | |
+| Observed sessions | |
+| Ev range | |
+
+## 1. Trigger
+
+What starts it, **in all its real variants** — every format, sender, channel. "An email arrives" is never one step.
+
+<!-- table:operating-map.triggers role=register id=Variant -->
+
+| Variant | Format | Sender / channel | Share of volume | Source |
+|---|---|---|---|---|
+
+## 2. Steps
+
+Every step **including the ones nobody counts**. Decompose until each has a single actor, a single system, and a single outcome.
+
+<!-- table:operating-map.steps role=register id=# -->
+
+| # | Step | Actor | System | Secs | Manual? | Source | Verified |
+|---|---|---|---|---|---|---|---|
+
+## 3. Volume and frequency
+
+Input to **both** prioritisation and the ROI model. Never a frequency without its window; if unknown write `unquantified` and raise a `Q-`.
+
+<!-- table:operating-map.volume role=kv -->
+
+| Item | Value |
+|---|---|
+| Instances per day | |
+| Instances per month | |
+| Peak (when, how much) | |
+| Source | |
+
+## 4. Judgement points
+
+Where a human decides something that is **not** a rule — **usually far fewer than expected**. If there is a written rule applied consistently, it is deterministic however much it feels like judgement.
+
+<!-- table:operating-map.judgement role=register id=Step # -->
+
+| Step # | Decision | Written rule exists? | Applied consistently? | Verdict | Source |
+|---|---|---|---|---|---|
+
+## 5. Exceptions
+
+Summary only — the register at `exception-register.md` is authoritative. **The long tail, not the happy path.**
+
+## 6. Undocumented knowledge
+
+What lives only in someone's head, **and whose head**. Detail in the exception register.
+
+<!-- table:operating-map.undocumented role=register id=Knowledge -->
+
+| Knowledge | Held by (role) | Consequence if they leave | Ex id |
+|---|---|---|---|
+
+## 7. Dead ends
+
+Outputs nobody consumes. Reports nobody opens. Steps that persist for historical reasons.
+
+For every output ask: **who reads this, and what do they do differently because of it?** A vague answer means ask the named recipient directly. **Do not recommend removal without confirming the consumer** — the one person who relies on it will surface at the worst moment.
+
+<!-- table:operating-map.dead-ends role=register id=Output -->
+
+| Output | Produced by | Effort | Believed consumer | Confirmed? | Source |
+|---|---|---|---|---|---|
+
+## 8. Failure modes
+
+<!-- table:operating-map.failure-modes role=register id=Failure -->
+
+| Failure | Frequency | Who notices | How long after | **Who gets blamed** | Recovery | Recovery documented? |
+|---|---|---|---|---|---|---|
+
+*Who gets blamed* is not gossip — it tells you where the real pressure sits, and therefore which failures the client will actually pay to prevent.
+
+## 9. Systems touched
+
+Every application, **in order**, with how data moves between them.
+
+<!-- table:operating-map.systems role=register id=Order -->
+
+| Order | System | Purpose at this point | Data in | Data out | How it moves |
+|---|---|---|---|---|---|
+
+## Flow
+
+```mermaid
+flowchart TD
+  A[Trigger] --> B[Step]
+  B --> C{Judgement point}
+  C -->|happy path| D[Step]
+  C -->|EX-001| E[Exception handling]
+```
+
+## Cycle time
+
+<!-- table:operating-map.cycle-time role=register id=Segment -->
+
+| Segment | Elapsed | Of which working | Of which waiting |
+|---|---|---|---|
+
+Waiting is usually invisible in whatever metrics the client already has, and frequently produces the largest number in the business case with the least resistance to it.

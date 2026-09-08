@@ -1,0 +1,34 @@
+# Exception register — {{CLIENT_NAME}}
+
+**The most valuable artefact in discovery.** Every deviation from the happy path, with the rule that handles it and the person who holds that rule.
+
+Exceptions are first-class here — not a column on a map — because validation constraints and eval golden cases are built directly from these rows.
+
+**Frequency must be a rate with a window, or the literal string `unquantified`.** Never a word like "often".
+
+**Rule holder** is the column that matters most. If you cannot name them, raise a `Q-` — it is not a blank cell.
+
+**Capture the rule verbatim before paraphrasing.** A paraphrase smooths off the conditions that make the rule correct.
+
+<!-- table:exception-register.rows role=register id=Id -->
+
+| Id | Trigger | Frequency | Current handling | Rule holder (role) | Rule, verbatim | Source | Downstream |
+|---|---|---|---|---|---|---|---|
+
+<!-- table:exception-register.undocumented role=register id=Ex id -->
+
+## Undocumented rules
+
+The rules that exist only in someone's head. The highest-value rows in the engagement.
+
+**Protect the holder.** The rule exists because the official process is inadequate, so surfacing it can look like surfacing a workaround they are responsible for. Frame every one as a process finding, never as individual behaviour.
+
+| Ex id | Rule, verbatim | Held by (role) | How it was elicited | Confirmed by holder? |
+|---|---|---|---|---|
+
+<!-- table:exception-register.promoted role=register id=Ex id -->
+
+## Promoted
+
+| Ex id | Became | Where |
+|---|---|---|

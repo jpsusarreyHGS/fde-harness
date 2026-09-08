@@ -14,7 +14,7 @@ A register of generic project risks is not a risk register. Where are the risks 
 
 ## Assumptions
 
-Mirrored from `../01-Discovery/requirements-register.md`. Reviewed at every gate.
+Mirrored from `../02-Workflow/requirements-register.md`. Reviewed at every gate.
 
 | Id | Assumption | Owner | Confirm by | **What breaks if wrong** | Status |
 |---|---|---|---|---|---|

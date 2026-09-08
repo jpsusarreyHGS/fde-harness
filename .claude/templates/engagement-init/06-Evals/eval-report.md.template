@@ -1,0 +1,78 @@
+# Eval report — {{CLIENT_NAME}}
+
+The client-facing artefact. Often the one that closes the deal, and half of the G2 gate.
+
+<!-- table:eval-report.headline role=kv -->
+
+| Item | Value |
+|---|---|
+| Suite | |
+| Run date | |
+| Held-out slice | |
+| Verdict | PASS · PASS WITH CAVEATS · FAIL |
+
+## Result
+
+The format, verbatim — **absolute counts, failures grouped by class, and a stated next action.** Far more persuasive than any accuracy percentage.
+
+```
+NN runs · NN passed · NN failed
+  N × <failure class>
+  N × <failure class>
+→ <are these classes addressable? what happens next?>
+```
+
+**Failures are not something to minimise.** They are the input to the next iteration, and showing them is what makes the passes credible. A report with no failures reads as a report that was not run honestly.
+
+<!-- table:eval-report.four-tests role=labels key=Test -->
+
+## The four tests
+
+| Test | Question | Passed | Failed | Notes |
+|---|---|---|---|---|
+| 01 | Did it have the right data? | | | |
+| 02 | Did it take the required steps, including the compliance ones? | | | |
+| 03 | Does it match an expert? | | | |
+| 04 | Is it safe to act on? | | | |
+
+Test 04: a system that correctly declines to act is **passing**. Score the routing decision, not the absence of an action.
+
+<!-- table:eval-report.failures role=register id=Case -->
+
+## Failures
+
+| Case | Source (EX/CQ) | Test | Severity | Expected | Actual | Class | Route to |
+|---|---|---|---|---|---|---|---|
+
+**P0 is a stop** — a confidently wrong answer, an unauthorised write, or a permission-boundary crossing. Maps to the G2 requirement of **zero silent failures**.
+
+<!-- table:eval-report.regression role=kv -->
+
+## Regression gate
+
+| Item | Value |
+|---|---|
+| Deliberately broken change tested | |
+| Gate blocked it | |
+| Date tested | |
+
+A regression suite nobody has seen fail is a regression suite of unknown value.
+
+<!-- table:eval-report.audit role=kv -->
+
+## Audit trail
+
+| Item | Value |
+|---|---|
+| Any run reproducible on request | |
+| Sample run demonstrated | |
+| Reviewer | |
+
+## What this verdict does not cover
+
+Mandatory. A verdict read as broader than it is, is the most consequential misreading available here.
+
+- Client-led UAT
+- Load at production volume
+- Long-horizon drift
+- Exceptions not yet in the register

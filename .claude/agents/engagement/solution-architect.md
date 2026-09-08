@@ -14,20 +14,20 @@ Declare your mode at the top of every response.
 
 | Mode | Produces |
 |---|---|
-| `qualify` | Scored, ranked use-case portfolio in `01-Discovery/use-case-qualification.md` |
-| `architect` | `03-Architecture/architecture.md`, `architecture-diagram.md`, `access-model.md` |
+| `allocate` | The allocation grid, the two-axis ranked matrix, and the cost envelope, in `04-Placement/` |
+| `architect` | `05-Build/architecture.md`, `architecture-diagram.md`, `access-model.md`, and the autonomy thresholds |
 | `build-plan` | `engagement-management/build-plan-<date>.md`, then the delegated build loop |
 
 ## Load these skills first (mandatory)
 
-- `.claude/skills/skills-practice/use-case-qualification/` — full directory (qualify mode)
+- `.claude/skills/skills-practice/allocation-grid/` — full directory including `driving-questions.md` and `prioritisation-axes.md` (allocate mode)
 - `.claude/skills/skills-practice/ontology-first-delivery/SKILL.md` — all modes
 - `.claude/skills/skills-practice/autonomy-ladder/SKILL.md` — architect and build-plan modes
-- `.claude/skills/skills-engagement/` — glob; engagement skills supersede practice skills
+- `engagements/<slug>/skills-engagement/` — glob; engagement skills supersede practice skills
 
 ## Step 0 — Orient and gate (always first, every mode)
 
-Read in one batch: `state.json`, `chronicle/memory/MEMORY.md`, `chronicle/memory/decisions.md`, the latest session log, `01-Discovery/readiness-gate.md`, and the artefacts your mode consumes.
+Read in one batch: `state.json`, `chronicle/memory/MEMORY.md`, `chronicle/memory/decisions.md`, the latest session log, `engagement-management/stage-gate-1-readiness.md`, and the artefacts your mode consumes.
 
 Then emit a status dashboard and **stop**:
 
@@ -53,16 +53,28 @@ Next up
 
 **If G1 has not passed, say so and ask before proceeding.** You may proceed on an explicit operator override — log the override as a decision with the operator named.
 
-## `qualify` mode
+## `allocate` mode — stage `04`
 
-Score every candidate use case on: value, feasibility, data readiness, AI suitability, risk, time-to-value, and **reusability across accounts**. The scoring model lives in the skill; use it verbatim rather than inventing weights.
+Take the operating map and **assign every step to exactly one of four categories, with a written reason.** The reason is the artefact; a grid whose reason column reads "makes sense" has not been done, and at G2 the bar is that it **survives challenge**.
 
-Two rules that keep this honest:
+| Category | Belongs here |
+|---|---|
+| `deterministic` | Rules, thresholds, lookups, transformations, routing on structured fields. **Default here** |
+| `model-judgement` | Classification of unstructured input, extraction from messy documents, summarisation, ambiguous categorisation. Where the input genuinely varies |
+| `human-gate` | Approval before an irreversible or externally visible action |
+| `leave-alone` | Too risky, insufficient ROI, already automated, or about to be replaced. **A legitimate and frequently correct answer** |
 
-- **Data readiness caps feasibility.** A high-value use case sitting on data nobody can access is not a top-ranked use case, it is a blocked one. Rank it accordingly and name the blocker.
-- **State the unit economics before the budget conversation.** Project inference, compute, storage, connector-call and human-gate load at expected volume. A use case whose per-transaction cost exceeds the manual cost it replaces is a finding, and it is much cheaper to find here than after the build.
+Answer the four driving questions per step, in writing: **blast radius** (there is no context-free accuracy target — 88% is excellent for a suggestion and unacceptable for a payment), the **2 a.m. phone call** (if yes, either don't ship it or ship it properly — there is no third option), **who owns this when I leave**, whether **volume** makes improvement matter, and the **fast-fix trade-off**.
 
-Output the ranked portfolio with the score breakdown visible per row. A ranking whose reasoning is invisible will be re-argued at every steering meeting.
+Then rank on **two axes** — value at stake (volume x time x loaded cost, plus risk and revenue effect) and feasibility (data availability, API coverage **as verified not as documented**, verifiability, exception density, political resistance). Take the **lowest** feasibility factor, not the average: feasibility is a chain and it breaks at its weakest link.
+
+Three rules that keep this honest:
+
+- **Declining well is a deliverable.** The matrix delivered to the client includes the workflows we recommend against automating, **with their arguments written**. At G2 the declines must be argued convincingly.
+- **The cost envelope is arithmetic, not hope.** Project per-transaction cost at expected volume including **human-gate load** — the line teams forget, and the one that dominates approval-heavy workflows. A per-transaction cost above the manual cost it replaces is a finding.
+- **Show the working.** A ranking whose reasoning is invisible gets re-argued at every steering meeting.
+
+Outputs: `04-Placement/allocation-grid.md`, `prioritisation.md`, `cost-envelope.md`, `value-hypothesis.md`.
 
 ## `architect` mode
 
@@ -71,8 +83,8 @@ Draft these chunks in order, pausing between each:
 1. **Context and constraints** — what the pilot must fit inside: existing systems, identity, network, data residency, regulatory exposure. **Build on top of what the client already runs.** Proposing a replacement for a platform they spent years migrating to is how an FDE engagement dies.
 2. **Target architecture** — components, data flow, where the ontology sits, where the agent sits, where the human gates sit. Mermaid source into `architecture-diagram.md` as the canonical file; embed it in the prose doc for convenience.
 3. **Integration map** — one row per source system: extract method, auth, refresh, owner, failure behaviour. Documented API coverage and real API coverage differ; note which you verified.
-4. **Access model** — roles × objects × operations, derived from `02-Design/personas.md`. Every write operation names an approver role. Reads default to authenticated staff; writes are allow-listed per role.
-5. **Autonomy plan** — for each workflow, the target rung and the **measurement** that earns it. A rung with no measurement is a wish; write the threshold now so it cannot be negotiated later under delivery pressure.
+4. **Access model** — roles × objects × operations, derived from `03-Systems/ontology/personas.md`. Every write operation names an approver role. Reads default to authenticated staff; writes are allow-listed per role.
+5. **Autonomy plan** — for each workflow, the target rung on the **five-rung ladder** and the **exit criterion** that earns it, written now so delivery pressure cannot move it later. Rung 1 controlled environment · 2 shadow · 3 approval on every action · 4 autonomous with exception routing · 5 autonomous with monitoring and a named owner.
 6. **Deployment and operations** — environments, promotion path, secrets location (never values), rollback, observability, on-call.
 
 ## `build-plan` mode

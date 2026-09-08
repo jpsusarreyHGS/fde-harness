@@ -1,0 +1,41 @@
+# Adoption — {{CLIENT_NAME}}
+
+**A working system with no users is a failed engagement.** Adoption is part of the deployment, not a follow-on.
+
+<!-- table:adoption.cohort role=register id=User -->
+
+## First cohort
+
+Hand-hold them personally.
+
+| User | Role | Onboarded | First real use | Still using at +2 weeks | Notes |
+|---|---|---|---|---|---|
+
+<!-- table:adoption.first-week role=register id=Observation -->
+
+## First week of real usage
+
+**Watch it the same way you watched the original workflow.** The tells that identified the opportunity will also tell you where the new system is failing people.
+
+| Observation | Tell | What it indicates | Action taken |
+|---|---|---|---|
+
+<!-- table:adoption.resistance role=register id=Who -->
+
+## Resistance
+
+**Treat resistance as information rather than obstruction.** When someone insists a system does not work and cannot articulate why, **go and watch them use it** — there is almost always a real requirement underneath that nobody thought to ask about.
+
+| Who (role) | What they said | What watching revealed | Real requirement underneath | Resolved? |
+|---|---|---|---|---|
+
+<!-- table:adoption.metrics role=kv -->
+
+## Adoption metrics
+
+| Item | Value |
+|---|---|
+| Eligible users | |
+| Active users | |
+| Usage trend | |
+| Workarounds observed | |

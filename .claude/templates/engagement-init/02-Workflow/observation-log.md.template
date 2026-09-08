@@ -1,0 +1,24 @@
+# Observation log — {{CLIENT_NAME}}
+
+One row per **observed action**. Capture events, not summaries — the raw sequence is what reveals the loops and the dead time. Synthesis happens in `operating-map.md`, downstream.
+
+**Ids are append-only and never reused.** A deleted row is struck through with a reason, not removed — a dangling citation is a defect you can find, a silently renumbered id is one you cannot.
+
+**Class:** `observed` (an FDE watched it) · `system` (a log or export) · `documented` (an SOP) · `stated` (someone said so).
+**Tell:** `repeat` · `paste` · `switch` · `dead` · `-`
+
+<!-- table:observation-log.rows role=register id=Id -->
+
+| Id | Time | Actor (role) | Action | System | Secs | Interrupted by | Tell | Class | Notes / verbatim |
+|---|---|---|---|---|---|---|---|---|---|
+
+<!-- table:observation-log.sessions role=register id=Date -->
+
+## Sessions
+
+| Date | Workflow observed | Operator role | Duration | Consent basis | Ev range |
+|---|---|---|---|---|---|
+
+## Tell counts
+
+Derived from the `Tell` column above — **do not maintain by hand.** Counts are computed at derive time and rendered on the dashboard. Never report a count without its observation window.

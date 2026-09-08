@@ -1,6 +1,6 @@
 # Capture formats
 
-Canonical row shapes for the discovery instruments. Templates in `.claude/templates/engagement-init/01-Discovery/` implement these; keep the two in sync.
+Canonical row shapes for the discovery instruments. Templates in `.claude/templates/engagement-init/02-Workflow/` implement these; keep the two in sync.
 
 ## Observation log
 

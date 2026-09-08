@@ -1,0 +1,31 @@
+# Requirements register — {{CLIENT_NAME}}
+
+**A requirement with no source is not a requirement.** Route it to `open-questions.md`, or tag it `ASSUMPTION` with a named owner and a confirm-by date.
+
+The `Source` column carries one or more `EV-` / `EX-` ids. Sources that do **not** count: "Discovery", "The client said", "Standard practice", "Obvious from the workflow", and **another requirement** — requirements do not source each other.
+
+**Confidence:** `verified` (observed or system evidence) · `UNVERIFIED` (stated only — must be verified before build) · `ASSUMPTION` (no evidence). The shouty case on `UNVERIFIED` is deliberate and load-bearing.
+
+**Never quietly upgrade a confidence class.** Promotion requires new evidence and a citation to it.
+
+**Acceptance criteria must be able to fail.** If you cannot describe the input and output that constitute a failure, you have written a hope. Never invent an AC for someone else's requirement — ask.
+
+<!-- table:requirements-register.rows role=register id=Id -->
+
+| Id | Requirement | Source | Class | Confidence | Acceptance criteria | Priority | Owner |
+|---|---|---|---|---|---|---|---|
+
+<!-- table:requirements-register.assumptions role=register id=Req id -->
+
+## Assumptions
+
+Every one needs an owner, a confirm-by date, and **what breaks if it is wrong** — that last field is what turns an assumption into a managed risk rather than a permanent guess.
+
+| Req id | Assumption (stated positively) | Owner | Confirm by | What breaks if wrong |
+|---|---|---|---|---|
+
+Mirror every open assumption into `../engagement-management/raid-log.md`.
+
+## Chain audit
+
+Derived at derive time — **do not maintain by hand.** The audit computes: unsourced requirements, orphan evidence, dangling `Source` citations, stale `UNVERIFIED`, and unowned assumptions. Counts render on the dashboard.

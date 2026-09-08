@@ -1,0 +1,48 @@
+# Retrospective — {{CLIENT_NAME}}
+
+<!-- table:retrospective.outcome role=kv -->
+
+| Item | Value |
+|---|---|
+| Stages completed | |
+| Gates passed | |
+| Measured outcome | |
+| Against baseline | |
+| Autonomy rung reached | |
+
+<!-- table:retrospective.behaviours role=labels key=Behaviour -->
+
+## Behaviours
+
+The five the bootcamp certifies. Observed on this engagement?
+
+| Behaviour | Observed | Where |
+|---|---|---|
+| Chose observation over interview | | |
+| Declined an automation | | |
+| Shipped something in under a day | | |
+| Held a position under authority pressure | | |
+| Made an explicit fold-in / discard call | | |
+
+<!-- table:retrospective.learned role=register id=Lesson -->
+
+## What we learned
+
+| Lesson | Evidence | Generalisable? | Routed to |
+|---|---|---|---|
+
+<!-- table:retrospective.effort role=register id=Stage -->
+
+## Effort benchmarks
+
+For estimating the next engagement.
+
+| Stage | Estimated | Actual | Variance | Why |
+|---|---|---|---|---|
+
+<!-- table:retrospective.would-differently role=register id=Item -->
+
+## What we would do differently
+
+| Item | What happened | What we would do instead |
+|---|---|---|

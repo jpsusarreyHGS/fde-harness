@@ -1,14 +1,18 @@
 ---
-description: Invoke the evaluator to build golden sets from the exception register and competency questions, run the eval suites, measure shadow-mode agreement to set the autonomy rung, and return a pass/fail verdict with severity-tagged failures and a routing hint per failure. The eval report is often the client-facing artefact that closes the deal.
+description: Stage 06. Invoke the evaluator to score the system against the four tests, build golden sets from the exception register and competency questions, run the suite, and produce the client-facing eval report with a failure taxonomy. Also measures shadow-mode agreement for the autonomy ladder.
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
-Use the Agent tool to dispatch the `evaluator` agent. Follow its instructions exactly. Per `evaluator.md`:
+Use the Agent tool to dispatch the `evaluator` agent. Per `evaluator.md`:
 
-1. **Loads `autonomy-ladder`** in full, plus `observation-protocol` — it needs to know how the exception register was built to build cases from it.
-2. **Builds golden sets from evidence, never from imagination.** Every case cites an `EX-NNN` or a `CQ-NN`; a case the agent invented tests its idea of the domain, not the client's. Five suites: competency, exception, retrieval, tool use, regression.
-3. **Runs and reports** expected vs actual per case, with failures tagged P0-P3 and routed by type. **P0 is a stop** — a wrong answer presented confidently, an unauthorised write, or a permission-boundary crossing gets flagged immediately rather than at the end of the suite.
-4. **Measures the autonomy rung** into `05-Evals/autonomy-ledger.md` with sample size, agreement rate and **divergence categories** — 92% clustered on one exception type is a fixable gap; 92% scattered is a capability ceiling, and the report says which.
-5. **Emits the eval report** with a mandatory boundary section stating what the verdict does *not* cover. A verdict without it reads as broader than it is, and that misreading is what a client will hold HGS to.
+1. **Loads `skills-practice/four-tests`** and `skills-practice/autonomy-ladder` in full, plus `observation-protocol` — it needs to know how the exception register was built to build cases from it.
+2. **Scores every output against the four tests:** did it have the right data · did it take the required steps including the compliance ones · does it match an expert · **is it safe to act on**. A system that correctly declines to act is *passing* — the routing is a design outcome, not a failure.
+3. **Builds golden sets from evidence, never from imagination.** Every case cites an `EX-` or a `CQ-`. Where history exists it is mined directly; for subjective work the corpus is mined for the implicit standards nobody wrote down.
+4. **Reports in the runbook's format** — absolute counts, failures grouped by class, a stated next action. Failures are not minimised: they are the input to the next iteration, and showing them is what makes the passes credible.
+5. **Tests the regression gate by breaking something on purpose** and confirming it blocks. A regression suite nobody has seen fail is of unknown value.
+6. **Measures shadow-mode agreement** into `07-Production/autonomy-ledger.md` with the **disagreement pattern** — clustered means a fixable gap, scattered means a capability ceiling, and they demand opposite decisions.
+7. **States what the verdict does not cover.** Mandatory.
 
-The agent never marks a case passed without running it, never softens a P0, and never sets a rung without a logged measurement.
+**P0 is a stop** — a confidently wrong answer, an unauthorised write, or a permission-boundary crossing. It maps to the G2 requirement of zero silent failures.
+
+Output: `06-Evals/eval-report.md`, rendered to `deliverables/<slug>/06-Evals/`. It is often the artefact that closes the deal.

@@ -11,7 +11,7 @@ description: Consent, residency, retention, redaction and monitoring law for FDE
 
 This is not caution for its own sake. Evidence captured under unresolved terms may have to be destroyed, and destroying your discovery evidence means redoing discovery. It is also the moment when a client's security and legal functions form their view of whether HGS is safe to work with, and that view is very hard to revise.
 
-Write the agreed terms to `01-Discovery/evidence-handling-terms.md`. The `discovery-analyst` **hard-stops** if that file is missing or unsigned.
+Write the agreed terms to `00-Setup/evidence-handling-terms.md`. The `discovery-analyst` **hard-stops** if that file is missing or unsigned.
 
 ## The six terms
 

@@ -1,0 +1,35 @@
+# Stage gate 3 — Production readiness — {{CLIENT_NAME}}
+
+Between stages `08` and `09`. The capstone bar.
+
+<!-- table:stage-gate-3.decision role=kv -->
+
+| Item | Value |
+|---|---|
+| Recommendation | READY · READY WITH CAVEATS · NOT READY |
+| Assessed | |
+| Decided | |
+| Decided by | |
+
+<!-- table:stage-gate-3.criteria role=labels key=Criterion -->
+
+## Criteria
+
+| Criterion | Standard | Status | Evidence | To close | Owner |
+|---|---|---|---|---|---|
+| Shadow mode passed | Threshold met **and the disagreements understood** — clustered or scattered, named either way | | | | |
+| UAT complete | Client-led, against their own cases, exit criteria agreed in advance | | | | |
+| Client review held | Readout given, arithmetic shown, a risk named before being asked | | | | |
+| **A measured outcome** | Not projected. ROI model populated with **actuals** against the stage-04 baseline | | | | |
+| Fold-in or discard | Called on **every** artefact, named date on each discard | | | | |
+| Library contribution | At least one generalised asset **accepted by the library owner** | | | | |
+| Named production owner | Someone named owns it, and has accepted | | | | |
+
+The last three separate a finished engagement from an abandoned one.
+
+<!-- table:stage-gate-3.caveats role=register id=Caveat -->
+
+## Caveats the operator would be accepting
+
+| Caveat | Consequence if it bites | Accepted by |
+|---|---|---|

@@ -1,0 +1,34 @@
+# Stack decision — {{CLIENT_NAME}}
+
+**Pick one stack and get genuinely good at it.** Build on top of what the client already runs — proposing a replacement for a platform they spent years migrating to is how an engagement dies.
+
+<!-- table:stack-decision.chosen role=kv -->
+
+| Item | Value |
+|---|---|
+| Stack | |
+| Chosen because | |
+| Decided by | |
+| Date | |
+
+<!-- table:stack-decision.client-platforms role=register id=Platform -->
+
+## What the client already runs
+
+| Platform | Purpose | Immovable? | We build on / around / never touch |
+|---|---|---|---|
+
+`never touch` is a legitimate and frequently correct answer. Record why.
+
+<!-- table:stack-decision.rejected role=register id=Option -->
+
+## Options rejected
+
+| Option | Why rejected | Migration cost we would have been asking them to absorb |
+|---|---|---|
+
+## The sponsor question
+
+Every client eventually asks what happens if they want to change model provider. **Have a real answer**, and record it here — no vendor should implicitly hold the practice's roadmap.
+
+>

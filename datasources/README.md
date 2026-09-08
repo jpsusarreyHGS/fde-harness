@@ -4,7 +4,7 @@ Drop client input files here. **Read-only to the harness** — agents convert, e
 
 ## Before anything lands here
 
-**The evidence-handling terms must be settled.** Residency, retention, redaction, access, deletion, onward use — see `.claude/skills/skills-practice/evidence-handling/SKILL.md`, and record the agreed position in `engagements/<slug>/01-Discovery/evidence-handling-terms.md`.
+**The evidence-handling terms must be settled.** Residency, retention, redaction, access, deletion, onward use — see `.claude/skills/skills-practice/evidence-handling/SKILL.md`, and record the agreed position in `engagements/<slug>/00-Setup/evidence-handling-terms.md`.
 
 Evidence captured or received under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.
 
@@ -21,7 +21,7 @@ This directory is gitignored. Client data does not go into the repository, and a
 ## Binary documents
 
 ```bash
-uv run --script --frozen scripts/convert_to_md.py "datasources/<slug>/<file>.pdf" --out "engagements/<slug>/01-Discovery/evidence/tmp.md"
+uv run --script --frozen scripts/convert_to_md.py "datasources/<slug>/<file>.pdf" --out "engagements/<slug>/02-Workflow/evidence/tmp.md"
 ```
 
 The converter refuses to write anywhere under `datasources/`.

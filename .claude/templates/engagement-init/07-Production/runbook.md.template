@@ -1,0 +1,44 @@
+# Production runbook — {{CLIENT_NAME}}
+
+<!-- table:runbook.ownership role=kv -->
+
+| Item | Value |
+|---|---|
+| **Named owner** | |
+| Escalation | |
+| On-call hours | |
+| Error budget | |
+
+A rung-5 system without a named owner has not reached rung 5.
+
+<!-- table:runbook.monitoring role=register id=Signal -->
+
+## Monitoring
+
+| Signal | Threshold | Where it alerts | Who responds |
+|---|---|---|---|
+
+<!-- table:runbook.failure-response role=register id=Failure -->
+
+## Failure response
+
+| Failure | Detection | Immediate action | Recovery | Rollback path |
+|---|---|---|---|---|
+
+<!-- table:runbook.routine role=register id=Task -->
+
+## Routine operations
+
+| Task | Frequency | Owner | Runbook link |
+|---|---|---|---|
+
+<!-- table:runbook.handover role=kv -->
+
+## Handover
+
+| Item | Done | Date | Confirmed by |
+|---|---|---|---|
+| Owner accepted | | | |
+| Runbook walked through | | | |
+| Access transferred | | | |
+| Support model agreed | | | |

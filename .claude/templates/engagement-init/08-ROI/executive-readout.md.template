@@ -1,0 +1,45 @@
+# Executive readout — {{CLIENT_NAME}}
+
+Four rules, in order of how often they are broken.
+
+## 1. The recommendation
+
+**Lead with the outcome, not the architecture.** This goes in the first ninety seconds. Nobody in the room wants the method first.
+
+>
+
+## 2. The arithmetic
+
+**The first question will be where the number came from.** Have the chain ready, each link traceable to an artefact.
+
+<!-- table:executive-readout.chain role=labels key=Link -->
+
+| Link | Claim | Evidence | Artefact |
+|---|---|---|---|
+| This change reduces… | | | |
+| Which moves… | | | |
+| Which is worth… | | | |
+
+## 3. The risk, named before we are asked
+
+**Volunteering the downside is the fastest way to make the upside credible.** Pick a real one — a named risk nobody could have found is theatre.
+
+<!-- table:executive-readout.risks role=register id=Risk -->
+
+| Risk | Likelihood | Consequence | What we are doing about it |
+|---|---|---|---|
+
+## 4. The sponsor's sentence
+
+They will have to repeat this upward, probably without us in the room. **Write it for them**, in their vocabulary, and check they will actually say it.
+
+>
+
+<!-- table:executive-readout.confirmation role=kv -->
+
+| Item | Value |
+|---|---|
+| Sentence agreed with sponsor | |
+| Date | |
+| Readout delivered | |
+| Attendees | |
