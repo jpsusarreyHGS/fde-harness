@@ -4,7 +4,7 @@ Owned by `engagement-manager`. `solution-architect` reads it at session start an
 
 | | |
 |---|---|
-| Current phase | {{PHASE}} |
+| Current phase | {{STAGE}} |
 | Next gate | G1 |
 | Updated | |
 

@@ -47,6 +47,14 @@ before(async () => {
 
   assert.ok(res.created.length > 40, `expected 40+ seeded files, got ${res.created.length}`);
 
+  // The gap that let {{PHASE}} reach derived state: the scaffolder reported
+  // the unresolved placeholder and nothing asserted on it.
+  assert.deepEqual(
+    res.unresolved,
+    [],
+    `templates reference placeholders the scaffolder does not substitute: ${res.unresolved.join(", ")}`,
+  );
+
   state = await deriveState({
     engagementDir: join(engagements, "fixture-co"),
     slug: "fixture-co",
@@ -124,6 +132,19 @@ test("gate criteria are parsed from the memo templates", () => {
     g1.behaviours.some((b) => /should not be built/i.test(b.name)),
     "G1 must certify declining an automation",
   );
+});
+
+test("no unsubstituted placeholder reaches derived state", () => {
+  const leaked = Object.entries(state.engagement)
+    .filter(([, v]) => /\{\{[A-Z_]+\}\}/.test(v))
+    .map(([k, v]) => `${k}=${v}`);
+  assert.deepEqual(leaked, [], `placeholders in engagement identity: ${leaked.join(", ")}`);
+});
+
+test("engagement identity carries the fields the console renders", () => {
+  for (const k of ["client", "sponsor", "scope", "stage", "residency", "labour"]) {
+    assert.ok(state.engagement[k], `engagement.${k} missing from derived identity`);
+  }
 });
 
 test("schema version is 2", () => {

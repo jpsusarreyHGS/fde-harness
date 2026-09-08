@@ -4,12 +4,13 @@
 |---|---|
 | Client | {{CLIENT_NAME}} |
 | Slug | {{SLUG}} |
+| Scope | {{SCOPE}} |
 | Sponsor | {{SPONSOR}} |
 | Started | {{DATE}} |
-| Phase | {{PHASE}} |
+| Stage | {{STAGE}} |
 | Ontology repo | {{ONTOLOGY_REPO}} |
 | Residency | {{RESIDENCY}} |
-| Labour representation | {{LABOUR}} |
+| Labour | {{LABOUR}} |
 
 ## Scope
 

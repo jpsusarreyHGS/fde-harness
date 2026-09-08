@@ -42,3 +42,15 @@ __pycache__/
 # Node
 node_modules/
 *.tsbuildinfo
+
+# Next build output
+.next/
+out/
+
+# Engagement content is client data and lives in SharePoint, not in this repo.
+# To develop the console against real data, scaffold a local engagement and
+# derive it — see apps/web/README.md. It stays untracked.
+engagements/*
+!engagements/.gitkeep
+deliverables/*
+!deliverables/.gitkeep

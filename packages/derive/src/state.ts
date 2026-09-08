@@ -387,19 +387,35 @@ export async function deriveState(opts: {
     join(engagementDir, "chronicle", "memory", "engagement-overview.md"),
   );
   const engagement: Record<string, string> = { slug };
+  // An unsubstituted placeholder is not a value. Propagating "{{PHASE}}" into
+  // derived state is exactly the silent wrongness this package exists to
+  // prevent, so it is dropped here as well as reported by the scaffolder.
+  const usable = (v: string) => filled(v) && !/\{\{[A-Z_]+\}\}/.test(v);
   if (overview) {
     for (const t of parseAnchoredTables(overview)) {
       for (const r of t.rows) {
         const k = col(r, "Item"); const v = col(r, "Value");
-        if (filled(k) && filled(v)) engagement[k.toLowerCase().replace(/\s+/g, "-")] = v;
+        if (filled(k) && usable(v)) engagement[k.toLowerCase().replace(/\s+/g, "-")] = v;
       }
     }
     const kv = overview.matchAll(/^\|\s*([A-Za-z][A-Za-z ]+?)\s*\|\s*(.+?)\s*\|$/gm);
     for (const m of kv) {
       const k = m[1]!.trim().toLowerCase().replace(/\s+/g, "-");
       if (k === "item" || /^-+$/.test(k)) continue;
-      if (!(k in engagement) && filled(m[2]!)) engagement[k] = m[2]!.trim();
+      if (!(k in engagement) && usable(m[2]!)) engagement[k] = m[2]!.trim();
     }
+  }
+
+  // Tolerate the earlier key spellings so an engagement created before the
+  // template was corrected still renders.
+  const alias: Record<string, string> = {
+    phase: "stage",
+    "labour-representation": "labour",
+    "data-residency": "residency",
+  };
+  for (const [from, to] of Object.entries(alias)) {
+    const v = engagement[from];
+    if (v !== undefined && engagement[to] === undefined) engagement[to] = v;
   }
 
   const friction: State["friction"] = [];
