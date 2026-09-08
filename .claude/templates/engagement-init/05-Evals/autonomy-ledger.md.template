@@ -1,0 +1,35 @@
+# Autonomy ledger — {{CLIENT_NAME}}
+
+Every autonomy-rung measurement. Append-only.
+
+**A rung is a measurement, not a phase name.** A row with `agreement` empty renders as "asserted, not measured" — in red, deliberately.
+
+| Date | Workflow | Rung | Sample | Window | Agreement | Divergence | Detail | P0 count | Decision | Decided by |
+|---|---|---|---|---|---|---|---|---|---|---|
+| | | shadow / suggest / approval / audit | | | | clustered / scattered | | | | |
+
+## Why divergence clustering matters more than the rate
+
+92% agreement clustered on one exception type is a **fixable gap** — a missing rule, probably already in the exception register, possibly a day's work.
+
+92% scattered randomly is a **capability ceiling** — no amount of iteration will move it.
+
+These look identical in a summary metric and require completely different decisions. Always categorise before reporting.
+
+## Thresholds for this engagement
+
+Set at architect time, **before any measurement exists**.
+
+| Transition | Threshold | Min sample | Window |
+|---|---|---|---|
+| Shadow → Suggest | | | |
+| Suggest → Act with approval | | | |
+| Act with approval → Act with audit | | | |
+
+## What a rung does not license
+
+A rung is measured per workflow, on the traffic it was measured on. It does **not** transfer to a different workflow, to the same workflow after a model / prompt / ontology / data change (**that is a regression trigger**), to a materially higher volume, or to another client.
+
+| Workflow | Rung | Measured on | Re-measurement triggered by |
+|---|---|---|---|
+| | | | |

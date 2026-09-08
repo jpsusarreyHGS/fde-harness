@@ -1,0 +1,49 @@
+# Source systems — {{CLIENT_NAME}}
+
+Field-level mappings and identity rules. Feeds the ingestion pipelines.
+
+## Sources
+
+| Id | System | Type | Extract | Auth | Refresh | Owner |
+|---|---|---|---|---|---|---|
+| S1 | | CRM / docs / stream / DB | | | | |
+
+## Identity rules
+
+**Ingestion runs in identity order — the minting system first.** This is a hard dependency, not a preference.
+
+| Entity | Minted by | Referenced by | Key | Stable? | On disagreement |
+|---|---|---|---|---|---|
+| | S1 | S2, S3 | | | survivorship rule + adjudicator |
+
+## Field mappings
+
+| Source | Field | Type | Maps to object | Maps to property | Transform | Nullable | Notes |
+|---|---|---|---|---|---|---|---|
+| S1 | | | | | | | |
+
+**Record every transform, however trivial.** Reformatting a date or mapping one code to another is undocumented logic today and a silent data defect tomorrow. Transforms discovered in a copy-paste tell (`paste` rows in the observation log) belong here.
+
+## Identifier convention
+
+One helper module constructs identifiers; pipelines and the query layer both use it. **Divergent identifier logic between ingestion and query is very hard to see and very easy to prevent.**
+
+| Entity | Pattern | Example |
+|---|---|---|
+| | | |
+
+## Provenance
+
+Every source contributes an activity record so any fact can be attributed.
+
+| Source | Activity record | Captured |
+|---|---|---|
+| | | |
+
+## Validation
+
+| Shape | Constrains | From exception | Blocking |
+|---|---|---|---|
+| | | EX- | yes |
+
+A build that has not passed validation is not built.

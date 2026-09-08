@@ -1,0 +1,40 @@
+# Personas and permission matrix — {{CLIENT_NAME}}
+
+Derived from `../01-Discovery/stakeholder-map.md`. Becomes the role module in the built application.
+
+## Personas
+
+| Role | What they do | Systems today | Questions they ask (CQ ids) | Source |
+|---|---|---|---|---|
+| | | | CQ- | |
+
+The **exception holder must appear here.** Their questions are usually the ones the ontology exists to answer.
+
+## Permission matrix
+
+| Role | Read | Create | Modify | Approve | Close |
+|---|---|---|---|---|---|
+| | | | | | |
+
+Rules, inherited from the reference architecture and non-negotiable:
+
+- **Role comes from the authenticated session only** — never from client input, a header, or a request body.
+- **Reads default to authenticated staff; writes are allow-listed per role.**
+- **Every write names an approver role.** Nothing writes because it seemed reasonable at runtime.
+- At least one role should be read-only, and it should be the one that audits.
+
+## Write allow-list
+
+The complete set of things an agent may change. Enumerated here, derived from approved use cases.
+
+| Write | Object | Roles permitted | Approver | Reversible | Use case |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Impersonation test list
+
+For the evaluator: one authorisation-denied test per role per write.
+
+| Role | Attempted write | Expected | Test case |
+|---|---|---|---|
+| | | denied + audited | |

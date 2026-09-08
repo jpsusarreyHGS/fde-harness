@@ -1,0 +1,67 @@
+# Architecture diagram — {{CLIENT_NAME}}
+
+**Canonical Mermaid source.** The copy embedded in `architecture.md` is for reading convenience; this file is the source of truth.
+
+```mermaid
+flowchart LR
+  %% Source systems
+  subgraph SRC[Source systems]
+    S1[S1 - ]
+    S2[S2 - ]
+    S3[S3 - ]
+  end
+
+  %% Ingestion and validation
+  subgraph ING[Ingestion]
+    MAP[Mappers]
+    VAL[Validation gate]
+  end
+
+  %% Ontology and store
+  subgraph CORE[Ontology and store]
+    ONT[Domain model]
+    STORE[(Store)]
+  end
+
+  %% Agent layer
+  subgraph AGENT[Agent layer]
+    TPL[Governed templates]
+    LOOP[Agent loop]
+  end
+
+  %% Human gates
+  subgraph GATE[Human gates]
+    APPR[Approval queue]
+    AUD[Audit log]
+  end
+
+  S1 --> MAP
+  S2 --> MAP
+  S3 --> MAP
+  MAP --> VAL
+  VAL --> STORE
+  ONT --- STORE
+  STORE --> TPL
+  TPL --> LOOP
+  LOOP -->|read| TPL
+  LOOP -->|proposed write| APPR
+  APPR -->|approved, re-bound| TPL
+  LOOP --> AUD
+  APPR --> AUD
+```
+
+## Conventions
+
+- **Identity order matters.** The minting source appears leftmost among sources and its mapper runs first.
+- **The validation gate is always on the path to the store.** A build that has not passed validation is not built.
+- **Writes never go store-ward from the agent loop directly.** They route through the approval queue and are re-bound from `{templateId, params}` before executing. Drawing it any other way misrepresents the security model.
+- **The audit log receives from every path**, reads included.
+
+## Legend
+
+| Shape | Means |
+|---|---|
+| `[ ]` | Service or component |
+| `[( )]` | Data store |
+| Solid edge | Synchronous call |
+| Labelled edge | Governed or gated path |

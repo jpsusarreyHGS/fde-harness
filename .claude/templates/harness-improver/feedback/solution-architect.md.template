@@ -1,0 +1,27 @@
+# Agent feedback — solution-architect
+
+Living per-role feedback file. Appended by `chronicle` at session end, one dated section per session. Read by `harness-improver` when consolidating cross-session friction.
+
+**Append only. Never overwrite an earlier section** — the value of this file is the time series.
+
+---
+
+## {{SESSION_DATE}} — Session {{SESSION_ID}}
+
+### Inputs given
+<!-- What did the agent receive? Which artefacts, which ids, which skills were named in the dispatch. -->
+
+### Output quality
+<!-- Was it useful? Where was it strong? Where did the operator or a downstream agent have to rework or override it? -->
+
+### Friction points
+<!-- Where it stalled, asked redundant questions, missed context already available in the engagement, or produced output needing rework. Cite file and line. -->
+
+### Suggested improvements
+<!-- Concrete edits that would have prevented the friction. Format: "In step N, add: <text>" or "Replace step N with: <text>". These are preserved verbatim and NEVER auto-applied — promoting one into the agent prompt is a deliberate human action. -->
+
+### Open questions
+<!-- Unresolved this session, affecting this agent's behaviour. -->
+
+### Assumptions
+<!-- Working assumptions baked into this session that should be made explicit and challenged next pass. -->

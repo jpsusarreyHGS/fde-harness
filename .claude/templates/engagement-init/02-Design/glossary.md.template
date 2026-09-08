@@ -1,0 +1,31 @@
+# Glossary — {{CLIENT_NAME}}
+
+The client's approved vocabulary. **Their words are the asset**; do not normalise into industry-standard terms without logging it as a decision with a named approver.
+
+Where two functions use different words for the same thing, both appear as synonyms and the canonical choice is a **logged decision, not the modeller's preference**.
+
+Where the same word is used at different grains, **that is two terms.** Naming them apart is often the single most valuable thing the engagement delivers — the client has been having a recurring argument nobody could resolve because both sides were right about different things.
+
+| Term | Definition | **Grain — one row is one what?** | Synonyms | Used by | Owner | Worked example | Source |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | EV- / Q- |
+
+## Grain splits
+
+| Word | Meaning A (grain) | Meaning B (grain) | New names | Decided by |
+|---|---|---|---|---|
+| | | | | |
+
+## Canonical-term decisions
+
+| Concept | Candidates | Chosen | Rationale | Approved by |
+|---|---|---|---|---|
+| | | | | |
+
+## Not yet defined
+
+Terms in use with no agreed definition. A glossary cannot be "approved" while a term here has no owner.
+
+| Term | Blocked on | Owner |
+|---|---|---|
+| | | |

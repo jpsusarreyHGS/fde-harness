@@ -1,0 +1,17 @@
+# Decisions — {{CLIENT_NAME}}
+
+Canonical writer: `solution-architect`. `discovery-analyst` and `ontology-engineer` surface decisions but route them here.
+
+**Every decision records the alternative rejected.** A decision with no rejected alternative was not a decision, and it will be re-argued.
+
+| Date | Decision | Alternative rejected | Why | Decided by | Reversible |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Operator overrides
+
+Where the operator proceeded past a gate, a threshold or a guardrail. Logged with their name — not as a criticism, but because an override the team cannot find later becomes an unexplained anomaly.
+
+| Date | Override | Risk accepted | Accepted by |
+|---|---|---|---|
+| | | | |

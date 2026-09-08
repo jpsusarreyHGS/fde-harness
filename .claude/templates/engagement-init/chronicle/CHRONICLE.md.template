@@ -1,0 +1,11 @@
+# Chronicle index — {{CLIENT_NAME}}
+
+Session logs live in `chronicle/sessions/YYYY-MM-DD-NNN.md`. **Never flat-list session files at `chronicle/*.md`.**
+
+| Session | Summary |
+|---|---|
+| | |
+
+## Out-of-session changes
+
+Operator-edited file at `chronicle/sessions/out-of-session-changes.md` (optional). Agents read it at session start; if non-empty, treat it as authoritative state.

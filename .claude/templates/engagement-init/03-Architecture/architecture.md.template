@@ -1,0 +1,78 @@
+# Target architecture — {{CLIENT_NAME}}
+
+Produced by `solution-architect` in `architect` mode. Six chunks, drafted in order.
+
+## 1. Context and constraints
+
+**Build on top of what the client already runs.** Proposing a replacement for a platform they spent years migrating to is how an FDE engagement dies.
+
+| Constraint | Detail | Source |
+|---|---|---|
+| Existing platforms in scope | | |
+| Identity | | |
+| Network / connectivity | | |
+| Data residency | {{RESIDENCY}} | |
+| Regulatory exposure | | |
+| Change windows | | |
+
+## 2. Target architecture
+
+```mermaid
+flowchart LR
+  subgraph SRC[Source systems]
+  end
+  subgraph CORE[Ontology and store]
+  end
+  subgraph AGENT[Agent layer]
+  end
+  subgraph GATE[Human gates]
+  end
+```
+
+Canonical Mermaid source lives in `architecture-diagram.md`; this is an embedded copy for reading convenience.
+
+| Component | Purpose | Technology | Hosted | Owner |
+|---|---|---|---|---|
+| | | | | |
+
+**Store choice rationale** — chosen from the competency questions, not from precedent. A graph store earns its place where relationship traversal and per-fact provenance are the point; where the questions are aggregations over known joins, a relational or warehouse layer with a semantic model on top is less machinery for the same answer.
+
+> …
+
+## 3. Integration map
+
+| Source | Extract | Auth | Refresh | Owner | Failure behaviour | **Coverage verified by us** |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+## 4. Access model
+
+Summarised here; the record of design is `access-model.md`.
+
+## 5. Autonomy plan
+
+Written **now**, before any measurement exists, so it cannot be renegotiated later under delivery pressure.
+
+| Workflow | Target rung | **Measurement that earns it** | Threshold | Min sample | Window |
+|---|---|---|---|---|---|
+| | | shadow-mode agreement | | | |
+
+## 6. Deployment and operations
+
+| Item | Value |
+|---|---|
+| Environments | |
+| Promotion path | |
+| Where secrets live (**never values**) | |
+| Rollback mechanism | |
+| Observability | |
+| On-call / support | |
+| Error budget | |
+
+## Decisions
+
+Every architecture decision, with the alternative rejected. Mirrored into `../chronicle/memory/decisions.md`.
+
+| Decision | Alternative rejected | Why | Date | Decided by |
+|---|---|---|---|---|
+| | | | | |

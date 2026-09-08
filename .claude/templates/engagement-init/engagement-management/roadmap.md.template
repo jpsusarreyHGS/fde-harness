@@ -1,0 +1,36 @@
+# Roadmap — {{CLIENT_NAME}}
+
+Owned by `engagement-manager`. `solution-architect` reads it at session start and flips slice statuses at session end.
+
+| | |
+|---|---|
+| Current phase | {{PHASE}} |
+| Next gate | G1 |
+| Updated | |
+
+## Phases
+
+| Phase | Status | Started | Target | Gate |
+|---|---|---|---|---|
+| 01 Discovery | | | | G1 |
+| 02 Design | | | | G2 |
+| 03 Architecture | | | | |
+| 04 Build | | | | |
+| 05 Evals | | | | G3 |
+| 06 Launch | | | | |
+
+## Slices
+
+| # | Slice | Use case | Status | Requirements | Depends on | Target |
+|---|---|---|---|---|---|---|
+| | | UC- | not-started / active / blocked / done | REQ- | | |
+
+## Milestones
+
+| Milestone | Date | Owner | Client-visible |
+|---|---|---|---|
+| | | | |
+
+## Critical path
+
+<!-- What actually determines the end date. Usually a data-access dependency, not a build task. -->

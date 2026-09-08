@@ -1,0 +1,31 @@
+# Environment — {{CLIENT_NAME}}
+
+**Where things live. Never what the secrets are.**
+
+If you find a credential value in any file in this engagement, stop, report it, and do not commit.
+
+## Repositories
+
+| Repo | URL | Branch | Purpose |
+|---|---|---|---|
+| Ontology | {{ONTOLOGY_REPO}} | | |
+
+## Endpoints
+
+| Environment | Service | URL | Notes |
+|---|---|---|---|
+| dev | | | |
+
+## Credentials
+
+| What | **Where it lives** | Owner | Rotation |
+|---|---|---|---|
+| | vault path / secret manager reference | | |
+
+## Access provisioned
+
+Possible is not agreed; agreed is not provisioned.
+
+| System | Status | Granted | Expires |
+|---|---|---|---|
+| | not-requested / requested / agreed / provisioned | | |

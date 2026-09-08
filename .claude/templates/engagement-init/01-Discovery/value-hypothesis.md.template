@@ -1,0 +1,41 @@
+# Value hypothesis and KPI baseline — {{CLIENT_NAME}}
+
+**Capture baselines while the current state is still observable.** After the build the "before" number is gone and the business case becomes an argument you cannot win. This is the single most time-sensitive artefact in discovery.
+
+## Hypothesis
+
+> If we {{SCOPE}}, then <metric> will move from <baseline> to <target> by <date>, because <mechanism>.
+
+## Metrics
+
+A value score above 3 in the use-case matrix requires a baseline in this table.
+
+| Metric | Baseline | **Measured by us?** | Source | Target | By when | Owner | Cadence |
+|---|---|---|---|---|---|---|---|
+| | | yes / client-reported | | | | | |
+
+A client-reported baseline nobody has validated is not a baseline. Say which is which.
+
+## How the baseline was measured
+
+| Metric | Method | Sample | Window | Date | Ev ids |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Counter-metrics
+
+What must **not** get worse. A pilot that improves throughput and quietly degrades quality has not succeeded, and without a counter-metric nobody will notice until a customer does.
+
+| Counter-metric | Baseline | Acceptable floor | Owner |
+|---|---|---|---|
+| | | | |
+
+## Attribution
+
+How you will tell this pilot caused the change rather than something else that happened that quarter.
+
+| Item | Value |
+|---|---|
+| Comparison basis | before/after · control group · shadow-mode agreement |
+| Confounders known | |
+| Agreed with sponsor | |

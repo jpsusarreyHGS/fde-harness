@@ -1,0 +1,31 @@
+# Exception register — {{CLIENT_NAME}}
+
+**The most important artefact in discovery.** Every deviation from the happy path, with the rule that handles it and the person who holds that rule.
+
+Exceptions are first-class here — not a column on a process map — because the validation shapes and the eval golden sets are built directly from these rows.
+
+**Frequency must be a rate with a window, or the literal string `unquantified`.** Never a word like "often".
+
+**Rule holder** is the column that matters most. If you cannot name them, that is an open question, not a blank cell.
+
+**Capture the rule verbatim before paraphrasing it.** A paraphrase smooths off the conditions that make the rule correct.
+
+| Id | Trigger | Frequency | Current handling | Rule holder (role) | Rule, verbatim | Source | Downstream |
+|---|---|---|---|---|---|---|---|
+| EX-001 | | | | | "" | EV- | |
+
+## Undocumented rules
+
+The rules that exist only in someone's head. These are the highest-value rows in the engagement.
+
+**A note on care:** the rule exists because the official process is inadequate. Surfacing it can look like surfacing a workaround the holder is responsible for. Frame every one of these as a process finding, never as individual behaviour.
+
+| Ex id | Rule, verbatim | Held by (role) | How it was elicited | Confirmed by holder? |
+|---|---|---|---|---|
+| | "" | | | |
+
+## Promoted
+
+| Ex id | Became | Where |
+|---|---|---|
+| | shape / CQ-NN / eval case | |

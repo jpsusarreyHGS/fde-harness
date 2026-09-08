@@ -1,0 +1,57 @@
+# Evidence handling terms — {{CLIENT_NAME}}
+
+**Settle before capture begins** — not before the readout, not before procurement asks. The `discovery-analyst` hard-stops if this file is missing or unsigned.
+
+Evidence captured under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.
+
+| Status | |
+|---|---|
+| Agreed | no |
+| Agreed with | |
+| Date | |
+| Review date | |
+
+## The six terms
+
+| Term | Agreed position | Default if unstated |
+|---|---|---|
+| **Residency** — which tenant holds captured evidence | {{RESIDENCY}} | Client tenant |
+| **Retention** — how long, and what happens at close | | Defined period, deletion at close |
+| **Redaction** — what is stripped before it leaves the client environment | | Redact by default |
+| **Access** — who on the HGS side may read it | | Named engagement team only |
+| **Deletion** — mechanism, who confirms, evidence of deletion | | Documented, confirmed in writing |
+| **Onward use** — may a generalised pattern reach the practice asset library | | Yes, after generalisation strips all identifying material |
+
+Ask for onward use at the start, while goodwill is high and the request is abstract. It is the term teams forget to ask for and then need.
+
+## Monitoring constraint
+
+**Desktop task mining and session replay are employee monitoring, whatever the vendor's deck calls them.** In EU works-council jurisdictions and unionised environments they require **consultation, not notice** — a process with a counterparty who can say no, taking weeks.
+
+| Item | Value |
+|---|---|
+| Jurisdiction(s) | |
+| Labour representation | {{LABOUR}} |
+| Consultation required | |
+| Consultation status | |
+| Techniques in scope | shadowing · task mining · session replay · meeting capture |
+| Always-on instrumentation proposed | |
+
+**Where there is doubt, prefer consented, time-boxed shadowing.** It produces better material anyway: an operator who agreed to be there will show you the exception.
+
+## Observation consent
+
+| Item | Value |
+|---|---|
+| Operators briefed on purpose and handling | |
+| Roles recorded rather than names by default | |
+| Operator may pause the observer | yes |
+| Verbatim quotes attributed to role, not person | yes |
+
+## Close-out
+
+| Step | Done | Date | Confirmed by |
+|---|---|---|---|
+| Retention term executed | | | |
+| Deletion confirmed in writing | | | |
+| Generalisation pass run | | | |

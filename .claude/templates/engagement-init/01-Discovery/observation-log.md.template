@@ -1,0 +1,29 @@
+# Observation log — {{CLIENT_NAME}}
+
+One row per **observed action**. Capture events, not summaries — the raw sequence is what reveals the loops and the dead time. Summarising happens in `current-state-workflow.md`, downstream.
+
+Ids are append-only and never reused. Everything downstream cites them.
+
+**Class:** `observed` (an FDE watched it) · `system` (a log or export) · `documented` (an SOP) · `stated` (someone said so).
+**Tell:** `repeat` · `paste` · `switch` · `dead` · `—`
+
+| Id | Time | Actor (role) | Action | System | Secs | Interrupted by | Tell | Class | Notes / verbatim |
+|---|---|---|---|---|---|---|---|---|---|
+| EV-001 | | | | | | | | | |
+
+## Sessions
+
+| Date | Workflow observed | Operator role | Duration | Consent basis | Ev range |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Tell counts
+
+Never report a count without its observation window.
+
+| Tell | Occurrences | Window (cases / days) | Rate | Ev ids |
+|---|---|---|---|---|
+| Repeated task | | | | |
+| Copy-paste between systems | | | | |
+| Tool or tab switching | | | | |
+| Dead time mid-workflow | | | | |

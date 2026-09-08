@@ -1,0 +1,1039 @@
+<title>FDE Engagement Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Raleway:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ HGS brand tokens — source: hgs.com/brand ============
+   Impact Green is accent ONLY: never behind body copy, never a large block. */
+:root{
+  --impact-green:#ABCF02; --primary-blue:#00B0F0;
+  --sage:#9AAC94; --system:#26476B; --foundation:#5C6D72; --teal:#3D9B99; --charcoal:#2D2D2D;
+  --blue-900:#001C41; --blue-800:#012A7C; --blue-600:#0088DD; --blue-400:#3CCCFF; --blue-100:#BEEEFF;
+  --orange:#E67300; --red:#D12536;
+
+  /* neutrals, biased toward the brand blue rather than pure grey */
+  --ground:#F4F6F9; --surface:#FFFFFF; --surface-2:#FAFBFC;
+  --line:#DFE5EC; --line-soft:#EDF1F5;
+  --ink:#2D2D2D; --ink-2:#5C6D72; --ink-3:#8A98A0;
+  --rail:#001C41; --rail-2:#01204A; --rail-ink:rgba(255,255,255,.72);
+
+  --pass:var(--impact-green); --active:var(--primary-blue);
+  --caveat:var(--orange); --fail:var(--red); --idle:var(--sage);
+
+  --shadow:0 1px 2px rgba(0,28,65,.06),0 2px 8px rgba(0,28,65,.05);
+  --shadow-lg:0 2px 4px rgba(0,28,65,.07),0 8px 24px rgba(0,28,65,.09);
+  --r:5px; --rail-w:250px;
+
+  --f-display:'Kanit',system-ui,-apple-system,sans-serif;
+  --f-head:'Raleway','Kanit',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#08131F; --surface:#0F1E30; --surface-2:#13243A;
+    --line:#22374F; --line-soft:#1A2C42;
+    --ink:#E6EDF3; --ink-2:#9FB0BF; --ink-3:#6F8090;
+    --rail:#04101D; --rail-2:#08192B;
+    --impact-green:#BEDE2E; --primary-blue:#3CCCFF; --orange:#FF9433; --red:#FF5C6B; --sage:#8A9C84;
+    --blue-100:#1D3A55;
+    --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 8px 28px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#08131F; --surface:#0F1E30; --surface-2:#13243A;
+  --line:#22374F; --line-soft:#1A2C42;
+  --ink:#E6EDF3; --ink-2:#9FB0BF; --ink-3:#6F8090;
+  --rail:#04101D; --rail-2:#08192B;
+  --impact-green:#BEDE2E; --primary-blue:#3CCCFF; --orange:#FF9433; --red:#FF5C6B; --sage:#8A9C84;
+  --blue-100:#1D3A55;
+  --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 8px 28px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--f-display);font-weight:300;font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.2;font-weight:600;text-wrap:balance}
+a{color:var(--primary-blue)}
+:focus-visible{outline:2px solid var(--primary-blue);outline-offset:2px;border-radius:2px}
+
+/* ---------- rail ---------- */
+.rail{position:fixed;inset:0 auto 0 0;width:var(--rail-w);background:var(--rail);
+  color:#fff;padding:22px 0 16px;overflow-y:auto;z-index:60;
+  display:flex;flex-direction:column;gap:18px}
+.rail .brand{padding:0 20px}
+.rail .brand svg{width:96px;height:auto;display:block}
+.rail .brand .sub{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--impact-green);margin-top:8px;font-weight:500}
+.switch{padding:0 12px}
+.switch .lbl{font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--rail-ink);padding:0 8px 6px;font-weight:500}
+.switch button{display:block;width:100%;text-align:left;font-family:inherit;font-size:12.5px;
+  background:transparent;border:0;color:rgba(255,255,255,.78);padding:7px 8px;border-radius:4px;
+  cursor:pointer;border-left:2px solid transparent;transition:background .15s,color .15s}
+.switch button:hover{background:var(--rail-2);color:#fff}
+.switch button.on{background:var(--rail-2);color:#fff;border-left-color:var(--impact-green);font-weight:500}
+.switch button span{display:block;font-size:10px;color:rgba(255,255,255,.42);font-weight:300}
+.switch button.on span{color:var(--blue-400)}
+.rail nav{padding:0 12px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px;
+  display:flex;flex-direction:column;gap:1px}
+.rail nav a{display:flex;align-items:baseline;gap:9px;text-decoration:none;
+  color:rgba(255,255,255,.66);font-size:12.5px;padding:6px 8px;border-radius:4px;
+  border-left:2px solid transparent;transition:color .15s,background .15s}
+.rail nav a:hover,.rail nav a.on{color:#fff;background:var(--rail-2);border-left-color:var(--impact-green)}
+.rail nav a i{font-style:normal;font-size:10px;color:var(--impact-green);min-width:14px;font-weight:500}
+.rail nav a em{font-style:normal;margin-left:auto;font-size:10.5px;color:rgba(255,255,255,.38);
+  font-variant-numeric:tabular-nums}
+.rail .foot{margin-top:auto;padding:12px 20px 0;border-top:1px solid rgba(255,255,255,.1);
+  font-size:10.5px;color:rgba(255,255,255,.4);line-height:1.6}
+.themebtn{margin:0 20px;font-family:inherit;font-size:11px;background:transparent;
+  border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);padding:5px 10px;
+  border-radius:4px;cursor:pointer}
+.themebtn:hover{border-color:var(--impact-green);color:#fff}
+
+/* ---------- shell ---------- */
+.page{margin-left:var(--rail-w)}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px}
+
+/* ---------- masthead ---------- */
+.mast{background:var(--surface);border-bottom:1px solid var(--line);padding:24px 0 0}
+.mast .top{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.mast h1{font-size:26px;letter-spacing:-.01em}
+.mast .who{font-size:12px;color:var(--ink-2);margin-top:5px}
+.mast .who b{font-weight:500;color:var(--ink)}
+.mast .gen{margin-left:auto;text-align:right;font-size:10.5px;color:var(--ink-3);line-height:1.7}
+.mast .gen code{font-family:var(--f-display);font-weight:400;color:var(--ink-2)}
+
+/* phase pipeline — 01..06 is a real sequence, so the numbering carries information */
+.pipe{display:flex;gap:2px;margin:20px 0 0;overflow-x:auto;padding-bottom:2px}
+.ph{flex:1 1 0;min-width:104px;background:var(--surface-2);border:1px solid var(--line-soft);
+  border-bottom:3px solid var(--idle);padding:9px 11px 8px;position:relative}
+.ph:first-child{border-radius:var(--r) 0 0 0}.ph:last-child{border-radius:0 var(--r) 0 0}
+.ph .n{font-size:9.5px;letter-spacing:.1em;color:var(--ink-3);font-weight:500;
+  font-variant-numeric:tabular-nums}
+.ph .t{font-size:12.5px;font-weight:500;color:var(--ink);margin-top:1px}
+.ph .p{font-size:10.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ph.active{background:var(--surface);border-bottom-color:var(--active);box-shadow:var(--shadow)}
+.ph.active .t{color:var(--active)}
+.ph.complete{border-bottom-color:var(--pass)}
+.ph.blocked{border-bottom-color:var(--fail)}
+.ph .bar{position:absolute;left:0;bottom:-3px;height:3px;background:var(--active);transition:width .5s}
+
+/* gate strip */
+.gates{display:flex;gap:0;border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);
+  overflow:hidden;background:var(--surface)}
+.gate{flex:1;padding:11px 14px;display:flex;align-items:center;gap:10px;
+  border-right:1px solid var(--line-soft)}
+.gate:last-child{border-right:0}
+.gate .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--idle)}
+.gate.passed .dot{background:var(--pass)}
+.gate.ready .dot{background:var(--active)}
+.gate.caveats .dot{background:var(--caveat)}
+.gate.not-ready .dot{background:var(--fail);box-shadow:0 0 0 3px color-mix(in srgb,var(--fail) 18%,transparent)}
+.gate .g{font-size:11px;font-weight:500;color:var(--ink-2);letter-spacing:.04em}
+.gate .s{font-size:12px;color:var(--ink)}
+.gate .m{margin-left:auto;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* banner */
+.banner{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--line);border-left:3px solid var(--caveat);border-radius:var(--r);
+  padding:13px 16px;margin:18px 0 0;box-shadow:var(--shadow)}
+.banner .k{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--caveat);
+  font-weight:500;flex:0 0 auto;padding-top:2px;width:108px}
+.banner p{margin:0;font-size:12.5px;color:var(--ink-2);max-width:78ch}
+.banner p b{font-weight:500;color:var(--ink)}
+.banner.stop{border-left-color:var(--fail)}
+.banner.stop .k{color:var(--fail)}
+
+/* ---------- sections ---------- */
+.sec{padding:34px 0 0}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.sec-h h2{font-family:var(--f-head);font-size:16px;font-weight:600;letter-spacing:.01em}
+.sec-h .note{font-size:11.5px;color:var(--ink-3);margin-left:auto;text-align:right;max-width:44ch}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--line-soft);display:flex;align-items:baseline;gap:10px}
+.card-h h3{font-family:var(--f-head);font-size:12.5px;font-weight:600;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--ink-2)}
+.card-h .r{margin-left:auto;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.card-b{padding:16px}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g23{grid-template-columns:1.6fr 1fr}
+
+/* ---------- the chain (hero) ---------- */
+.chain{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 0 0}
+.link{flex:1 1 0;min-width:118px;padding:0 14px;border-left:1px solid var(--line-soft);position:relative}
+.link:first-child{border-left:0;padding-left:0}
+.link .stage{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--teal);
+  font-weight:500}
+.link .num{font-family:var(--f-display);font-size:30px;font-weight:600;line-height:1.05;
+  color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px}
+.link .of{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.link .att{font-size:10.5px;font-weight:500;margin-top:5px;font-variant-numeric:tabular-nums}
+.link .att.ok{color:var(--ink-3)}
+.link .att.warn{color:var(--caveat)}
+.link .att.bad{color:var(--fail)}
+.link .track{height:4px;background:var(--line-soft);border-radius:2px;margin-top:9px;overflow:hidden}
+.link .fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+.ratios{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);
+  border-top:1px solid var(--line-soft);margin-top:18px}
+.ratio{background:var(--surface);padding:13px 16px}
+.ratio .k{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.ratio .v{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px;
+  display:flex;align-items:baseline;gap:7px}
+.ratio .v small{font-size:11px;font-weight:400;color:var(--ink-3)}
+.ratio .d{font-size:11px;color:var(--ink-2);margin-top:2px;line-height:1.45}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:0 12px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td b{font-weight:500}
+td code{font-family:var(--f-display);font-weight:500;font-size:11.5px;color:var(--teal);
+  letter-spacing:.02em;white-space:nowrap}
+.scroll{overflow-x:auto}
+
+/* pills */
+.pill{display:inline-block;font-size:9.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;
+  padding:2.5px 7px;border-radius:3px;white-space:nowrap;border:1px solid transparent}
+.pill.pass{background:color-mix(in srgb,var(--impact-green) 20%,transparent);color:#4A5C00;border-color:color-mix(in srgb,var(--impact-green) 45%,transparent)}
+.pill.active{background:color-mix(in srgb,var(--primary-blue) 16%,transparent);color:var(--blue-800);border-color:color-mix(in srgb,var(--primary-blue) 40%,transparent)}
+.pill.caveat{background:color-mix(in srgb,var(--orange) 15%,transparent);color:#8A4400;border-color:color-mix(in srgb,var(--orange) 40%,transparent)}
+.pill.fail{background:color-mix(in srgb,var(--red) 14%,transparent);color:#8E1520;border-color:color-mix(in srgb,var(--red) 40%,transparent)}
+.pill.idle{background:color-mix(in srgb,var(--sage) 20%,transparent);color:#4C5A48;border-color:color-mix(in srgb,var(--sage) 45%,transparent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.pass{color:#D3EC5E}
+  :root:not([data-theme="light"]) .pill.active{color:var(--blue-400)}
+  :root:not([data-theme="light"]) .pill.caveat{color:#FFB066}
+  :root:not([data-theme="light"]) .pill.fail{color:#FF8A94}
+  :root:not([data-theme="light"]) .pill.idle{color:#AEBFA8}}
+:root[data-theme="dark"] .pill.pass{color:#D3EC5E}
+:root[data-theme="dark"] .pill.active{color:var(--blue-400)}
+:root[data-theme="dark"] .pill.caveat{color:#FFB066}
+:root[data-theme="dark"] .pill.fail{color:#FF8A94}
+:root[data-theme="dark"] .pill.idle{color:#AEBFA8}
+
+/* instrument rows */
+.instr{display:grid;grid-template-columns:1fr}
+.irow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line-soft)}
+.irow:last-child{border-bottom:0}
+.irow:hover{background:var(--surface-2)}
+.irow .nm{font-size:12.5px;flex:0 0 208px}
+.irow .nm b{font-weight:400}
+.irow .meter{flex:1;height:5px;background:var(--line-soft);border-radius:3px;overflow:hidden;min-width:60px}
+.irow .meter i{display:block;height:100%;border-radius:3px}
+.irow .ct{flex:0 0 52px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.irow .st{flex:0 0 78px;text-align:right}
+.irow .up{flex:0 0 72px;text-align:right;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* score bars in use-case table */
+.sbar{display:flex;gap:1.5px;align-items:flex-end;height:16px}
+.sbar i{width:5px;background:var(--blue-100);border-radius:1px}
+.sbar i.f{background:var(--primary-blue)}
+.sbar i.cap{background:var(--caveat)}
+
+/* age chip */
+.age{display:inline-block;font-size:10.5px;font-weight:500;font-variant-numeric:tabular-nums;
+  padding:1.5px 6px;border-radius:3px;background:var(--line-soft);color:var(--ink-2)}
+.age.old{background:color-mix(in srgb,var(--caveat) 16%,transparent);color:#8A4400}
+.age.stale{background:color-mix(in srgb,var(--red) 14%,transparent);color:#8E1520}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .age.old{color:#FFB066}
+  :root:not([data-theme="light"]) .age.stale{color:#FF8A94}}
+:root[data-theme="dark"] .age.old{color:#FFB066}
+:root[data-theme="dark"] .age.stale{color:#FF8A94}
+
+/* ops strip */
+.ops{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.op{background:var(--surface);padding:14px 16px}
+.op .k{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500}
+.op .v{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px}
+.op .d{font-size:11px;color:var(--ink-2);margin-top:3px;line-height:1.5}
+.op .d em{font-style:normal;color:var(--fail);font-weight:500}
+
+.empty{padding:22px 16px;font-size:12.5px;color:var(--ink-3);font-style:italic;text-align:center}
+.legend{font-size:10.5px;color:var(--ink-3);padding:10px 16px;border-top:1px solid var(--line-soft);
+  display:flex;gap:16px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:2px;display:block}
+
+footer{margin-top:44px;background:var(--rail);color:rgba(255,255,255,.5);padding:20px 0;font-size:11px}
+footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+footer b{color:rgba(255,255,255,.8);font-weight:500}
+
+/* ---------- portfolio ---------- */
+.pf{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:16px}
+.pfc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);padding:16px;cursor:pointer;text-align:left;font-family:inherit;
+  transition:box-shadow .18s,transform .18s;display:flex;flex-direction:column;gap:11px}
+.pfc:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.pfc .hd h3{font-size:15px}
+.pfc .hd .sc{font-size:11.5px;color:var(--ink-2);margin-top:2px}
+.pfc .ph2{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:500}
+.pfc .mini{display:flex;gap:2px}
+.pfc .mini i{flex:1;height:4px;border-radius:2px;background:var(--line-soft)}
+.pfc .kv{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2)}
+.pfc .kv b{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.pfc .alert{font-size:11.5px;font-weight:400;color:var(--fail);display:flex;gap:6px;align-items:baseline}
+.pfc .alert::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--fail);flex:0 0 auto;margin-top:5px}
+
+@media(max-width:1080px){
+  :root{--rail-w:0px}
+  .rail{position:static;width:100%;height:auto;flex-direction:column}
+  .rail nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 8px}
+  .switch{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px}
+  .switch .lbl{grid-column:1/-1}
+  .page{margin-left:0}.wrap{padding:0 18px}
+  .g2,.g3,.g23{grid-template-columns:1fr}
+  .ops{grid-template-columns:1fr 1fr}
+  .ratios{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .mast h1{font-size:21px}.ops{grid-template-columns:1fr}
+  .irow .nm{flex-basis:130px}.irow .up{display:none}
+  .mast .gen{margin-left:0;text-align:left}
+}
+</style>
+
+<aside class="rail">
+  <div class="brand">
+    <svg role="img" aria-label="HGS" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 532.9134 283.4646">
+      <path fill="#fff" d="M324.8913,232.9503c-8.9434,0-17.4368-.575-25.5058-1.7496-4.6214-.6751-8.7933-1.4498-12.5407-2.3747-4.5213-1.1-7.6941-5.1742-7.6941-9.8234,0-6.5239,6.0704-11.2982,12.4156-9.8484,2.7479.625,5.5458,1.175,8.4188,1.6499,7.2942,1.1746,14.5138,1.7496,21.7084,1.7496,12.2408,0,20.9841-1.3247,26.2301-3.9495,5.246-2.6244,7.8692-7.5234,7.8692-14.7224,0-5.2493-1.424-9.2234-4.2219-11.9479-2.823-2.7245-7.0945-5.1492-12.8155-7.2987-5.7205-2.1249-13.0648-4.6742-22.0082-7.5739-7.9689-2.7245-15.0634-5.5491-21.2839-8.4487-6.2201-2.9246-11.0666-6.8488-14.5639-11.7982-3.4972-4.949-5.246-11.6231-5.246-19.9717,0-12.2477,4.2719-21.6212,12.8155-28.1452,8.5435-6.4989,22.333-9.7734,41.3936-9.7734,7.3693,0,14.4638.55,21.2835,1.5995,3.5973.575,6.9198,1.2,10.0175,1.8997,4.5467,1.0249,7.7442,5.1242,7.7442,9.7984,0,6.3742-5.8953,11.2482-12.1158,9.8484-7.9439-1.7996-15.663-2.7245-23.1574-2.7245-12.0407,0-20.7343,1.2247-26.0804,3.6493-5.3457,2.4247-8.0189,6.9488-8.0189,13.5728,0,4.4741,1.1992,8.0238,3.6473,10.6482,2.4231,2.6244,6.2205,4.8494,11.3664,6.6991,5.1459,1.8497,11.7909,4.1243,19.96,6.8488,10.6918,3.2995,19.3353,6.6987,25.9303,10.1983,6.595,3.4992,11.4661,7.7736,14.5639,12.8227,3.0977,5.0495,4.6714,11.6731,4.6714,19.822,0,13.5979-4.7715,23.571-14.2891,29.8948-9.518,6.3242-23.0327,9.4736-40.5192,9.4736l.025-.025Z"/>
+      <path fill="#fff" d="M201.5854,281.3464c-10.2923,0-20.3599-.575-30.1522-1.7496-6.67-.7998-12.6653-1.8997-18.0365-3.3245-4.2465-1.125-7.1695-4.974-7.1695-9.3735,0-6.1987,5.7456-10.8229,11.7913-9.4482,4.5463,1.0245,9.3679,1.8993,14.4388,2.6244,9.7177,1.3498,19.0355,2.0494,27.9789,2.0494,14.5638,0,25.2556-.8748,32.0507-2.6244,6.7947-1.7496,10.1922-6.2237,10.1922-13.4227,0-5.0491-1.7988-8.6484-5.3961-10.7983-3.5973-2.1495-9.9671-3.1994-19.0852-3.1994h-36.7221c-25.4558,0-38.1711-8.5483-38.1711-25.6708,0-5.6237,1.7984-11.0231,5.3957-16.1722,3.5973-5.1492,8.9934-8.7985,16.188-10.923-7.7692-3.8745-13.5147-9.2734-17.1871-16.1726-3.6974-6.8988-5.5458-15.1223-5.5458-24.6459,0-17.2968,4.9962-29.8948,15.0138-37.7684,9.9921-7.8737,25.3057-11.8232,45.8899-11.8232,4.272,0,8.6936.3498,13.265,1.0249,4.5718.6751,8.119,1.3247,10.6422,1.8997h38.3208c4.6714,0,8.3938,3.9241,8.1436,8.5984-.2248,4.3244-3.8221,7.724-8.1436,7.724h-14.4142c4.4717,3.6994,7.6691,8.1235,9.6176,13.2726,1.9485,5.1492,2.923,10.8483,2.923,17.0474,0,15.3475-4.4717,27.2704-13.4151,35.719-8.943,8.4483-22.6328,12.6726-41.0938,12.6726-3.1223,0-5.8706-.1497-8.3187-.4249-2.4231-.2998-5.2961-.6246-8.5935-1.0245-6.0204.1997-11.6659,1.8993-16.9119,5.0991-5.246,3.1994-7.8692,7.3487-7.8692,12.3978,0,3.2995,1.3239,5.7242,3.9221,7.2987,2.6232,1.5499,7.4443,2.3246,14.4141,2.3246h38.1711c13.7895,0,24.3812,2.7745,31.7755,8.2986,7.3697,5.5491,11.0666,13.6479,11.0666,24.3461,0,13.5978-5.6455,23.046-16.9119,28.2953-11.2668,5.2492-27.3042,7.8737-48.0886,7.8737h.025ZM203.034,168.79c13.7899,0,23.3075-2.2245,28.5535-6.6987,5.246-4.4745,7.8692-12.3482,7.8692-23.621s-2.7729-19.4471-8.3187-24.4962c-5.5458-5.0491-14.9137-7.5735-28.1286-7.5735s-22.4331,2.4243-28.2787,7.2987c-5.8206,4.849-8.7432,13.1229-8.7432,24.7956,0,10.6982,2.7729,18.4222,8.2937,23.1715,5.5458,4.7739,15.1134,7.1486,28.7032,7.1486l.0496-.025Z"/>
+      <path fill="#fff" d="M1.1874,221.6828V49.0362c0-6.5988,5.3459-11.9479,11.9409-11.9479s11.941,5.3491,11.941,11.9479v61.2402c6.4201-5.2493,13.9394-9.5236,22.583-12.8231,8.6432-3.2995,18.6857-4.949,30.1518-4.949,16.7125,0,29.2282,4.0742,37.5965,12.2477,8.3438,8.1739,12.5407,20.9966,12.5407,38.494v78.4369c0,6.599-5.3461,11.9479-11.941,11.9479s-11.941-5.3489-11.941-11.9479v-77.5621c0-12.048-2.6728-20.4466-8.0189-25.2209-5.3457-4.7743-14.139-7.149-26.3798-7.149-7.7692,0-15.7881,1.7-24.0318,5.0991-8.2687,3.3996-15.1135,7.824-20.5344,13.273v91.5598c0,6.599-5.3459,11.9479-11.9409,11.9479s-11.941-5.3489-11.941-11.9479h-.025Z"/>
+      <path fill="#ABCF02" fill-rule="evenodd" d="M479.1439,148.713c2.6753,0,4.8421,2.1681,4.8421,4.8421s-2.1668,4.8421-4.8421,4.8421-4.8421-2.168-4.8421-4.8421,2.1668-4.8421,4.8421-4.8421ZM438.0788,62.2757c14.1995-5.4098,26.902-3.6998,39.0395,4.0799,9.0548,5.8053,15.5634,17.3154,20.47,30.195.9523,2.4989-.3026,5.2965-2.8003,6.2487-2.4977.9519-5.294-.3018-6.2463-2.8012-4.7776-12.5411-10.3743-21.4655-16.6528-25.4897-9.652-6.1878-19.1425-7.4568-30.3641-3.1829-14.5263,5.5337-24.7069,24.3199-19.6388,43.4644,3.3451,12.6431,10.0272,23.0044,21.8863,34.4774,1.9247,1.859,1.9732,4.9248.117,6.8471-1.8602,1.9219-4.9268,1.9732-6.8475.1142-12.7549-12.3341-20.6032-24.1658-24.5172-38.9612-6.21-23.4523,5.9477-47.5225,25.5542-54.9918ZM447.4684,40.5891c23.4156-1.9514,40.0644,7.0046,51.1407,18.9561,10.9109,11.7748,16.3502,26.36,17.9925,36.1092,2.2476,13.3388-6.9928,23.983-18.174,26.3382-5.6895,1.198-11.9358.2998-17.5406-3.3293-5.5926-3.6191-10.2128-9.7298-13.1826-18.4182-3.2805-9.5793-10.1523-12.7529-15.7933-12.207-5.7338.5552-11.2458,4.9946-11.9762,13.2839-.4842,5.4845,1.3558,12.5479,5.6935,19.9943,4.2974,7.3774,10.8544,14.7785,19.2151,20.8578,2.1628,1.5729,2.6389,4.6012,1.0652,6.764-1.5696,2.1624-4.6,2.641-6.7628,1.0681-9.3937-6.833-16.8788-15.2252-21.8863-23.8147-4.9631-8.5197-7.6909-17.5974-6.9726-25.7197,1.1379-12.8941,10.2733-21.0644,20.6919-22.0732,10.5155-1.0177,21.2932,5.2908,25.8851,18.7115,2.4332,7.1074,5.8993,11.2305,9.2847,13.4235,3.3733,2.1826,6.9928,2.6749,10.2814,1.9824,6.7709-1.426,11.8954-7.6877,10.6244-15.2538-1.3881-8.2199-6.1334-20.9724-15.5513-31.1352-9.2525-9.9856-23.0646-17.568-43.2279-15.8874-31.7158,2.643-48.6951,32.3618-46.6202,58.9559.2078,2.6664-1.7847,4.9962-4.4507,5.2045-2.666.2078-4.9958-1.7851-5.204-4.4511-2.3638-30.3003,16.9732-66.1517,55.468-69.36ZM399.3645,123.3984c2.5038-.939,5.2952.3297,6.2358,2.8334,1.7028,4.5451,4.2086,9.7702,7.5779,15.916,1.2872,2.3448.4277,5.288-1.9167,6.5736-2.3444,1.286-5.286.4273-6.574-1.9175-3.4892-6.3625-6.2294-12.0322-8.1566-17.1713-.939-2.5042.3297-5.2953,2.8335-6.2342ZM458.5851,114.9054c2.1829-1.5483,5.2052-1.0358,6.7507,1.1448,12.6903,17.8694,32.7125,18.6385,45.8628,10.0478,2.2355-1.4627,5.2376-.8337,6.7023,1.405,1.4607,2.2391.8312,5.2396-1.4082,6.7023-17.1128,11.1812-43.0907,9.9328-59.0495-12.5487-1.5495-2.1806-1.037-5.2029,1.142-6.7511ZM453.3193,97.4673c2.6753,0,4.8421,2.1681,4.8421,4.8421s-2.1668,4.8421-4.8421,4.8421-4.8421-2.168-4.8421-4.8421,2.1668-4.8421,4.8421-4.8421ZM384.8575,60.1928c15.7449-25.1067,39.9135-40.4831,72.9488-38.7806,41.7511,2.1518,60.8814,29.7279,71.2556,50.2669,1.2065,2.3868.2502,5.2993-2.1386,6.505-2.3888,1.2057-5.2981.2478-6.5046-2.1394-9.8013-19.4084-26.5832-43.0781-63.1129-44.9609-29.1051-1.5-50.1279,11.7468-64.2443,34.2542-1.4208,2.2657-4.4087,2.9505-6.6744,1.5297s-2.9505-4.4091-1.5297-6.6748ZM415.9382,9.2742c23.6537-9.927,78.6358-16.4682,114.8266,29.5141,1.6544,2.1014,1.2912,5.146-.8111,6.7999-2.1023,1.6536-5.1447,1.2908-6.7992-.8107-32.4058-41.1756-81.9325-35.6114-103.4718-26.5737-2.4654,1.0348-5.3021-.1254-6.3391-2.5913-1.033-2.4658.1291-5.3035,2.5946-6.3383ZM398.7536,18.4773c2.2859-1.3877,5.2642-.6595,6.6531,1.6263,1.3881,2.2858.6577,5.2641-1.6274,6.652-5.0858,3.0879-8.7642,6.5441-13.4812,11.6541-1.8138,1.9649-4.8772,2.0873-6.8423.2735-1.9647-1.8139-2.0873-4.8773-.2732-6.8423,4.9668-5.381,9.359-9.5919,15.571-13.3635Z"/>
+    </svg>
+    <div class="sub">FDE engagement console</div>
+  </div>
+
+  <div class="switch" id="switch">
+    <div class="lbl">Engagements</div>
+  </div>
+
+  <nav id="nav"></nav>
+
+  <button class="themebtn" id="themebtn" type="button">Switch theme</button>
+
+  <div class="foot">
+    Derived from <code>state.json</code>.<br>
+    Regenerate with <code>/dashboard</code>.
+  </div>
+</aside>
+
+<main class="page" id="page"></main>
+
+<footer>
+  <div class="wrap">
+    <div><b>HGS</b> · Forward deployed engineering</div>
+    <div>FDE harness MVP · console v1 · example data</div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   STATE — in the harness this block is replaced by the real
+   state.json set, derived from the filesystem by /dashboard.
+   The figures below are illustrative examples, not real accounts.
+   ============================================================ */
+var STATE = [
+{
+  schemaVersion:1, generatedAt:"2026-09-08T09:14:00Z",
+  engagement:{ slug:"meridian-claims", client:"Meridian Health (example)",
+    sponsor:"VP Claims Operations", scope:"Triage and route inbound claims correspondence",
+    nonGoals:"No adjudication. No payment release. No member-facing surface.",
+    phase:"01-Discovery", startedAt:"2026-08-11", ontologyRepo:"AI_Ontology_Credit_Union (pattern)",
+    residency:"client-tenant", labour:"works-council" },
+  phases:[
+    {id:"01-Discovery",label:"Discovery",status:"active",pct:68},
+    {id:"02-Design",label:"Design",status:"not-started",pct:12},
+    {id:"03-Architecture",label:"Architecture",status:"not-started",pct:0},
+    {id:"04-Build",label:"Build",status:"not-started",pct:0},
+    {id:"05-Evals",label:"Evals",status:"not-started",pct:0},
+    {id:"06-Launch",label:"Launch",status:"not-started",pct:0}],
+  gates:[
+    {id:"G1",label:"Discovery readiness",status:"not-ready",date:null,decidedBy:null,
+     criteria:[
+      {name:"Named executive sponsor, aligned",status:"met",evidence:"stakeholder-map.md",toClose:"",owner:""},
+      {name:"Bounded scope with explicit non-goals",status:"met",evidence:"pilot charter",toClose:"",owner:""},
+      {name:"Defined value with a measured baseline",status:"partial",evidence:"value-hypothesis.md rows 1-2",toClose:"Baseline for rework rate is client-reported, not measured by us",owner:"FDE"},
+      {name:"Feasible data",status:"unmet",evidence:"data-readiness.md S2",evidence2:"",toClose:"Document store access agreed but not provisioned",owner:"Client IT — R. Okonjo"},
+      {name:"Known risks",status:"met",evidence:"raid-log.md",toClose:"",owner:""},
+      {name:"Agreed acceptance criteria",status:"partial",evidence:"requirements-register.md",toClose:"38 of 51 have ACs; client has not reviewed them",owner:"Process owner"},
+      {name:"Settled evidence-handling terms",status:"met",evidence:"evidence-handling-terms.md, signed 2026-08-14",toClose:"",owner:""}]},
+    {id:"G2",label:"Build readiness",status:"not-run",date:null,criteria:[]},
+    {id:"G3",label:"Release readiness",status:"not-run",date:null,criteria:[]}],
+  instruments:[
+    {id:"observation-log",label:"Observation log",rows:214,status:"populated",updated:"2026-09-05"},
+    {id:"exception-register",label:"Exception register",rows:23,status:"populated",updated:"2026-09-05"},
+    {id:"requirements-register",label:"Requirements register",rows:51,status:"populated",updated:"2026-09-06"},
+    {id:"open-questions",label:"Open questions",rows:14,status:"populated",updated:"2026-09-06"},
+    {id:"stakeholder-map",label:"Stakeholder map",rows:9,status:"populated",updated:"2026-08-20"},
+    {id:"current-state-workflow",label:"Current-state workflow",rows:31,status:"populated",updated:"2026-09-04"},
+    {id:"system-landscape",label:"System landscape",rows:11,status:"populated",updated:"2026-08-28"},
+    {id:"data-readiness",label:"Data readiness",rows:6,status:"populated",updated:"2026-09-02"},
+    {id:"use-case-qualification",label:"Use-case qualification",rows:5,status:"populated",updated:"2026-09-06"},
+    {id:"value-hypothesis",label:"Value hypothesis",rows:3,status:"thin",updated:"2026-08-26"},
+    {id:"evidence-handling-terms",label:"Evidence-handling terms",rows:6,status:"populated",updated:"2026-08-14"},
+    {id:"readiness-gate",label:"Readiness gate (G1)",rows:7,status:"populated",updated:"2026-09-06"}],
+  chain:{
+    evidence:{total:214,observed:151,system:38,documented:16,stated:9},
+    exceptions:{total:23,withRuleHolder:17,quantified:14},
+    requirements:{total:51,sourced:43,verified:37,unverified:6,assumption:8,withAC:38},
+    competencyQuestions:{total:14,answerable:0,needsData:5,notModelled:9},
+    ontologyObjects:{promoted:0,backlog:19},
+    evalCases:{total:0,passing:0,failing:0,p0:0}},
+  openQuestions:[
+    {id:"Q-004",question:"Which of the three 'urgent' definitions governs SLA routing?",why:"Three functions use the word at different thresholds; routing rule depends on it",owner:"Process owner",blocks:"UC-01 acceptance criteria",raised:"2026-08-21",ageDays:18},
+    {id:"Q-009",question:"Who authorises a re-open after the 30-day close?",why:"Observed twice with no documented approver",owner:"Claims supervisor",blocks:"Write allow-list",raised:"2026-08-29",ageDays:10},
+    {id:"Q-011",question:"Is the overnight batch the only refresh, or is there an intraday path?",why:"Staleness at point of use determines whether triage can be real-time",owner:"Client IT",blocks:"Architecture chunk 3",raised:"2026-09-01",ageDays:7},
+    {id:"Q-013",question:"Does the SOP's three-approval path still operate?",why:"SOP says three; observation shows one. Either a control is not working or it was never needed",owner:"Compliance",blocks:"Access model",raised:"2026-09-04",ageDays:4},
+    {id:"Q-014",question:"Can we name the operator who holds the vendor-routing rule?",why:"Exception EX-007 has no rule holder; eval quality is capped without it",owner:"Process owner",blocks:"Golden set for EX-007",raised:"2026-09-05",ageDays:3}],
+  raid:[
+    {type:"dependency",item:"Document store read access (S2)",owner:"Client IT — R. Okonjo",impact:"high",review:"2026-09-12",status:"open"},
+    {type:"risk",item:"Works-council consultation not yet scheduled; blocks any task-mining option",owner:"Engagement lead",impact:"high",review:"2026-09-10",status:"open"},
+    {type:"assumption",item:"Correspondence volume is stable month to month",owner:"Process owner",impact:"medium",review:"2026-09-15",status:"open"},
+    {type:"risk",item:"Rework-rate baseline is client-reported and unvalidated",owner:"FDE",impact:"medium",review:"2026-09-12",status:"open"},
+    {type:"issue",item:"Two 'account' grains in use across Claims and Finance",owner:"FDE",impact:"medium",review:"",status:"open"}],
+  autonomy:[],
+  useCases:[
+    {rank:1,name:"Correspondence triage and routing",scores:{value:5,feasibility:3,data:3,aiSuitability:5,risk:4,timeToValue:4,reusability:4},total:28,blocker:"S2 access not provisioned",blockerOwner:"Client IT",unitCost:"$0.031",volumeAssumed:"1.4k/day",status:"top"},
+    {rank:2,name:"Duplicate-claim detection",scores:{value:4,feasibility:4,data:4,aiSuitability:3,risk:4,timeToValue:5,reusability:3},total:27,blocker:"",blockerOwner:"",unitCost:"$0.009",volumeAssumed:"1.4k/day",status:"candidate"},
+    {rank:3,name:"Exception summarisation for supervisors",scores:{value:3,feasibility:5,data:4,aiSuitability:4,risk:5,timeToValue:5,reusability:2},total:28,blocker:"",blockerOwner:"",unitCost:"$0.014",volumeAssumed:"90/day",status:"candidate"},
+    {rank:4,name:"Provider-record reconciliation",scores:{value:4,feasibility:2,data:1,aiSuitability:3,risk:3,timeToValue:2,reusability:4},total:19,blocker:"Provider master not extractable",blockerOwner:"Client IT",unitCost:"—",volumeAssumed:"—",status:"deferred"},
+    {rank:5,name:"SLA breach prediction",scores:{value:3,feasibility:3,data:2,aiSuitability:4,risk:2,timeToValue:3,reusability:5},total:22,blocker:"Risk 2 — needs logged operator decision",blockerOwner:"Operator",unitCost:"$0.006",volumeAssumed:"1.4k/day",status:"blocked"}],
+  deliverables:[
+    {name:"Current-state workflow",phase:"01-Discovery",rendered:true,renderedAt:"2026-09-04"},
+    {name:"Use-case qualification",phase:"01-Discovery",rendered:true,renderedAt:"2026-09-06"},
+    {name:"Readiness gate (G1)",phase:"01-Discovery",rendered:false,renderedAt:null}],
+  datasources:[
+    {name:"claims-crm-export.csv",sizeBytes:8420000,classification:"raw",source:"S1 CRM",receivedAt:"2026-08-22"},
+    {name:"routing-sop-v4.pdf",sizeBytes:1240000,classification:"converted",source:"S2 Docs",receivedAt:"2026-08-25"},
+    {name:"volume-by-queue.xlsx",sizeBytes:340000,classification:"converted",source:"S1 CRM",receivedAt:"2026-08-27"},
+    {name:"correspondence-sample.jsonl",sizeBytes:15600000,classification:"redacted",source:"S3 Stream",receivedAt:"2026-09-01"}],
+  skills:{practice:7,engagement:2,function:4,
+    supersedes:[{engagementSkill:"meridian-routing-vocabulary",practiceSkill:"requirements-elicitation"},
+                {engagementSkill:"meridian-doc-store-quirks",practiceSkill:"observation-protocol"}]},
+  harnessImprover:{lastRun:"2026-09-02",openProposals:3,feedbackFilesWithEntries:5,pendingPromptEdits:2},
+  sessions:{count:9,latest:"2026-09-06-002",latestDate:"2026-09-06",
+    latestSummary:"Pressure-tested ACs against the exception register; found 13 requirements with no AC and 2 documented-vs-observed contradictions."},
+  friction:[
+    {session:"2026-09-06-002",note:"Exception-register template had no column for whether the rule holder confirmed the verbatim rule. Added by hand twice."},
+    {session:"2026-09-04-001",note:"observation-protocol cites capture-formats.md for the tell table but the counts table lives in SKILL.md. Cost ~10 min."},
+    {session:"2026-09-02-001",note:"Converted PDF left in the engagement root for a session; unredacted client material outside its intended store."}]
+},
+{
+  schemaVersion:1, generatedAt:"2026-09-08T09:14:00Z",
+  engagement:{ slug:"northwind-servicing", client:"Northwind Mutual (example)",
+    sponsor:"Director, Member Servicing", scope:"Member-360 assembly and next-best-action for servicing agents",
+    nonGoals:"No credit decisions. No money movement. Graph is insight, not system of record.",
+    phase:"04-Build", startedAt:"2026-05-19", ontologyRepo:"AI_Ontology_Credit_Union",
+    residency:"client-tenant", labour:"none" },
+  phases:[
+    {id:"01-Discovery",label:"Discovery",status:"complete",pct:100},
+    {id:"02-Design",label:"Design",status:"complete",pct:100},
+    {id:"03-Architecture",label:"Architecture",status:"complete",pct:100},
+    {id:"04-Build",label:"Build",status:"active",pct:57},
+    {id:"05-Evals",label:"Evals",status:"active",pct:34},
+    {id:"06-Launch",label:"Launch",status:"not-started",pct:0}],
+  gates:[
+    {id:"G1",label:"Discovery readiness",status:"passed",date:"2026-06-13",decidedBy:"Engagement lead",criteria:[]},
+    {id:"G2",label:"Build readiness",status:"passed",date:"2026-07-25",decidedBy:"Engagement lead",criteria:[]},
+    {id:"G3",label:"Release readiness",status:"caveats",date:null,decidedBy:null,
+     criteria:[
+      {name:"Eval thresholds met",status:"partial",evidence:"runs/2026-09-05-exception.md",toClose:"Exception suite at 91%; threshold is 95%",owner:"Evaluator"},
+      {name:"Autonomy rung measured, not asserted",status:"unmet",evidence:"autonomy-ledger.md row 3",toClose:"Next-best-action rung is asserted; no shadow run yet",owner:"Solution architect"},
+      {name:"Rollback path proven",status:"met",evidence:"architecture.md §6",toClose:"",owner:""},
+      {name:"Support model agreed",status:"met",evidence:"06-Launch/runbook.md",toClose:"",owner:""},
+      {name:"Client sign-off",status:"unmet",evidence:"",toClose:"Blocked on the two rows above",owner:"Sponsor"}]}],
+  instruments:[
+    {id:"observation-log",label:"Observation log",rows:387,status:"populated",updated:"2026-06-09"},
+    {id:"exception-register",label:"Exception register",rows:41,status:"populated",updated:"2026-08-14"},
+    {id:"requirements-register",label:"Requirements register",rows:88,status:"populated",updated:"2026-08-30"},
+    {id:"open-questions",label:"Open questions",rows:4,status:"thin",updated:"2026-09-03"},
+    {id:"stakeholder-map",label:"Stakeholder map",rows:12,status:"populated",updated:"2026-06-02"},
+    {id:"current-state-workflow",label:"Current-state workflow",rows:44,status:"populated",updated:"2026-06-09"},
+    {id:"system-landscape",label:"System landscape",rows:14,status:"populated",updated:"2026-06-20"},
+    {id:"data-readiness",label:"Data readiness",rows:8,status:"populated",updated:"2026-06-20"},
+    {id:"use-case-qualification",label:"Use-case qualification",rows:7,status:"populated",updated:"2026-06-11"},
+    {id:"value-hypothesis",label:"Value hypothesis",rows:5,status:"populated",updated:"2026-06-05"},
+    {id:"evidence-handling-terms",label:"Evidence-handling terms",rows:6,status:"populated",updated:"2026-05-23"},
+    {id:"readiness-gate",label:"Readiness gate (G1)",rows:7,status:"populated",updated:"2026-06-13"}],
+  chain:{
+    evidence:{total:387,observed:266,system:74,documented:31,stated:16},
+    exceptions:{total:41,withRuleHolder:38,quantified:35},
+    requirements:{total:88,sourced:88,verified:81,unverified:7,assumption:4,withAC:88},
+    competencyQuestions:{total:22,answerable:19,needsData:2,notModelled:1},
+    ontologyObjects:{promoted:47,backlog:6},
+    evalCases:{total:64,passing:57,failing:7,p0:0}},
+  openQuestions:[
+    {id:"Q-031",question:"Should a dormant joint account surface on the primary member's 360?",why:"Affects CQ-14 and one write template",owner:"Servicing director",blocks:"Slice 6",raised:"2026-08-27",ageDays:12},
+    {id:"Q-033",question:"Retention period for agent-proposed actions that were never approved",why:"Audit scope; compliance asked",owner:"Compliance",blocks:"G3 sign-off",raised:"2026-09-01",ageDays:7},
+    {id:"Q-034",question:"Who adjudicates a survivorship conflict between core and CRM?",why:"Identity rule needs a named adjudicator, not a rule alone",owner:"Data owner",blocks:"Slice 7",raised:"2026-09-03",ageDays:5},
+    {id:"Q-035",question:"Is the 95% exception threshold negotiable for launch?",why:"Suite sits at 91%; a threshold change is an operator decision, not a delivery one",owner:"Engagement lead",blocks:"G3",raised:"2026-09-05",ageDays:3}],
+  raid:[
+    {type:"risk",item:"Next-best-action rung asserted rather than measured; G3 cannot pass on it",owner:"Solution architect",impact:"high",review:"2026-09-11",status:"open"},
+    {type:"issue",item:"Exception suite at 91% against a 95% threshold",owner:"Evaluator",impact:"high",review:"2026-09-11",status:"open"},
+    {type:"dependency",item:"Compliance answer on proposal retention",owner:"Compliance",impact:"medium",review:"2026-09-12",status:"open"},
+    {type:"assumption",item:"Agent headcount stays flat through the pilot window",owner:"Servicing director",impact:"low",review:"2026-09-20",status:"open"}],
+  autonomy:[
+    {workflow:"Member-360 assembly",rung:"approval",agreement:0.97,sample:412,window:"3 weeks",divergence:"clustered",divergenceDetail:"EX-019, EX-022 — joint-account edge cases",p0:0,measuredAt:"2026-08-22",decidedBy:"Engagement lead"},
+    {workflow:"Duplicate-record flagging",rung:"suggest",agreement:0.93,sample:190,window:"2 weeks",divergence:"scattered",divergenceDetail:"No cluster; spread across case types",p0:0,measuredAt:"2026-08-29",decidedBy:"Engagement lead"},
+    {workflow:"Next-best-action",rung:"suggest",agreement:null,sample:null,window:null,divergence:"n/a",divergenceDetail:"No shadow run yet",p0:0,measuredAt:null,decidedBy:null}],
+  useCases:[
+    {rank:1,name:"Member-360 assembly",scores:{value:5,feasibility:5,data:5,aiSuitability:4,risk:5,timeToValue:5,reusability:5},total:34,blocker:"",blockerOwner:"",unitCost:"$0.011",volumeAssumed:"3.2k/day",status:"built"},
+    {rank:2,name:"Duplicate-record flagging",scores:{value:4,feasibility:5,data:5,aiSuitability:3,risk:5,timeToValue:5,reusability:4},total:31,blocker:"",blockerOwner:"",unitCost:"$0.004",volumeAssumed:"3.2k/day",status:"built"},
+    {rank:3,name:"Next-best-action",scores:{value:5,feasibility:4,data:4,aiSuitability:5,risk:3,timeToValue:3,reusability:4},total:28,blocker:"Rung not measured",blockerOwner:"Solution architect",unitCost:"$0.026",volumeAssumed:"3.2k/day",status:"in-build"}],
+  deliverables:[
+    {name:"Glossary",phase:"02-Design",rendered:true,renderedAt:"2026-07-02"},
+    {name:"Personas and permissions",phase:"02-Design",rendered:true,renderedAt:"2026-07-02"},
+    {name:"Competency questions",phase:"02-Design",rendered:true,renderedAt:"2026-07-08"},
+    {name:"Architecture pack",phase:"03-Architecture",rendered:true,renderedAt:"2026-07-21"},
+    {name:"Eval report — Aug",phase:"05-Evals",rendered:true,renderedAt:"2026-08-30"},
+    {name:"Eval report — Sep",phase:"05-Evals",rendered:false,renderedAt:null}],
+  datasources:[
+    {name:"core-members.csv",sizeBytes:41200000,classification:"raw",source:"S1 Core",receivedAt:"2026-06-24"},
+    {name:"crm-households.csv",sizeBytes:6800000,classification:"raw",source:"S2 CRM",receivedAt:"2026-06-24"},
+    {name:"txn-stream-sample.jsonl",sizeBytes:88400000,classification:"redacted",source:"S3 Stream",receivedAt:"2026-06-28"},
+    {name:"policy-corpus/",sizeBytes:12900000,classification:"converted",source:"S4 Docs",receivedAt:"2026-07-01"},
+    {name:"servicing-sop.docx",sizeBytes:890000,classification:"converted",source:"S4 Docs",receivedAt:"2026-07-01"}],
+  skills:{practice:7,engagement:5,function:4,
+    supersedes:[{engagementSkill:"northwind-identity-rules",practiceSkill:"ontology-first-delivery"},
+                {engagementSkill:"northwind-core-api-limits",practiceSkill:"observation-protocol"},
+                {engagementSkill:"northwind-eval-thresholds",practiceSkill:"autonomy-ladder"}]},
+  harnessImprover:{lastRun:"2026-09-05",openProposals:1,feedbackFilesWithEntries:8,pendingPromptEdits:4},
+  sessions:{count:34,latest:"2026-09-05-003",latestDate:"2026-09-05",
+    latestSummary:"Ran the exception suite; 91% against a 95% threshold, divergence clustered on two joint-account exceptions. G3 held."},
+  friction:[
+    {session:"2026-09-05-003",note:"autonomy-ladder thresholds were inlined into the architecture doc and drifted from the skill after an engagement-skill override. Reference audit would have caught it."},
+    {session:"2026-08-30-001",note:"None."}]
+},
+{
+  schemaVersion:1, generatedAt:"2026-09-08T09:14:00Z",
+  engagement:{ slug:"atlas-onboarding", client:"Atlas Logistics (example)",
+    sponsor:"TBD", scope:"Shipper onboarding document intake",
+    nonGoals:"TBD", phase:"01-Discovery", startedAt:"2026-09-04",
+    ontologyRepo:"tbd", residency:"tbd", labour:"unknown" },
+  phases:[
+    {id:"01-Discovery",label:"Discovery",status:"active",pct:8},
+    {id:"02-Design",label:"Design",status:"not-started",pct:0},
+    {id:"03-Architecture",label:"Architecture",status:"not-started",pct:0},
+    {id:"04-Build",label:"Build",status:"not-started",pct:0},
+    {id:"05-Evals",label:"Evals",status:"not-started",pct:0},
+    {id:"06-Launch",label:"Launch",status:"not-started",pct:0}],
+  gates:[{id:"G1",label:"Discovery readiness",status:"not-run",date:null,criteria:[]},
+         {id:"G2",label:"Build readiness",status:"not-run",date:null,criteria:[]},
+         {id:"G3",label:"Release readiness",status:"not-run",date:null,criteria:[]}],
+  instruments:[
+    {id:"observation-log",label:"Observation log",rows:0,status:"empty",updated:"—"},
+    {id:"exception-register",label:"Exception register",rows:0,status:"empty",updated:"—"},
+    {id:"requirements-register",label:"Requirements register",rows:0,status:"empty",updated:"—"},
+    {id:"open-questions",label:"Open questions",rows:3,status:"thin",updated:"2026-09-05"},
+    {id:"stakeholder-map",label:"Stakeholder map",rows:2,status:"thin",updated:"2026-09-05"},
+    {id:"current-state-workflow",label:"Current-state workflow",rows:0,status:"empty",updated:"—"},
+    {id:"system-landscape",label:"System landscape",rows:0,status:"empty",updated:"—"},
+    {id:"data-readiness",label:"Data readiness",rows:0,status:"empty",updated:"—"},
+    {id:"use-case-qualification",label:"Use-case qualification",rows:0,status:"empty",updated:"—"},
+    {id:"value-hypothesis",label:"Value hypothesis",rows:0,status:"empty",updated:"—"},
+    {id:"evidence-handling-terms",label:"Evidence-handling terms",rows:0,status:"empty",updated:"—"},
+    {id:"readiness-gate",label:"Readiness gate (G1)",rows:0,status:"empty",updated:"—"}],
+  chain:{
+    evidence:{total:0,observed:0,system:0,documented:0,stated:0},
+    exceptions:{total:0,withRuleHolder:0,quantified:0},
+    requirements:{total:0,sourced:0,verified:0,unverified:0,assumption:0,withAC:0},
+    competencyQuestions:{total:0,answerable:0,needsData:0,notModelled:0},
+    ontologyObjects:{promoted:0,backlog:0},
+    evalCases:{total:0,passing:0,failing:0,p0:0}},
+  openQuestions:[
+    {id:"Q-001",question:"Who is the executive sponsor?",why:"G1 criterion 1 cannot be met without one",owner:"Account team",blocks:"G1",raised:"2026-09-05",ageDays:3},
+    {id:"Q-002",question:"Which tenant holds captured evidence?",why:"Capture cannot begin until residency is settled",owner:"Client security",blocks:"All capture",raised:"2026-09-05",ageDays:3},
+    {id:"Q-003",question:"Is there works-council or union representation at the depot sites?",why:"Determines whether observation needs consultation rather than notice",owner:"Client HR",blocks:"All capture",raised:"2026-09-05",ageDays:3}],
+  raid:[{type:"risk",item:"No named sponsor; engagement scoped by the account team only",owner:"Engagement lead",impact:"high",review:"2026-09-11",status:"open"}],
+  autonomy:[], useCases:[], deliverables:[],
+  datasources:[],
+  skills:{practice:7,engagement:0,function:4,supersedes:[]},
+  harnessImprover:{lastRun:null,openProposals:0,feedbackFilesWithEntries:1,pendingPromptEdits:0},
+  sessions:{count:1,latest:"2026-09-05-001",latestDate:"2026-09-05",
+    latestSummary:"Engagement scaffolded. Three blocking questions raised; no capture until residency and labour representation are settled."},
+  friction:[]
+}
+];
+
+/* ============================================================ */
+var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+var pct = function(a,b){ return b>0 ? Math.round(a/b*100) : 0; };
+var kb  = function(n){ return n>=1e6 ? (n/1e6).toFixed(1)+" MB" : Math.round(n/1e3)+" KB"; };
+
+var GATE_LABEL = {"not-run":"Not run","ready":"Ready","caveats":"Ready with caveats",
+                  "not-ready":"Not ready","passed":"Passed"};
+var PILL = {met:"pass",partial:"caveat",unmet:"fail",
+            populated:"pass",thin:"caveat",empty:"idle",
+            passed:"pass",ready:"active",caveats:"caveat","not-ready":"fail","not-run":"idle",
+            complete:"pass",active:"active","not-started":"idle",blocked:"fail",
+            built:"pass","in-build":"active",top:"active",candidate:"idle",deferred:"idle",blocked2:"fail"};
+var STATUS_VAR = {populated:"var(--pass)",thin:"var(--caveat)",empty:"var(--idle)"};
+
+var view = 0; // 0..n-1 = engagement, -1 = portfolio
+
+/* ---------- rail ---------- */
+function buildSwitch(){
+  var h = '<div class="lbl">Engagements</div>';
+  h += '<button type="button" data-v="-1" class="'+(view===-1?"on":"")+'">All engagements'
+     + '<span>'+STATE.length+' active</span></button>';
+  STATE.forEach(function(s,i){
+    h += '<button type="button" data-v="'+i+'" class="'+(view===i?"on":"")+'">'
+       + esc(s.engagement.client.replace(" (example)",""))
+       + '<span>'+esc(s.engagement.phase.replace(/^\d\d-/,""))+' · '+s.sessions.count+' sessions</span></button>';
+  });
+  document.getElementById("switch").innerHTML = h;
+  Array.prototype.forEach.call(document.querySelectorAll("#switch button"),function(b){
+    b.addEventListener("click",function(){ view = +b.dataset.v; render(); window.scrollTo(0,0); });
+  });
+}
+
+var SECTIONS = [
+  ["chain","Evidence chain"],["discovery","Discovery instruments"],
+  ["questions","Questions and RAID"],["usecases","Use-case portfolio"],
+  ["ontology","Ontology and evals"],["ops","Deliverables and ops"]];
+
+function buildNav(s){
+  var nav = document.getElementById("nav");
+  if(view===-1){ nav.innerHTML=""; return; }
+  var counts = { chain:s.chain.requirements.total, discovery:s.instruments.filter(function(i){return i.status!=="empty";}).length,
+    questions:s.openQuestions.length+s.raid.length, usecases:s.useCases.length,
+    ontology:s.chain.competencyQuestions.total, ops:s.deliverables.length };
+  nav.innerHTML = SECTIONS.map(function(sec,i){
+    return '<a href="#'+sec[0]+'"><i>'+String(i+1).padStart(2,"0")+'</i>'+sec[1]
+         + '<em>'+counts[sec[0]]+'</em></a>'; }).join("");
+}
+
+/* ---------- portfolio ---------- */
+function renderPortfolio(){
+  var h = '<section class="mast"><div class="wrap"><div class="top"><div>'
+    + '<h1>All engagements</h1>'
+    + '<div class="who">'+STATE.length+' active · derived from each engagement&rsquo;s <b>state.json</b></div></div>'
+    + '<div class="gen">Generated 2026-09-08 09:14 UTC<br>Rebuild with <code>/dashboard</code></div>'
+    + '</div><div style="height:24px"></div></div></section>';
+
+  h += '<div class="wrap"><section class="sec"><div class="sec-h"><h2>Portfolio</h2>'
+    + '<div class="note">Sorted by what needs attention: failed or caveated gates first.</div></div><div class="pf">';
+
+  var order = STATE.map(function(s,i){ return {s:s,i:i}; }).sort(function(a,b){
+    var w = {"not-ready":0,"caveats":1,"not-run":2,"ready":3,"passed":4};
+    var ga = Math.min.apply(null,a.s.gates.map(function(g){return w[g.status];}));
+    var gb = Math.min.apply(null,b.s.gates.map(function(g){return w[g.status];}));
+    return ga-gb; });
+
+  order.forEach(function(o){
+    var s=o.s, e=s.engagement, c=s.chain;
+    var alerts=[];
+    s.gates.forEach(function(g){ if(g.status==="not-ready") alerts.push(g.id+" not ready");
+      else if(g.status==="caveats") alerts.push(g.id+" carries caveats"); });
+    if(e.sponsor==="TBD") alerts.push("No named sponsor");
+    if(e.residency==="tbd") alerts.push("Residency unsettled — capture blocked");
+    if(e.labour==="works-council"||e.labour==="union") alerts.push("Monitoring needs consultation");
+    if(e.labour==="unknown") alerts.push("Labour representation unknown");
+    if(c.requirements.total>0 && c.requirements.sourced<c.requirements.total)
+      alerts.push((c.requirements.total-c.requirements.sourced)+" unsourced requirements");
+    s.autonomy.forEach(function(a){ if(a.agreement===null) alerts.push(a.workflow+" rung asserted, not measured"); });
+
+    h += '<button class="pfc" type="button" data-v="'+o.i+'">'
+      + '<div class="hd"><div class="ph2">'+esc(e.phase.replace(/^\d\d-/,""))+'</div>'
+      + '<h3>'+esc(e.client)+'</h3><div class="sc">'+esc(e.scope)+'</div></div>'
+      + '<div class="mini">'+s.phases.map(function(p){
+          var col = p.status==="complete"?"var(--pass)":p.status==="active"?"var(--active)":
+                    p.status==="blocked"?"var(--fail)":"var(--line-soft)";
+          return '<i style="background:'+col+'"></i>'; }).join("")+'</div>'
+      + '<div class="kv"><div>Evidence <b>'+c.evidence.total+'</b></div>'
+      + '<div>Reqs <b>'+c.requirements.total+'</b></div>'
+      + '<div>CQ answerable <b>'+c.competencyQuestions.answerable+'/'+c.competencyQuestions.total+'</b></div>'
+      + '<div>Open Qs <b>'+s.openQuestions.length+'</b></div></div>'
+      + (alerts.length ? alerts.slice(0,3).map(function(a){
+            return '<div class="alert">'+esc(a)+'</div>'; }).join("")
+         : '<div class="kv" style="color:var(--ink-3)">Nothing flagged</div>')
+      + '</button>';
+  });
+
+  h += '</div></section>';
+
+  h += '<section class="sec"><div class="sec-h"><h2>Practice health</h2>'
+     + '<div class="note">Whether engagement N+1 is getting cheaper than N.</div></div><div class="ops">';
+  var totProp = STATE.reduce(function(a,s){return a+s.harnessImprover.openProposals;},0);
+  var totPend = STATE.reduce(function(a,s){return a+s.harnessImprover.pendingPromptEdits;},0);
+  var totSup  = STATE.reduce(function(a,s){return a+s.skills.supersedes.length;},0);
+  var totFric = STATE.reduce(function(a,s){return a+s.friction.filter(function(f){return f.note!=="None.";}).length;},0);
+  h += '<div class="op"><div class="k">Open proposals</div><div class="v">'+totProp+'</div>'
+     + '<div class="d">Harness improvements awaiting per-proposal approval.</div></div>'
+     + '<div class="op"><div class="k">Pending prompt edits</div><div class="v">'+totPend+'</div>'
+     + '<div class="d">Agent-prompt changes held in feedback for deliberate promotion. Never auto-applied.</div></div>'
+     + '<div class="op"><div class="k">Engagement supersedes</div><div class="v">'+totSup+'</div>'
+     + '<div class="d">Client-calibrated skills overriding practice method — candidates for generalisation at close.</div></div>'
+     + '<div class="op"><div class="k">Friction logged</div><div class="v">'+totFric+'</div>'
+     + '<div class="d">Cited instances across recent sessions. Every proposal traces to one.</div></div>';
+  h += '</div></section></div>';
+
+  document.getElementById("page").innerHTML = h;
+  Array.prototype.forEach.call(document.querySelectorAll(".pfc"),function(b){
+    b.addEventListener("click",function(){ view=+b.dataset.v; render(); window.scrollTo(0,0); }); });
+}
+
+/* ---------- engagement ---------- */
+function renderEngagement(s){
+  var e=s.engagement, c=s.chain;
+  var h="";
+
+  /* masthead */
+  h += '<section class="mast"><div class="wrap"><div class="top"><div>'
+    + '<h1>'+esc(e.client)+'</h1>'
+    + '<div class="who">'+esc(e.scope)+' · sponsor <b>'+esc(e.sponsor)+'</b>'
+    + ' · started '+esc(e.startedAt)+' · residency <b>'+esc(e.residency)+'</b></div></div>'
+    + '<div class="gen">Session <code>'+esc(s.sessions.latest)+'</code> · '+s.sessions.count+' logged<br>'
+    + 'Generated 2026-09-08 09:14 UTC</div></div>';
+
+  /* phase pipeline */
+  h += '<div class="pipe">'+s.phases.map(function(p,i){
+      return '<div class="ph '+p.status+'"><div class="n">'+String(i+1).padStart(2,"0")+'</div>'
+        + '<div class="t">'+esc(p.label)+'</div>'
+        + '<div class="p">'+p.pct+'%</div>'
+        + (p.status==="active"?'<div class="bar" style="width:'+p.pct+'%"></div>':'')
+        + '</div>'; }).join("")+'</div>';
+
+  /* gates */
+  h += '<div class="gates">'+s.gates.map(function(g){
+      var det = g.criteria && g.criteria.length
+        ? g.criteria.filter(function(x){return x.status==="met";}).length+'/'+g.criteria.length+' criteria'
+        : (g.date ? g.date : "—");
+      return '<div class="gate '+g.status+'"><span class="dot"></span>'
+        + '<span class="g">'+g.id+'</span><span class="s">'+GATE_LABEL[g.status]+'</span>'
+        + '<span class="m">'+esc(det)+'</span></div>'; }).join("")+'</div>';
+
+  /* banners */
+  if(e.residency==="tbd"){
+    h += '<div class="banner stop"><div class="k">Capture blocked</div><p>Evidence residency is unsettled. '
+      + '<b>discovery-analyst hard-stops until the handling terms are agreed and signed</b> — evidence captured '
+      + 'under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.</p></div>';
+  }
+  if(e.labour==="works-council"||e.labour==="union"||e.labour==="unknown"){
+    h += '<div class="banner"><div class="k">Monitoring</div><p>Labour representation: <b>'+esc(e.labour)+'</b>. '
+      + 'Desktop task mining and session replay are employee monitoring, and here they require <b>consultation, not notice</b> — '
+      + 'a process with a counterparty who can say no. Prefer consented, time-boxed shadowing; it produces better material anyway.</p></div>';
+  }
+  h += '<div style="height:22px"></div></div></section><div class="wrap">';
+
+  /* ===== the chain (hero) ===== */
+  var links = [
+    {stage:"Observed",   n:c.evidence.observed,          of:c.evidence.total,      ofl:"evidence rows", note:"primary evidence"},
+    {stage:"Exceptions", n:c.exceptions.withRuleHolder,  of:c.exceptions.total,    ofl:"logged",        note:"with a named rule holder"},
+    {stage:"Requirements",n:c.requirements.sourced,      of:c.requirements.total,  ofl:"in register",   note:"carrying a Source:"},
+    {stage:"Ontology",   n:c.ontologyObjects.promoted,   of:c.ontologyObjects.promoted+c.ontologyObjects.backlog, ofl:"candidates", note:"promoted"},
+    {stage:"Questions",  n:c.competencyQuestions.answerable, of:c.competencyQuestions.total, ofl:"written", note:"answerable, run and verified"},
+    {stage:"Eval cases", n:c.evalCases.passing,          of:c.evalCases.total,     ofl:"cases",         note:"passing"}];
+
+  h += '<section class="sec" id="chain"><div class="sec-h"><h2>Evidence chain</h2>'
+    + '<div class="note">Every artefact traces backwards. Attrition at a link is where the work is.</div></div>'
+    + '<div class="card"><div class="card-b"><div class="chain">'
+    + links.map(function(l){
+        var p = pct(l.n,l.of);
+        var cls = l.of===0 ? "ok" : p>=90 ? "ok" : p>=60 ? "warn" : "bad";
+        var col = l.of===0 ? "var(--line-soft)" : p>=90 ? "var(--pass)" : p>=60 ? "var(--caveat)" : "var(--fail)";
+        return '<div class="link"><div class="stage">'+l.stage+'</div>'
+          + '<div class="num">'+l.n+'</div>'
+          + '<div class="of">of '+l.of+' '+l.ofl+'</div>'
+          + '<div class="att '+cls+'">'+(l.of===0?"—":p+"% "+l.note)+'</div>'
+          + '<div class="track"><div class="fill" style="width:'+p+'%;background:'+col+'"></div></div>'
+          + '</div>'; }).join("")
+    + '</div>';
+
+  /* three health ratios */
+  var r1=pct(c.requirements.sourced,c.requirements.total),
+      r2=pct(c.exceptions.withRuleHolder,c.exceptions.total),
+      r3=pct(c.competencyQuestions.answerable,c.competencyQuestions.total);
+  h += '<div class="ratios">'
+    + '<div class="ratio"><div class="k">Sourcing discipline</div>'
+    + '<div class="v" style="color:'+(r1===100?"var(--pass)":"var(--fail)")+'">'+r1+'%<small>'
+    + c.requirements.sourced+'/'+c.requirements.total+'</small></div>'
+    + '<div class="d">'+(c.requirements.total-c.requirements.sourced>0
+        ? '<b>'+(c.requirements.total-c.requirements.sourced)+' unsourced rows</b> sit in the register looking sourced. These block modelling.'
+        : 'Every requirement cites evidence.')+'</div></div>'
+    + '<div class="ratio"><div class="k">Rule holders named</div>'
+    + '<div class="v" style="color:'+(r2>=90?"var(--pass)":r2>=60?"var(--caveat)":"var(--fail)")+'">'+r2+'%<small>'
+    + c.exceptions.withRuleHolder+'/'+c.exceptions.total+'</small></div>'
+    + '<div class="d">The ceiling on eval quality. An exception with no rule holder cannot be adjudicated.</div></div>'
+    + '<div class="ratio"><div class="k">Ontology coverage</div>'
+    + '<div class="v" style="color:'+(r3>=90?"var(--pass)":r3>=60?"var(--caveat)":"var(--idle)")+'">'+r3+'%<small>'
+    + c.competencyQuestions.answerable+'/'+c.competencyQuestions.total+'</small></div>'
+    + '<div class="d">Answerable means <b>run and verified</b> — not that the entities exist and it should work.</div></div>'
+    + '</div></div></section>';
+
+  /* evidence class split */
+  h += '<section class="sec"><div class="grid g23">'
+    + '<div class="card"><div class="card-h"><h3>Evidence by class</h3>'
+    + '<div class="r">'+c.evidence.total+' rows</div></div><div class="card-b">';
+  var classes=[["Observed",c.evidence.observed,"var(--pass)","An FDE watched it. Primary — can source a requirement alone."],
+    ["System",c.evidence.system,"var(--primary-blue)","Log or export. Primary for volume; silent on intent."],
+    ["Documented",c.evidence.documented,"var(--caveat)","SOP or policy. Aspirational until observed."],
+    ["Stated",c.evidence.stated,"var(--idle)","Interview or transcript. Corroborating only."]];
+  h += classes.map(function(x){
+      var p = pct(x[1],c.evidence.total);
+      return '<div class="irow" style="padding-left:0;padding-right:0">'
+        + '<div class="nm"><b>'+x[0]+'</b></div>'
+        + '<div class="meter"><i style="width:'+p+'%;background:'+x[2]+'"></i></div>'
+        + '<div class="ct">'+x[1]+'</div>'
+        + '<div class="up" style="flex-basis:38px">'+p+'%</div></div>'; }).join("")
+    + '<div class="legend" style="padding-left:0;padding-right:0">Requirements sourced only from '
+    + '<b>&nbsp;Stated&nbsp;</b> evidence are labelled UNVERIFIED and must be verified before build.</div>'
+    + '</div></div>';
+
+  /* confidence */
+  h += '<div class="card"><div class="card-h"><h3>Requirement confidence</h3></div><div class="card-b">'
+    + [["Verified",c.requirements.verified,"pass"],["Unverified",c.requirements.unverified,"caveat"],
+       ["Assumption",c.requirements.assumption,"idle"],["With acceptance criteria",c.requirements.withAC,
+        c.requirements.withAC===c.requirements.total?"pass":"caveat"]].map(function(x){
+      return '<div class="irow" style="padding-left:0;padding-right:0">'
+        + '<div class="nm" style="flex-basis:auto;flex:1"><b>'+x[0]+'</b></div>'
+        + '<div class="ct">'+x[1]+'</div>'
+        + '<div class="st"><span class="pill '+x[2]+'">'+x[2].replace("pass","ok").replace("caveat","watch")+'</span></div>'
+        + '</div>'; }).join("")
+    + '</div></div></div></section>';
+
+  /* ===== instruments ===== */
+  var maxRows = Math.max.apply(null,s.instruments.map(function(i){return i.rows;}).concat([1]));
+  h += '<section class="sec" id="discovery"><div class="sec-h"><h2>Discovery instruments</h2>'
+    + '<div class="note">Coverage is not readiness. An engagement can have full instruments and still fail G1.</div></div>'
+    + '<div class="card"><div class="instr">'
+    + s.instruments.map(function(i){
+        return '<div class="irow"><div class="nm"><b>'+esc(i.label)+'</b></div>'
+          + '<div class="meter"><i style="width:'+pct(i.rows,maxRows)+'%;background:'+STATUS_VAR[i.status]+'"></i></div>'
+          + '<div class="ct">'+i.rows+'</div>'
+          + '<div class="st"><span class="pill '+PILL[i.status]+'">'+i.status+'</span></div>'
+          + '<div class="up">'+esc(i.updated)+'</div></div>'; }).join("")
+    + '</div><div class="legend">'
+    + '<span><i style="background:var(--pass)"></i>populated — 5+ rows</span>'
+    + '<span><i style="background:var(--caveat)"></i>thin — 1 to 4</span>'
+    + '<span><i style="background:var(--idle)"></i>empty — 0</span>'
+    + '<span style="margin-left:auto">Bar is relative to the largest instrument in this engagement.</span>'
+    + '</div></div></section>';
+
+  /* ===== gate criteria detail ===== */
+  var openGate = s.gates.filter(function(g){return g.criteria&&g.criteria.length;})[0];
+  if(openGate){
+    h += '<section class="sec"><div class="sec-h"><h2>'+openGate.id+' — '+esc(openGate.label)+'</h2>'
+      + '<div class="note">A gate is a stop, not a status update. The memo recommends; the operator decides.</div></div>'
+      + '<div class="card"><div class="card-h"><h3>Criteria</h3>'
+      + '<div class="r">'+GATE_LABEL[openGate.status]+'</div></div><div class="scroll"><table>'
+      + '<thead><tr><th>Criterion</th><th>Status</th><th>Evidence</th><th>To close</th><th>Owner</th></tr></thead><tbody>'
+      + openGate.criteria.map(function(x){
+          return '<tr><td><b>'+esc(x.name)+'</b></td>'
+            + '<td><span class="pill '+PILL[x.status]+'">'+x.status+'</span></td>'
+            + '<td><code>'+esc(x.evidence||"—")+'</code></td>'
+            + '<td>'+esc(x.toClose||"—")+'</td><td>'+esc(x.owner||"—")+'</td></tr>'; }).join("")
+      + '</tbody></table></div></div></section>';
+  }
+
+  /* ===== questions + RAID ===== */
+  h += '<section class="sec" id="questions"><div class="sec-h"><h2>Questions and RAID</h2>'
+    + '<div class="note">Ranked by what is blocked, not by curiosity. Aged questions blocking a top use case come first.</div></div>'
+    + '<div class="grid g2"><div class="card"><div class="card-h"><h3>Open questions</h3>'
+    + '<div class="r">'+s.openQuestions.length+' unanswered</div></div>';
+  if(s.openQuestions.length){
+    h += '<div class="scroll"><table><thead><tr><th>Id</th><th>Question</th><th>Blocks</th><th class="n">Age</th></tr></thead><tbody>'
+      + s.openQuestions.slice().sort(function(a,b){return b.ageDays-a.ageDays;}).map(function(q){
+          var ac = q.ageDays>=14?"stale":q.ageDays>=7?"old":"";
+          return '<tr><td><code>'+esc(q.id)+'</code></td>'
+            + '<td><b>'+esc(q.question)+'</b><br><span style="color:var(--ink-3);font-size:11.5px">'+esc(q.why)+'</span></td>'
+            + '<td>'+esc(q.blocks)+'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(q.owner)+'</span></td>'
+            + '<td class="n"><span class="age '+ac+'">'+q.ageDays+'d</span></td></tr>'; }).join("")
+      + '</tbody></table></div>';
+  } else { h += '<div class="empty">No open questions.</div>'; }
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-h"><h3>RAID</h3><div class="r">'+s.raid.length+' open</div></div>';
+  if(s.raid.length){
+    h += '<div class="scroll"><table><thead><tr><th>Type</th><th>Item</th><th>Owner</th><th>Review</th></tr></thead><tbody>'
+      + s.raid.map(function(r){
+          var bad = !r.owner || !r.review;
+          return '<tr><td><span class="pill '+(r.impact==="high"?"fail":r.impact==="medium"?"caveat":"idle")+'">'+esc(r.type)+'</span></td>'
+            + '<td>'+esc(r.item)+'</td><td>'+esc(r.owner||"—")+'</td>'
+            + '<td>'+(bad ? '<span class="pill fail">untracked</span>' : esc(r.review))+'</td></tr>'; }).join("")
+      + '</tbody></table></div><div class="legend">An entry with no owner or no review date is not tracked — it renders as a defect, deliberately.</div>';
+  } else { h += '<div class="empty">RAID log empty.</div>'; }
+  h += '</div></div></section>';
+
+  /* ===== use cases ===== */
+  h += '<section class="sec" id="usecases"><div class="sec-h"><h2>Use-case portfolio</h2>'
+    + '<div class="note">Feasibility is capped at the data score. Any dimension at 1 is a stop, not a low score to average away.</div></div>';
+  if(s.useCases.length){
+    var DIMS=["value","feasibility","data","aiSuitability","risk","timeToValue","reusability"];
+    h += '<div class="card"><div class="scroll"><table><thead><tr><th class="n">#</th><th>Use case</th>'
+      + '<th>Scores</th><th class="n">Total</th><th class="n">Cost / txn</th><th>Blocker</th><th>Status</th></tr></thead><tbody>'
+      + s.useCases.map(function(u){
+          var bars = DIMS.map(function(d){
+            var v=u.scores[d]; var capped = (d==="feasibility" && u.scores.feasibility>u.scores.data);
+            return '<i class="'+(capped?"cap":"f")+'" style="height:'+(v/5*16)+'px" title="'+d+': '+v+'"></i>'; }).join("");
+          return '<tr><td class="n">'+u.rank+'</td>'
+            + '<td><b>'+esc(u.name)+'</b></td>'
+            + '<td><div class="sbar">'+bars+'</div></td>'
+            + '<td class="n"><b>'+u.total+'</b></td>'
+            + '<td class="n">'+esc(u.unitCost)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(u.volumeAssumed)+'</span></td>'
+            + '<td>'+(u.blocker?esc(u.blocker)+'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(u.blockerOwner)+'</span>':'—')+'</td>'
+            + '<td><span class="pill '+(PILL[u.status]||"idle")+'">'+esc(u.status)+'</span></td></tr>'; }).join("")
+      + '</tbody></table></div><div class="legend">'
+      + '<span>Bars, left to right: value · feasibility · data · AI fit · risk · time to value · reusability</span>'
+      + '<span><i style="background:var(--caveat)"></i>feasibility exceeding the data score — cap it</span>'
+      + '</div></div>';
+  } else { h += '<div class="card"><div class="empty">No candidates scored yet. Run <b>/qualify</b>.</div></div>'; }
+  h += '</section>';
+
+  /* ===== ontology + evals + autonomy ===== */
+  h += '<section class="sec" id="ontology"><div class="sec-h"><h2>Ontology and evals</h2>'
+    + '<div class="note">Competency questions map 1:1 to governed read templates, so coverage is countable rather than asserted.</div></div>'
+    + '<div class="ops" style="margin-bottom:16px">'
+    + '<div class="op"><div class="k">Promoted</div><div class="v">'+c.ontologyObjects.promoted+'</div>'
+    + '<div class="d">Objects in the ontology repo, each logged against the requirement that justified it.</div></div>'
+    + '<div class="op"><div class="k">Backlog</div><div class="v">'+c.ontologyObjects.backlog+'</div>'
+    + '<div class="d">Candidates awaiting a precondition — grain, identity rule, or a question that needs them.</div></div>'
+    + '<div class="op"><div class="k">Eval cases</div><div class="v">'+c.evalCases.total+'</div>'
+    + '<div class="d">'+(c.evalCases.total?c.evalCases.passing+' passing · '+c.evalCases.failing+' failing':'None built. Golden sets come from the exception register.')+'</div></div>'
+    + '<div class="op"><div class="k">P0 failures</div><div class="v" style="color:'+(c.evalCases.p0?"var(--fail)":"var(--ink)")+'">'+c.evalCases.p0+'</div>'
+    + '<div class="d">'+(c.evalCases.p0?'<em>A P0 is a stop.</em>':'Wrong answer presented as correct, unauthorised write, or a permission-boundary crossing.')+'</div></div>'
+    + '</div>';
+
+  h += '<div class="card"><div class="card-h"><h3>Autonomy ledger</h3>'
+    + '<div class="r">a rung is a measurement, not a phase name</div></div>';
+  if(s.autonomy.length){
+    h += '<div class="scroll"><table><thead><tr><th>Workflow</th><th>Rung</th><th class="n">Agreement</th>'
+      + '<th class="n">Sample</th><th>Divergence</th><th>Decided by</th></tr></thead><tbody>'
+      + s.autonomy.map(function(a){
+          var measured = a.agreement!==null;
+          return '<tr><td><b>'+esc(a.workflow)+'</b></td>'
+            + '<td><span class="pill '+(measured?"active":"fail")+'">'+esc(a.rung)+'</span></td>'
+            + '<td class="n">'+(measured
+                ? '<b>'+Math.round(a.agreement*100)+'%</b>'
+                : '<span class="pill fail">asserted, not measured</span>')+'</td>'
+            + '<td class="n">'+(a.sample?a.sample+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(a.window)+'</span>':'—')+'</td>'
+            + '<td>'+(a.divergence==="n/a"?'—':'<span class="pill '+(a.divergence==="clustered"?"caveat":"fail")+'">'+a.divergence+'</span>'
+                + '<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(a.divergenceDetail)+'</span>')+'</td>'
+            + '<td>'+esc(a.decidedBy||"—")+'</td></tr>'; }).join("")
+      + '</tbody></table></div><div class="legend">Clustered divergence is a fixable gap — usually a rule already in the '
+      + 'exception register. Scattered divergence is a capability ceiling. They look identical in a summary metric.</div>';
+  } else { h += '<div class="empty">No workflows measured. Nothing has earned a rung.</div>'; }
+  h += '</div></section>';
+
+  /* ===== ops ===== */
+  h += '<section class="sec" id="ops"><div class="sec-h"><h2>Deliverables and ops</h2>'
+    + '<div class="note">Nothing is a client deliverable until it has been rendered.</div></div>'
+    + '<div class="grid g2">';
+
+  h += '<div class="card"><div class="card-h"><h3>Deliverables</h3><div class="r">'
+    + s.deliverables.filter(function(d){return d.rendered;}).length+' of '+s.deliverables.length+' rendered</div></div>';
+  if(s.deliverables.length){
+    h += '<div class="instr">'+s.deliverables.map(function(d){
+        return '<div class="irow"><div class="nm" style="flex:1;flex-basis:auto"><b>'+esc(d.name)+'</b>'
+          + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.phase)+'</span></div>'
+          + '<div class="st"><span class="pill '+(d.rendered?"pass":"idle")+'">'+(d.rendered?"rendered":"pending")+'</span></div>'
+          + '<div class="up">'+esc(d.renderedAt||"—")+'</div></div>'; }).join("")+'</div>';
+  } else { h += '<div class="empty">Nothing rendered yet. Run <b>/render</b>.</div>'; }
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-h"><h3>Datasources</h3><div class="r">read-only to the harness</div></div>';
+  if(s.datasources.length){
+    h += '<div class="scroll"><table><thead><tr><th>File</th><th>Source</th><th>Class</th><th class="n">Size</th></tr></thead><tbody>'
+      + s.datasources.map(function(d){
+          return '<tr><td><code>'+esc(d.name)+'</code></td><td>'+esc(d.source)+'</td>'
+            + '<td><span class="pill '+(d.classification==="redacted"?"pass":d.classification==="converted"?"active":"caveat")+'">'
+            + esc(d.classification)+'</span></td>'
+            + '<td class="n">'+kb(d.sizeBytes)+'</td></tr>'; }).join("")
+      + '</tbody></table></div>';
+  } else { h += '<div class="empty">No sources received.</div>'; }
+  h += '</div></div>';
+
+  /* skills + improver */
+  h += '<div class="grid g2" style="margin-top:16px">'
+    + '<div class="card"><div class="card-h"><h3>Skills in force</h3><div class="r">'
+    + (s.skills.practice+s.skills.engagement+s.skills.function)+' loaded</div></div><div class="card-b">'
+    + '<div class="irow" style="padding-left:0;padding-right:0"><div class="nm" style="flex:1;flex-basis:auto">'
+    + '<b>Practice</b> <span style="color:var(--ink-3)">— reusable across every client</span></div><div class="ct">'+s.skills.practice+'</div></div>'
+    + '<div class="irow" style="padding-left:0;padding-right:0"><div class="nm" style="flex:1;flex-basis:auto">'
+    + '<b>Engagement</b> <span style="color:var(--ink-3)">— client-calibrated, supersede practice</span></div><div class="ct">'+s.skills.engagement+'</div></div>'
+    + '<div class="irow" style="padding-left:0;padding-right:0"><div class="nm" style="flex:1;flex-basis:auto">'
+    + '<b>Function</b> <span style="color:var(--ink-3)">— harness operation</span></div><div class="ct">'+s.skills.function+'</div></div>';
+  if(s.skills.supersedes.length){
+    h += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">'
+      + '<div class="k" style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px">Active supersedes</div>'
+      + s.skills.supersedes.map(function(x){
+          return '<div style="font-size:12px;color:var(--ink-2);margin-bottom:4px"><code>'+esc(x.engagementSkill)
+            + '</code> &rarr; overrides <code>'+esc(x.practiceSkill)+'</code></div>'; }).join("")
+      + '</div>';
+  }
+  h += '</div></div>';
+
+  var hi = s.harnessImprover;
+  h += '<div class="card"><div class="card-h"><h3>Improvement loop</h3><div class="r">'
+    + (hi.lastRun?'last run '+esc(hi.lastRun):'never run')+'</div></div><div class="card-b">'
+    + '<div class="ratios" style="margin-top:0;border-top:0;grid-template-columns:1fr 1fr">'
+    + '<div class="ratio" style="padding:0 14px 12px 0"><div class="k">Open proposals</div>'
+    + '<div class="v">'+hi.openProposals+'</div><div class="d">Awaiting per-proposal approval. Never batched.</div></div>'
+    + '<div class="ratio" style="padding:0 0 12px 14px"><div class="k">Pending prompt edits</div>'
+    + '<div class="v" style="color:'+(hi.pendingPromptEdits?"var(--caveat)":"var(--ink)")+'">'+hi.pendingPromptEdits+'</div>'
+    + '<div class="d">Held in feedback for deliberate promotion. <b>harness-improver never edits an agent prompt.</b></div></div>'
+    + '</div>';
+  if(s.friction.length){
+    var real = s.friction.filter(function(f){return f.note!=="None.";});
+    h += '<div style="margin-top:4px;padding-top:12px;border-top:1px solid var(--line-soft)">'
+      + '<div style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px">'
+      + 'Friction cited in recent sessions</div>'
+      + (real.length ? real.map(function(f){
+          return '<div style="font-size:12px;color:var(--ink-2);margin-bottom:8px;padding-left:11px;border-left:2px solid var(--line)">'
+            + esc(f.note)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(f.session)+'</span></div>'; }).join("")
+        : '<div style="font-size:12px;color:var(--ink-3)">None logged. Legitimate — but a permanently empty list means the loop is not running.</div>')
+      + '</div>';
+  }
+  h += '</div></div></div></section>';
+
+  /* last session */
+  h += '<section class="sec"><div class="card"><div class="card-h"><h3>Last session</h3>'
+    + '<div class="r"><code>'+esc(s.sessions.latest)+'</code> · '+esc(s.sessions.latestDate)+'</div></div>'
+    + '<div class="card-b"><p style="margin:0;max-width:80ch;font-size:13.5px">'+esc(s.sessions.latestSummary)+'</p></div></div>'
+    + '<div style="height:8px"></div></section></div>';
+
+  document.getElementById("page").innerHTML = h;
+}
+
+function render(){
+  buildSwitch();
+  if(view===-1){ document.getElementById("nav").innerHTML=""; renderPortfolio(); }
+  else { var s=STATE[view]; buildNav(s); renderEngagement(s); wireNav(); }
+}
+
+function wireNav(){
+  var links = Array.prototype.slice.call(document.querySelectorAll("#nav a"));
+  var secs  = links.map(function(a){ return document.getElementById(a.getAttribute("href").slice(1)); });
+  if(!("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if(en.isIntersecting){
+        var i = secs.indexOf(en.target);
+        links.forEach(function(l){ l.classList.remove("on"); });
+        if(i>-1) links[i].classList.add("on");
+      }});
+  },{rootMargin:"-10% 0px -78% 0px"});
+  secs.forEach(function(x){ if(x) io.observe(x); });
+}
+
+/* theme toggle */
+document.getElementById("themebtn").addEventListener("click",function(){
+  var cur = document.documentElement.getAttribute("data-theme");
+  var isDark = cur==="dark" || (!cur && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+});
+
+render();
+</script>

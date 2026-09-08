@@ -1,0 +1,40 @@
+# Client data — never committed.
+# Exclude the CONTENTS, not the directory: a negation cannot re-include a
+# file inside an excluded directory, so `datasources/` would also drop the
+# README that documents the read-only rule.
+datasources/*
+!datasources/.gitkeep
+!datasources/README.md
+
+# Converted binaries are unredacted copies of client material
+tmp_conversion*.md
+tmp_formulas*.md
+
+# Generated dashboards
+dashboard.html
+engagements/*/dashboard.html
+
+# Local machine state
+.mcp.json
+.claude/settings.local.json
+settings.local.json
+.env
+.env.*
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs & temp
+*.log
+*.tmp
+tmp/
+temp/
+
+# Python bytecode
+__pycache__/
+*.pyc

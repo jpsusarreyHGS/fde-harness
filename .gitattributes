@@ -1,0 +1,12 @@
+# Shell scripts must check out with LF even on Windows — they run under bash
+# (WSL, Git Bash, macOS, Linux), where CRLF causes failures.
+*.sh text eol=lf
+
+# PowerShell scripts are run by Windows; keep CRLF.
+*.ps1 text eol=crlf
+
+# Markdown and templates: normalise to LF in the repo.
+*.md text eol=lf
+*.template text eol=lf
+*.py text eol=lf
+*.json text eol=lf

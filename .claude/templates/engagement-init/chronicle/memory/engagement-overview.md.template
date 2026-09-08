@@ -1,0 +1,28 @@
+# Engagement overview — {{CLIENT_NAME}}
+
+| | |
+|---|---|
+| Client | {{CLIENT_NAME}} |
+| Slug | {{SLUG}} |
+| Sponsor | {{SPONSOR}} |
+| Started | {{DATE}} |
+| Phase | {{PHASE}} |
+| Ontology repo | {{ONTOLOGY_REPO}} |
+| Residency | {{RESIDENCY}} |
+| Labour representation | {{LABOUR}} |
+
+## Scope
+
+{{SCOPE}}
+
+## Non-goals
+
+{{NON_GOALS}}
+
+## Why now
+
+<!-- What made the client act. The trigger event is usually the best predictor of what they will actually judge the pilot on. -->
+
+## Updates
+
+<!-- Dated appends only. Never overwrite. -->

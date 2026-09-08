@@ -1,0 +1,37 @@
+# Requirements register — {{CLIENT_NAME}}
+
+**A requirement with no `Source:` is not a requirement.** Route it to `open-questions.md`, or tag it `ASSUMPTION` with a named owner and a confirm-by date.
+
+**Confidence:** `verified` (observed or system evidence) · `UNVERIFIED` (stated evidence only — must be verified before build) · `ASSUMPTION` (no evidence).
+
+Never quietly upgrade a confidence class. Promotion needs new evidence and a citation to it.
+
+**Acceptance criteria must be able to fail.** If you cannot describe the input and output that would constitute a failure, you have written a hope. Never invent an AC for someone else's requirement — ask.
+
+| Id | Requirement | Source | Class | Confidence | Acceptance criteria | Priority | Owner |
+|---|---|---|---|---|---|---|---|
+| REQ-001 | | EV- / EX- | functional | verified | Given … when … then … | must | |
+
+## Assumptions
+
+Every assumption needs an owner, a confirm-by date, and **what breaks if it is wrong** — that last field is what turns it into a managed risk rather than a permanent guess.
+
+| Req id | Assumption (stated positively) | Owner | Confirm by | What breaks if wrong |
+|---|---|---|---|---|
+| | | | | |
+
+Mirror every open assumption into `../engagement-management/raid-log.md`.
+
+## Chain audit
+
+Run before any gate and before the ontology-engineer models anything.
+
+| Check | Count | Notes |
+|---|---|---|
+| Total requirements | | |
+| Sourced | | |
+| Unsourced (blocks modelling) | | |
+| `UNVERIFIED` | | |
+| `ASSUMPTION` without owner or date | | |
+| With acceptance criteria | | |
+| Dangling `Source:` citations | | |

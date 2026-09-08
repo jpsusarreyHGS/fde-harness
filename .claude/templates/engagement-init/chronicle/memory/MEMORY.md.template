@@ -1,0 +1,14 @@
+# Memory index — {{CLIENT_NAME}}
+
+Loaded at session start. Each entry is a single line under ~150 characters: `- [Title](file.md) — one-line hook`.
+
+## Engagement context
+- [Engagement overview](engagement-overview.md) — who the client is, what we are building, why
+- [Environment](environment.md) — endpoints, repos, where credentials live (never values)
+
+## Domain
+- [Client vocabulary](client-vocabulary.md) — their words, verbatim, before normalisation
+- [Decisions](decisions.md) — decisions with rationale and the alternative rejected
+
+## Gates
+<!-- - [Stage gate 1 decisions](stage-gate-1-decisions.md) — G1 sign-off, caveats accepted, deferred scope -->

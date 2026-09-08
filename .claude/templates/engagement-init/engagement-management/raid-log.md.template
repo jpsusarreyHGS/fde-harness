@@ -1,0 +1,35 @@
+# RAID log — {{CLIENT_NAME}}
+
+Risks, assumptions, issues, dependencies.
+
+**An entry with no owner and no review date is not tracked.** It renders as a defect on the dashboard, which is intended.
+
+A register of generic project risks is not a risk register. Where are the risks specific to *this* client's data, systems, labour environment and regulatory exposure? If nothing here is uncomfortable, it was not written honestly.
+
+## Risks
+
+| Id | Risk | Impact | Likelihood | Owner | Mitigation | Review | Status |
+|---|---|---|---|---|---|---|---|
+| R-01 | | high/med/low | | | | | open |
+
+## Assumptions
+
+Mirrored from `../01-Discovery/requirements-register.md`. Reviewed at every gate.
+
+| Id | Assumption | Owner | Confirm by | **What breaks if wrong** | Status |
+|---|---|---|---|---|---|
+| A-01 | | | | | open |
+
+## Issues
+
+| Id | Issue | Impact | Owner | Raised | Target | Status |
+|---|---|---|---|---|---|---|
+| I-01 | | | | | | open |
+
+## Dependencies
+
+Client-side dependencies are the most common cause of a missed pilot date, and the least visible in a build plan.
+
+| Id | Dependency | On whom | Needed by | Status | Escalation |
+|---|---|---|---|---|---|
+| D-01 | | | | | |

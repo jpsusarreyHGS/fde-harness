@@ -1,0 +1,39 @@
+# Data readiness — {{CLIENT_NAME}}
+
+Scored 1-5 per `skills-practice/use-case-qualification/scoring-model.md`.
+
+**A score of 3 or below requires a named blocker and a named owner.** An amber with no blocker is a green you have not justified.
+
+**This score caps feasibility** in the use-case matrix. A high-value use case sitting on inaccessible data is blocked, not top-ranked.
+
+| Source | Available | Accessible | Quality | Score | Blocker | Blocker owner | Target date |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+## Quality checks we ran ourselves
+
+"IT says the data is clean" is not a quality check.
+
+| Source | Check | Result | Sample | Date |
+|---|---|---|---|---|
+| | completeness / uniqueness / format / freshness | | | |
+
+## Access status
+
+Possible is not agreed. Agreed is not provisioned. This distinction costs more pilots their first three weeks than any other single thing.
+
+| Source | Status | Requested | Granted | Notes |
+|---|---|---|---|---|
+| | not-requested / requested / agreed / **provisioned** | | | |
+
+## Security and residency constraints
+
+| Source | Classification | Residency requirement | Redaction needed | Approver |
+|---|---|---|---|---|
+| | | | | |
+
+## Delivery blockers
+
+| Blocker | Owner | Impact | Mitigation | In RAID? |
+|---|---|---|---|---|
+| | | | | |

@@ -1,0 +1,39 @@
+# Entities and relationships — {{CLIENT_NAME}}
+
+Working draft before promotion into the ontology repo. **Never drafted from a blank page** — every row cites a requirement.
+
+## Entities
+
+| Name | **Grain — one row is one what?** | Minted by | Key | Requirements | Glossary term | Promoted |
+|---|---|---|---|---|---|---|
+| | | | | REQ- | | |
+
+If the grain needs an "or", it is two entities. The most common failure is promoting an entity at the grain of the **source table** rather than the business object — that exports the source system's assumptions into the client's vocabulary permanently.
+
+## Properties
+
+| Entity | Property | Type | Required | Source field | Transform |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Relationships
+
+| From | Relationship | To | Cardinality | Requirements | Inferred or asserted |
+|---|---|---|---|---|---|
+| | | | | REQ- | |
+
+Inferred relationships are **proposed for human confirmation**, never automatically accepted.
+
+## Events and actions
+
+| Name | Kind | Actor | Object | Preconditions | Approver |
+|---|---|---|---|---|---|
+| | event / action | | | | |
+
+## Shapes
+
+Derived from the exception register — every exception representing an invalid state becomes a constraint.
+
+| Shape | Constrains | From exception | Severity |
+|---|---|---|---|
+| | | EX- | violation / warning |

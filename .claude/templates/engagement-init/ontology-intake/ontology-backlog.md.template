@@ -1,0 +1,17 @@
+# Ontology backlog — {{CLIENT_NAME}}
+
+Candidate entities, relationships, events and rules awaiting promotion. Proposed by `discovery-analyst`; promoted by `ontology-engineer`.
+
+A candidate is promotable only when **all five preconditions** hold. The failing precondition is named here — that note is what makes the backlog useful rather than a graveyard.
+
+| Candidate | Kind | Source | Grain stated | Req cites it | In glossary | Identity rule known | CQ needs it | Failing precondition |
+|---|---|---|---|---|---|---|---|---|
+| | entity / relationship / event / action / rule | EV- / EX- | | REQ- | | | CQ- | |
+
+## Parked
+
+Candidates that will not be promoted in this pilot, with what evidence would change that.
+
+| Candidate | Why parked | Would be justified by |
+|---|---|---|
+| | | |

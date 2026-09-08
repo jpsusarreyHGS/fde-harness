@@ -1,0 +1,49 @@
+/* HGS brand tokens — source: https://hgs.com/brand/
+   Import this rather than hardcoding hex values, so a brand refresh is one edit. */
+
+:root {
+  /* Primary */
+  --hgs-impact-green: #ABCF02;  /* Accent ONLY. Never behind body copy, never a
+                                   large text block. Excessive use disrupts
+                                   visual harmony — the brand guide says so. */
+  --hgs-primary-blue: #00B0F0;
+
+  /* Secondary */
+  --hgs-sage:            #9AAC94;
+  --hgs-system:          #26476B;
+  --hgs-foundation-grey: #5C6D72;
+  --hgs-teal:            #3D9B99;
+  --hgs-core-charcoal:   #2D2D2D;
+
+  /* Blue palette */
+  --hgs-blue-900: #001C41;
+  --hgs-blue-800: #012A7C;
+  --hgs-blue-600: #0088DD;
+  --hgs-blue-400: #3CCCFF;
+  --hgs-blue-300: #84DFFF;
+  --hgs-blue-100: #BEEEFF;
+
+  /* Alerts */
+  --hgs-orange: #E67300;  /* alerts and callouts */
+  --hgs-red:    #D12536;  /* strong alerts, negative actions, errors */
+
+  /* Typography — Kanit is primary. Bold for top-level headlines; Raleway
+     Medium for secondary headlines. ALWAYS sentence case. */
+  --hgs-font-display: 'Kanit', 'Raleway', system-ui, -apple-system, sans-serif;
+  --hgs-font-body:    'Kanit', 'Raleway', system-ui, -apple-system, sans-serif;
+  --hgs-weight-bold:    600;
+  --hgs-weight-medium:  500;
+  --hgs-weight-regular: 400;
+  --hgs-weight-light:   300;
+}
+
+/* Status mapping used consistently across harness-generated HTML.
+   Keep these stable — an FDE reading two dashboards should not have to
+   re-learn what a colour means. */
+:root {
+  --status-pass:     var(--hgs-impact-green);  /* passed, met, on target */
+  --status-active:   var(--hgs-primary-blue);  /* in progress */
+  --status-caveat:   var(--hgs-orange);        /* caveats, partial, at risk */
+  --status-fail:     var(--hgs-red);           /* not ready, failed, P0 */
+  --status-inactive: var(--hgs-sage);          /* not started, deferred */
+}

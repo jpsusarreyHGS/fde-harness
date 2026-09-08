@@ -1,0 +1,42 @@
+# Use cases — {{CLIENT_NAME}}
+
+End-to-end flows. Each write-back becomes a governed write template and an entry in the allow-list.
+
+## UC-01 — <name>
+
+| | |
+|---|---|
+| Persona | |
+| Trigger | |
+| Requirements | REQ- |
+| Competency questions used | CQ- |
+| Exceptions handled | EX- |
+| Target autonomy rung | shadow / suggest / approval / audit |
+| Measurement that earns it | |
+
+**Steps**
+
+| # | Actor | Action | Data touched | Human gate |
+|---|---|---|---|---|
+| 1 | | | | |
+
+**Write-backs**
+
+| Write | Object | Approver role | Reversible | Provenance stamped |
+|---|---|---|---|---|
+| | | | | |
+
+**Out of scope for this use case**
+
+- …
+
+## Scope boundary
+
+State plainly what the system is **not**. Without this sentence, scope expands into the space where a wrong answer has consequences, and it expands quietly.
+
+| Item | Value |
+|---|---|
+| The system is | insight / decision support / system of record |
+| Explicitly out of scope | |
+| The agent may assemble evidence for, but never decide | |
+| Enforced where | system prompt + write allow-list |
