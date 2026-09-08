@@ -34,7 +34,7 @@ Ask for onward use at the start, while goodwill is high and the request is abstr
 | Labour representation | {{LABOUR}} |
 | Consultation required | |
 | Consultation status | |
-| Techniques in scope | shadowing · task mining · session replay · meeting capture |
+| Techniques in scope | |
 | Always-on instrumentation proposed | |
 
 **Where there is doubt, prefer consented, time-boxed shadowing.** It produces better material anyway: an operator who agreed to be there will show you the exception.

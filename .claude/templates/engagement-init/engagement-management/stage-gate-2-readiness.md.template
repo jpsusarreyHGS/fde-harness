@@ -6,11 +6,13 @@ Between stages `06` and `07`. The bootcamp's Week 2 bar. The system runs live ag
 
 | Item | Value |
 |---|---|
-| Recommendation | READY · READY WITH CAVEATS · NOT READY |
+| Recommendation | |
 | Held-out slice used | |
 | Assessed | |
 | Decided | |
 | Decided by | |
+
+`Recommendation` is one of `READY`, `READY WITH CAVEATS` or `NOT READY`. Leave it blank until assessed. **Code never sets `passed`** — a person does, with a name.
 
 <!-- table:stage-gate-2.criteria role=labels key=Criterion -->
 

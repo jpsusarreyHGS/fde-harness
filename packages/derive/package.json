@@ -1,0 +1,22 @@
+{
+  "name": "@hgs-fde/derive",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Derives state.json from an FDE engagement's markdown instruments. Zero runtime dependencies.",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "derive": "node src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}

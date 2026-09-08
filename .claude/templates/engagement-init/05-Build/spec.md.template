@@ -11,8 +11,10 @@ End-to-end flows. Each write-back becomes a governed write template and an entry
 | Requirements | REQ- |
 | Competency questions used | CQ- |
 | Exceptions handled | EX- |
-| Target autonomy rung | shadow / suggest / approval / audit |
+| Target autonomy rung | |
 | Measurement that earns it | |
+
+Rungs, per `skills-practice/autonomy-ladder`: `1` controlled environment · `2` shadow mode · `3` approval on every action · `4` autonomous with exception routing · `5` autonomous with monitoring. Record the number and the **exit criterion** that earns it.
 
 **Steps**
 
@@ -36,7 +38,7 @@ State plainly what the system is **not**. Without this sentence, scope expands i
 
 | Item | Value |
 |---|---|
-| The system is | insight / decision support / system of record |
+| The system is | |
 | Explicitly out of scope | |
 | The agent may assemble evidence for, but never decide | |
 | Enforced where | system prompt + write allow-list |

@@ -6,10 +6,12 @@ Between stages `08` and `09`. The capstone bar.
 
 | Item | Value |
 |---|---|
-| Recommendation | READY · READY WITH CAVEATS · NOT READY |
+| Recommendation | |
 | Assessed | |
 | Decided | |
 | Decided by | |
+
+`Recommendation` is one of `READY`, `READY WITH CAVEATS` or `NOT READY`. Leave it blank until assessed. **Code never sets `passed`** — a person does, with a name.
 
 <!-- table:stage-gate-3.criteria role=labels key=Criterion -->
 
