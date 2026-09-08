@@ -46,7 +46,7 @@ deliverables/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow,03-Systems,04-Placem
 
 Read every template in **one batched call**, substitute placeholders, write all files in **one batched call** — the 4-step pattern from `CLAUDE.md`. Roughly three round-trips, not fifty.
 
-Skip anything that already exists. Seed all 49 templates, plus one feedback file per role from `.claude/templates/harness-improver/feedback/`.
+Skip anything that already exists. Seed all **50** templates under `engagement-init/`, plus the **8** per-role feedback files from `.claude/templates/harness-improver/feedback/`. If those counts do not match what you find on disk, say so — a missing template is a defect, not something to work around.
 
 ## Step 4 — Write the initial `state.json`
 

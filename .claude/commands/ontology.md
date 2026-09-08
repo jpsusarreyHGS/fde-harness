@@ -1,5 +1,5 @@
 ---
-description: Invoke the ontology-engineer to promote discovery output into the client domain model. Assembles the 03-Systems/ontology contract layer (glossary, personas, competency questions, use cases, source systems) then models entities, relationships, shapes and governed query templates into the ontology repo. Audits the evidence chain first and stops if the model would be speculative.
+description: Stage 03. Invoke the ontology-engineer to promote discovery output into the client domain model. Assembles the 03-Systems/ontology contract layer (glossary, personas, competency questions, use cases, source systems) then models entities, relationships, shapes and governed query templates into the ontology repo. Audits the evidence chain first and stops if the model would be speculative.
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 

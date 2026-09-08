@@ -1,5 +1,5 @@
 ---
-description: Run the chronicle protocol on the main thread to write the session log, append per-role agent feedback, update engagement memory, and regenerate state.json so the dashboard is current. Runs in the main thread rather than as a dispatched subagent because the session narrative it must capture lives only in the current context. Invoke at session end, at a milestone, or any time on request.
+description: Any stage, at session end. Run the chronicle protocol on the main thread to write the session log, append per-role agent feedback, update engagement memory, and regenerate state.json so the dashboard is current. Runs in the main thread rather than as a dispatched subagent because the session narrative it must capture lives only in the current context. Invoke at session end, at a milestone, or any time on request.
 allowed-tools: Read Write Glob Bash
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Rebuild state.json from the filesystem for one or all engagements, then render the FDE dashboard to a self-contained HTML file. The dashboard is the FDE's GUI — engagement portfolio, phase progress, discovery instrument coverage, evidence chain health, gate status, ontology and eval coverage, open questions and RAID. No arguments renders every engagement; pass a client slug to render one.
+description: Any stage. Rebuild state.json from the filesystem for one or all engagements, then render the FDE dashboard to a self-contained HTML file. The dashboard is the FDE's GUI — engagement portfolio, phase progress, discovery instrument coverage, evidence chain health, gate status, ontology and eval coverage, open questions and RAID. No arguments renders every engagement; pass a client slug to render one.
 allowed-tools: Read Write Glob Bash Skill
 ---
 

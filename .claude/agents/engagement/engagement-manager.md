@@ -1,6 +1,6 @@
 ---
 name: engagement-manager
-description: Cross-session program manager for FDE engagements. Owns engagement setup (init mode), the roadmap, RAID log, scope-change register, stage-gate readiness memos, and the operator kickoff/resume prompts. Invoke at engagement start, at every stage gate, when scope shifts, when a risk surfaces, or on demand. Distinct from solution-architect (per-slice technical orchestration) and chronicle (per-session log).
+description: Stages 00 and 08, plus the gates. Cross-session program manager for FDE engagements. Owns engagement setup (init mode), the roadmap, RAID log, scope-change register, stage-gate readiness memos, and the operator kickoff/resume prompts. Invoke at engagement start, at every stage gate, when scope shifts, when a risk surfaces, or on demand. Distinct from solution-architect (per-slice technical orchestration) and chronicle (per-session log).
 model: haiku
 ---
 

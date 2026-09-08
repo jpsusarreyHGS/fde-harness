@@ -1,11 +1,11 @@
 ---
-description: Invoke the solution-architect in build-plan mode to decompose the work into vertical slices and coordinate ontology-engineer, builder and evaluator per slice. Stops at every slice exit gate for operator review. Also the entry point for a self-contained POC with no prior discovery.
+description: Stage 05. Invoke the solution-architect in build-plan mode to decompose the work into vertical slices and coordinate ontology-engineer, builder and evaluator per slice. Stops at every slice exit gate for operator review. Also the entry point for a self-contained POC with no prior discovery.
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
 Use the Agent tool to dispatch the `solution-architect` agent in **`build-plan` mode**. Follow its instructions exactly. Per `solution-architect.md`:
 
-1. **Step 0** confirms upstream readiness (G2) and emits the status dashboard, then stops.
+1. **Step 0** confirms upstream readiness and emits the status dashboard, then stops. Upstream of stage `05` is **G1** (`03`→`04`) plus a completed stage `04`: the allocation grid and the ranked matrix must exist, because what was allocated to `human-gate` is not to be automated and `leave-alone` is not to be built. **G2 comes after evals, not before build.**
 2. **Decomposes vertically** — a slice is a thin end-to-end path that produces something a client can see and an evaluator can test. Never by layer: a completed data layer with no visible surface cannot be reviewed and de-risks nothing.
 3. **Writes the plan** to `engagement-management/build-plan-<date>.md`.
 4. **Runs the loop per slice** — `ontology-engineer` for new objects and templates, `builder` for pipelines and surface, `evaluator` for golden cases and the run. Each dispatch names the skills to load, the requirement ids in scope, and the acceptance criteria.

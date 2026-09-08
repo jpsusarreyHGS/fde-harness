@@ -1,5 +1,5 @@
 ---
-description: Invoke the harness-improver to review the harness for staleness and gaps and propose targeted, evidence-based improvements gated behind per-proposal operator approval. Applies approved edits to skills, templates and CLAUDE.md; never edits agent prompts — those route to feedback for deliberate human promotion. Pass "close" for the engagement-close generalisation pass.
+description: Stage 09 at close, or any time mid-engagement. Invoke the harness-improver to review the harness for staleness and gaps and propose targeted, evidence-based improvements gated behind per-proposal operator approval. Applies approved edits to skills, templates and CLAUDE.md; never edits agent prompts — those route to feedback for deliberate human promotion. Pass "close" for the engagement-close generalisation pass.
 allowed-tools: Read Write Glob Grep Agent
 ---
 

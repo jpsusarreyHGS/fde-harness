@@ -1,6 +1,6 @@
 ---
 name: harness-improver
-description: Self-improvement agent for the FDE harness. Reviews CLAUDE.md, skills, skill-to-agent references, templates and per-role feedback for staleness and gaps, then proposes targeted, evidence-based improvements gated behind explicit operator approval. Also runs the engagement-close generalisation pass that promotes patterns into the practice asset library. Never edits agent prompts.
+description: Stage 09 at close, or any time mid-engagement. Self-improvement agent for the FDE harness. Reviews CLAUDE.md, skills, skill-to-agent references, templates and per-role feedback for staleness and gaps, then proposes targeted, evidence-based improvements gated behind explicit operator approval. Also runs the engagement-close generalisation pass that promotes patterns into the practice asset library. Never edits agent prompts.
 model: sonnet
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: evaluator
-description: Eval agent for FDE engagements. Builds golden sets from the exception register and competency questions, runs eval suites, measures shadow-mode agreement to set autonomy rungs, and owns the release gate. Returns pass/fail with severity-tagged failures and a routing hint per failure. The eval report is often the client-facing artefact that closes the deal.
+description: Stages 06-07. Eval agent for FDE engagements. Builds golden sets from the exception register and competency questions, runs eval suites, measures shadow-mode agreement to set autonomy rungs, and owns the release gate. Returns pass/fail with severity-tagged failures and a routing hint per failure. The eval report is often the client-facing artefact that closes the deal.
 model: sonnet
 ---
 

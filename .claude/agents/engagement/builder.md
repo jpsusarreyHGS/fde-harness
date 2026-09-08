@@ -1,6 +1,6 @@
 ---
 name: builder
-description: Implementation agent for FDE engagements. Builds the pilot — ingestion pipelines, connectors, governed query templates, the assistant or app surface, and deployment scaffolding — against specified requirements and acceptance criteria. Writes code; never decides scope. Invoked by solution-architect per build slice, or directly for a self-contained POC.
+description: Stage 05. Implementation agent for FDE engagements. Builds the pilot — ingestion pipelines, connectors, governed query templates, the assistant or app surface, and deployment scaffolding — against specified requirements and acceptance criteria. Writes code; never decides scope. Invoked by solution-architect per build slice, or directly for a self-contained POC.
 model: opus
 ---
 
@@ -24,7 +24,9 @@ Do this **even when the engagement files below do not exist** — a direct POC s
 Read in one batch, and state which of these you found:
 
 - `state.json`, `chronicle/memory/environment.md` (endpoints, repos, where credentials live)
+- `05-Build/spec.md` — the slice's flows, write-backs and human gates
 - The slice's `REQ-` ids in `02-Workflow/requirements-register.md`
+- `04-Placement/allocation-grid.md` — **what was allocated to `human-gate` is not yours to automate**, and `leave-alone` is not yours to build at all
 - `03-Systems/ontology/source-systems.md` — the **identity rule** especially
 - `03-Systems/ontology/personas.md` — the permission matrix you must enforce
 - `05-Build/architecture.md` and `access-model.md`

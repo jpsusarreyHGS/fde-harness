@@ -1,0 +1,24 @@
+# Manual tasks — {{CLIENT_NAME}}
+
+Human-only steps and hand-offs. `builder` appends as it hits them; `solution-architect` reviews at session end.
+
+Every row is a claim that something **cannot** be automated. Say why, so the claim can be challenged.
+
+<!-- table:manual-tasks.rows role=register id=Id -->
+
+| Id | Task | Why it cannot be automated | Who must do it | Blocked until | Raised | Done |
+|---|---|---|---|---|---|---|
+
+<!-- table:manual-tasks.review role=kv -->
+
+## Review
+
+| Item | Value |
+|---|---|
+| Open tasks | |
+| Longest outstanding | |
+| Any that should be revisited for automation | |
+| Reviewed by | |
+| Date | |
+
+A manual task that has been open across three sessions is either a real constraint worth recording in the allocation grid as `leave-alone`, or a task nobody owns.

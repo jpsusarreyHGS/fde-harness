@@ -1,5 +1,5 @@
 ---
-description: Invoke the solution-architect in architect mode to produce the target architecture, the canonical Mermaid diagram, and the access model. Drafts six chunks in order — context and constraints, target architecture, integration map, access model, autonomy plan, deployment and operations — pausing between each for operator review.
+description: Stage 05. Invoke the solution-architect in architect mode to produce the target architecture, the canonical Mermaid diagram, and the access model. Drafts six chunks in order — context and constraints, target architecture, integration map, access model, autonomy plan, deployment and operations — pausing between each for operator review.
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 

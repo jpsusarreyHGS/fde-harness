@@ -1,6 +1,6 @@
 ---
 name: chronicle
-description: Session logger for FDE engagements. Writes the structured session log, appends per-role agent feedback, updates engagement memory, and appends a machine-readable run event so state can be derived without an interactive session. Invoke at the end of every session or after a significant milestone.
+description: All stages, at session end. Session logger for FDE engagements. Writes the structured session log, appends per-role agent feedback, updates engagement memory, and appends a machine-readable run event so state can be derived without an interactive session. Invoke at the end of every session or after a significant milestone.
 model: haiku
 ---
 
