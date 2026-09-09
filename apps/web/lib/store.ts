@@ -85,6 +85,17 @@ export interface EngagementState {
   sessions: { count: number; latest: string | null; latestDate: string | null; latestSummary: string | null };
   runEvents: { count: number; latest: string | null; byAgent: Record<string, number> };
   friction: { session: string; note: string }[];
+  /**
+   * The ranked question queue. Optional so a state.json written before the
+   * coach existed still renders — the console degrades, it does not crash.
+   */
+  coach?: {
+    key: string; ask: string; who: string; whoName: string | null;
+    blocks: string; location: string; why: string; score: number;
+    work: "ask" | "fix";
+    source: "gate" | "chain" | "open-question" | "stakeholder";
+    id: string | null;
+  }[];
 }
 
 export interface StoreInfo {

@@ -12,6 +12,7 @@ import {
 } from "./anchors.ts";
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
 import { scanIntake } from "./intake.ts";
+import { coach, type CoachQuestion } from "./coach.ts";
 import { pendingProposals } from "./proposals.ts";
 import {
   INSTRUMENTS, instrumentStatus, STAGES, type StageId,
@@ -78,6 +79,13 @@ export interface State {
     byAgent: Record<string, number>;
   };
   friction: { session: string; note: string }[];
+  /**
+   * The ranked question queue.
+   *
+   * Derived from the same findings and gate criteria as everything else, so
+   * the terminal and the console cannot disagree about what to ask next.
+   */
+  coach: CoachQuestion[];
 }
 
 export interface Gate {
@@ -520,5 +528,10 @@ export async function deriveState(opts: {
       byAgent,
     },
     friction,
+    coach: coach({
+      findings: chain.audit.findings,
+      gates,
+      tables: [...tablesByInstrument.values()].flat(),
+    }),
   };
 }

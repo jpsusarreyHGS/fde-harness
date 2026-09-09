@@ -66,4 +66,4 @@ and gets back rows to check, rather than a form to fill.
 
 **What the agent must not do:** invent a frequency, guess a rule holder, assign
 its own ids, or upgrade a confidence class. Anything it cannot source goes to
-`open-questions.md` as a `Q-` — that is the material the coach ranks and asks about next.
+`open-questions.md` as a `Q-` — that is the material `/next` ranks and puts a name against.

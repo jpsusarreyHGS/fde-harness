@@ -94,6 +94,12 @@ Read these **in order**, before any exploration:
 3. `engagements/<slug>/chronicle/CHRONICLE.md`, then the latest `chronicle/sessions/YYYY-MM-DD-NNN.md`
 4. `node packages/derive/src/cli.ts intake engagements/<slug>` — and `pending` after it
 
+Then, to plan rather than report:
+
+```bash
+node packages/derive/src/cli.ts next engagements/<slug>
+```
+
 Steps 1–3 are the *recorded* state. **Step 4 is the state nobody has recorded
 yet**, and it is the one an FDE is most likely to have just changed: `state.json`
 is derived from register rows, so a transcript dropped this morning is invisible
@@ -159,12 +165,18 @@ node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>  # agents w
 node packages/derive/src/cli.ts pending <engagement-dir>              # awaiting a decision
 node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
 node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>"
+node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to ask
 ```
 
 Three rules follow, none optional:
 
 - **Never hand-write a register row when `/capture` could propose it**, and never hand-assign an id. Minting by eye is a read-then-write race, and a collision corrupts every citation pointing at it.
 - **An accept whose citations dangle is refused whole.** A partial accept leaves the register in a state nobody chose.
+- **Never re-rank the queue by hand.** `/next` joins what a question blocks to
+  the prioritisation table and says so in its `why:` line. Presenting a
+  different order, or the same order with a better-sounding reason, is the
+  console's old lie — it rendered "ranked by what is blocked" over a sort by
+  age. If the ranking looks wrong, the prioritisation table is what to fix.
 - **A deleted row is struck through, not removed.** Its id stays spent forever so old citations remain findable — but a retired row is no longer data and does not count.
 
 ### Binary and text documents

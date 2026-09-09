@@ -12,6 +12,7 @@
  *   cli.ts anchors <engagement-dir> [filter]    register tables and their columns
  *   cli.ts propose <engagement-dir> <spec.json> validate and write a proposal
  *   cli.ts reject  <engagement-dir> <proposal> <reason>  decline it
+ *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *
  * Exit codes are meant for a runner and for CI:
  *   0  fine
@@ -35,11 +36,12 @@ import {
 } from "./proposals.ts";
 import { INSTRUMENTS } from "./instruments.ts";
 import { dataRows, parseAnchoredTables } from "./anchors.ts";
+import { deskWork, nextConversations } from "./coach.ts";
 import { WriteRefused } from "./writer.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
-  "intake", "pending", "accept", "reject", "mint", "anchors", "propose",
+  "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -260,6 +262,45 @@ if (fatal.length > 0) {
   process.exit(3);
 }
 for (const v of violations) console.error(`warn  ${v.rule}  ${v.detail}`);
+
+if (sub === "next") {
+  const n = Number(args.filter((a) => !a.startsWith("--"))[1] ?? "3");
+  const groups = nextConversations(state.coach, Number.isFinite(n) ? n : 3);
+  if (!groups.length) {
+    console.log("Nothing to ask. Every gate criterion is met and the chain is intact.");
+    process.exit(0);
+  }
+  for (const g of groups) {
+    console.log(`
+${g.whoName ? `${g.whoName} — ${g.who}` : `${g.who} (no name in the stakeholder map)`}`);
+    for (const q of g.questions.slice(0, 4)) {
+      console.log(`  · ${q.ask}`);
+      console.log(`      why: ${q.why}`);
+      if (q.blocks) console.log(`      blocks: ${q.blocks}`);
+      console.log(`      write it to: ${q.location}`);
+    }
+    if (g.questions.length > 4) {
+      console.log(`  … and ${g.questions.length - 4} more for the same conversation`);
+    }
+  }
+  const desk = deskWork(state.coach);
+  if (desk.length) {
+    console.log("\nYours to fix — no conversation will resolve these");
+    for (const q of desk.slice(0, 5)) {
+      console.log(`  · ${q.ask}`);
+      console.log(`      ${q.location}`);
+    }
+    if (desk.length > 5) console.log(`  … and ${desk.length - 5} more`);
+  }
+
+  console.log("");
+  console.log(
+    `${state.coach.length} item(s) in the queue: ${state.coach.length - desk.length} to ask, ` +
+      `${desk.length} to fix. Answers go into the instrument, not into chat — ` +
+      "that is what makes them count.",
+  );
+  process.exit(0);
+}
 
 if (args.includes("--audit")) {
   const a = state.chain.audit;

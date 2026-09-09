@@ -7,6 +7,7 @@
 export { parseAnchoredTables, dataRows, registerRows, answeredRows, isRetired, findTable, splitRow } from "./anchors.ts";
 export type { ParsedTable, TableAnchor, TableRole } from "./anchors.ts";
 export { deriveChain, extractIds, filled } from "./chain.ts";
+export { coach, deskWork, nextConversations, type CoachQuestion } from "./coach.ts";
 export type { ChainCounts, ChainAudit, AuditFinding } from "./chain.ts";
 export { INSTRUMENTS, STAGES, instrumentById, instrumentsForStage, instrumentStatus } from "./instruments.ts";
 export type { InstrumentDef, StageDef, StageId } from "./instruments.ts";
@@ -27,5 +28,6 @@ export {
 export type { EvidenceClass, IntakeItem, Handling } from "./intake.ts";
 export {
   writeProposal, acceptProposal, pendingProposals, previewProposal, PROPOSALS_DIR,
+  proposeFromSpec, rejectProposal,
 } from "./proposals.ts";
-export type { ProposalBlock, ProposalTarget, AcceptResult } from "./proposals.ts";
+export type { ProposalBlock, ProposalTarget, AcceptResult, ProposalSpec } from "./proposals.ts";

@@ -22,14 +22,14 @@ A Claude Code project harness implementing the HGS Forward Deployed Engineering 
 | | **G3 — Production gate** | `/gate 3` |
 | `09` | Run the loop again | `/harness-improver close` |
 
-Plus `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
+Plus `/next` (the three conversations to have tomorrow, with names attached), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
 
 ## What it gives you
 
 | | |
 |---|---|
 | **8 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, chronicle, harness-improver |
-| **14 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
+| **15 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
 | **A dashboard** | portfolio and per-engagement views, derived from `state.json` |

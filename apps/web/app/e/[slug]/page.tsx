@@ -33,6 +33,10 @@ export default async function Engagement({ params }: { params: Promise<{ slug: s
   const openGate = e.gates?.find((g) => g.criteria.length > 0);
   const maxRows = Math.max(1, ...e.instruments.map((i) => i.rows));
   const labour = ident["labour"];
+  // The same queue the terminal shows. Derived once, so the console and
+  // `/next` cannot disagree about what to ask.
+  const asks = (e.coach ?? []).filter((q) => q.work === "ask");
+  const fixes = (e.coach ?? []).filter((q) => q.work === "fix");
 
   return (
     <>
@@ -461,9 +465,82 @@ export default async function Engagement({ params }: { params: Promise<{ slug: s
             <h2>Questions and RAID</h2>
             <div className="note">
               Sorted by age, oldest first. Age computed at read time — never stored.
-              Ranking by what is blocked lands with the coach.
+              Age is not importance — the ranked queue below is the one to work from.
             </div>
           </div>
+          {asks.length > 0 && (
+            <div className="card">
+              <div className="card-h">
+                <h3>Ask next</h3>
+                <div className="r">
+                  {asks.length} to ask · {fixes.length} to fix
+                </div>
+              </div>
+              <div className="scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Who</th>
+                      <th>Question</th>
+                      <th>Why it ranks here</th>
+                      <th>Write it to</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {asks.slice(0, 12).map((q) => (
+                      <tr key={q.key}>
+                        <td>
+                          <b>{q.whoName ?? q.who}</b>
+                          {q.whoName && (
+                            <>
+                              <br />
+                              <span style={{ color: "var(--ink-3)", fontSize: "11.5px" }}>
+                                {q.who}
+                              </span>
+                            </>
+                          )}
+                        </td>
+                        <td>{q.ask}</td>
+                        {/* The reason is shown, never implied by position. */}
+                        <td style={{ color: "var(--ink-3)", fontSize: "11.5px" }}>{q.why}</td>
+                        <td>
+                          <code>{q.location}</code>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {fixes.length > 0 && (
+                <>
+                  <div className="card-h" style={{ borderTop: "1px solid var(--line-soft)" }}>
+                    <h3>Yours to fix</h3>
+                    <div className="r">no conversation will resolve these</div>
+                  </div>
+                  <div className="scroll">
+                    <table>
+                      <tbody>
+                        {fixes.slice(0, 6).map((q) => (
+                          <tr key={q.key}>
+                            <td>{q.ask}</td>
+                            <td>
+                              <code>{q.location}</code>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+              <div className="note">
+                Ranked by what it blocks, joined to the prioritisation table, and by how
+                fast the answer perishes. Findings the FDE already raised as a{" "}
+                <code>Q-</code> are not repeated here.
+              </div>
+            </div>
+          )}
+
           <div className="grid g2">
             <div className="card">
               <div className="card-h">
