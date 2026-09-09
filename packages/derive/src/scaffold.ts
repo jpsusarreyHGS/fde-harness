@@ -40,7 +40,10 @@ export interface ScaffoldResult {
 }
 
 const SUBDIRS = [
-  "00-Setup", "01-Organisation", "02-Workflow/evidence",
+  "00-Setup", "01-Organisation",
+  "02-Workflow/evidence/observed", "02-Workflow/evidence/system",
+  "02-Workflow/evidence/documented", "02-Workflow/evidence/stated",
+  "02-Workflow/proposals",
   "03-Systems/ontology", "04-Placement", "05-Build/builds",
   "06-Evals/golden-sets", "06-Evals/runs", "07-Production", "08-ROI",
   "09-Loop", "skills-engagement", "chronicle/memory", "chronicle/sessions",

@@ -174,12 +174,27 @@ export function parseAnchoredTables(markdown: string): ParsedTable[] {
  * count. This is the safeguard behind "a fresh engagement derives all-zero".
  */
 export function dataRows(t: ParsedTable): Record<string, string>[] {
-  return t.rows.filter((r) =>
-    Object.values(r).some((v) => {
+  return t.rows.filter((r) => {
+    if (isRetired(t, r)) return false;
+    return Object.values(r).some((v) => {
       const s = v.trim();
       return s !== "" && s !== "-" && s !== "—" && s !== "n/a";
-    }),
-  );
+    });
+  });
+}
+
+/**
+ * Has this row been withdrawn?
+ *
+ * "A deleted row is struck through with a reason, not removed." So a retired
+ * row must stay in the file — its id is spent forever and old citations must
+ * still resolve to something findable — but it is no longer data, and
+ * counting it would overstate every ratio built on the register.
+ */
+export function isRetired(t: ParsedTable, row: Record<string, string>): boolean {
+  const key = t.anchor.idColumn ?? t.headers[0];
+  if (!key) return false;
+  return /^~~.*~~$/.test((row[key] ?? "").trim());
 }
 
 /** Register rows only — what derived counts are allowed to see. */

@@ -4,7 +4,7 @@
  * Zero runtime dependencies. Used by the runner today and by the web app's
  * ingest endpoint next, so the parse lives in exactly one place.
  */
-export { parseAnchoredTables, dataRows, registerRows, answeredRows, findTable, splitRow } from "./anchors.ts";
+export { parseAnchoredTables, dataRows, registerRows, answeredRows, isRetired, findTable, splitRow } from "./anchors.ts";
 export type { ParsedTable, TableAnchor, TableRole } from "./anchors.ts";
 export { deriveChain, extractIds, filled } from "./chain.ts";
 export type { ChainCounts, ChainAudit, AuditFinding } from "./chain.ts";
@@ -16,3 +16,16 @@ export { deriveState, SCHEMA_VERSION } from "./state.ts";
 export type { State, Gate } from "./state.ts";
 export { validateState, tampered } from "./validate.ts";
 export type { Violation } from "./validate.ts";
+export { mintIds, scanIds, knownIds, homeOf } from "./ids.ts";
+export type { IdPrefix, MintResult } from "./ids.ts";
+export { appendRows, retireRow, tableColumns, escapeCell, WriteRefused } from "./writer.ts";
+export type { AppendResult } from "./writer.ts";
+export {
+  scanIntake, readIntake, transcriptToText, intakeBrief, handlingFor,
+  EVIDENCE_CLASSES, EVIDENCE_ROOT, CLASS_MEANING,
+} from "./intake.ts";
+export type { EvidenceClass, IntakeItem, Handling } from "./intake.ts";
+export {
+  writeProposal, acceptProposal, pendingProposals, previewProposal, PROPOSALS_DIR,
+} from "./proposals.ts";
+export type { ProposalBlock, ProposalTarget, AcceptResult } from "./proposals.ts";

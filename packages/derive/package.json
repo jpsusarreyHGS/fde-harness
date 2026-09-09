@@ -13,7 +13,10 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "derive": "node src/cli.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "intake": "node src/cli.ts intake",
+    "pending": "node src/cli.ts pending",
+    "accept": "node src/cli.ts accept"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
