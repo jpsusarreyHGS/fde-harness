@@ -128,12 +128,45 @@ Full engagement state in three reads. **Do not Glob, Bash-enumerate, or dispatch
 - **Desktop task mining and session replay are employee monitoring.** In works-council jurisdictions and unionised environments they require **consultation, not notice**. Getting this wrong ends an engagement.
 - **No client-identifying material in `skills-practice/` or `.claude/templates/`.** Generalise first; that is a deliberate step at close.
 
-### Binary documents
+### Intake — raw material in, structure out
+
+**The FDE produces raw material; the harness produces structure.** Eight hours beside the operator gets you the job — an FDE spending those hours typing into tables is not watching, which is the one thing only they can do.
+
+Drop whatever already exists into the folder that says what it is:
+
+```
+02-Workflow/evidence/observed/     an FDE watched it
+02-Workflow/evidence/system/       a log, export or record
+02-Workflow/evidence/documented/   an SOP, policy or spec
+02-Workflow/evidence/stated/       an interview, call or transcript
+```
+
+**The evidence class comes from the folder, never from the content.** That is the point: the discipline the whole judgment chain rests on becomes structural instead of something to remember at the end of a long day. A confident-sounding transcript in `stated/` can never silently become primary evidence, and a file dropped outside a class folder is reported rather than guessed.
+
+Then `/capture` extracts rows and writes a **proposal**. Nothing reaches a register until the FDE accepts it, and **ids are minted by code at accept time** — never by an agent, never typed by a human.
+
+```bash
+node packages/derive/src/cli.ts intake  <engagement-dir>   # what is waiting
+node packages/derive/src/cli.ts pending <engagement-dir>   # awaiting a decision
+node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
+```
+
+Three rules follow, none optional:
+
+- **Never hand-write a register row when `/capture` could propose it**, and never hand-assign an id. Minting by eye is a read-then-write race, and a collision corrupts every citation pointing at it.
+- **An accept whose citations dangle is refused whole.** A partial accept leaves the register in a state nobody chose.
+- **A deleted row is struck through, not removed.** Its id stays spent forever so old citations remain findable — but a retired row is no longer data and does not count.
+
+### Binary and text documents
+
+One converter handles the six Office formats plus the intake formats: plain text, CSV/TSV, JSON, `.eml`, and WebVTT/SRT transcripts (stripped to speech — roughly half a transcript is timing metadata).
 
 ```
 uv run --script --frozen scripts/convert_to_md.py <input> --out ./tmp_conversion.md
 uv run --script --frozen scripts/convert_to_md.py <input.xlsx> --formulas --out ./tmp_formulas.md
 ```
+
+**Audio and images are refused**, with an explanation rather than a confusing failure — the harness has no transcription or vision service. Produce a text version and drop it in the same evidence folder, where it keeps the standing of the original.
 
 Write into the engagement folder, read, then delete. Never target `datasources/`. CSVs over ~256 KB exceed a single `Read` — use offset+limit ranges.
 
