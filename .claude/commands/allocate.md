@@ -1,6 +1,6 @@
 ---
 description: Stage 04. Invoke the solution-architect in allocate mode to place the intelligence — assign every operating-map step to one of deterministic, model judgement, human gate or leave alone with a written reason, then rank workflows on value at stake and feasibility and produce the cost envelope. Includes the declines, argued.
-allowed-tools: Read Write Glob Grep Agent
+allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
 Use the Agent tool to dispatch the `solution-architect` agent in **`allocate` mode**. Per `solution-architect.md`:

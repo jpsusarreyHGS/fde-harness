@@ -94,6 +94,54 @@ export default async function Engagement({ params }: { params: Promise<{ slug: s
             </div>
           )}
 
+          {(e.intake?.waiting ?? 0) > 0 || (e.intake?.pendingProposals?.length ?? 0) > 0 ? (
+            <div className="banner">
+              <div className="k">Waiting on a person</div>
+              <p>
+                {(e.intake?.waiting ?? 0) > 0 && (
+                  <>
+                    <b>
+                      {e.intake!.waiting} file
+                      {e.intake!.waiting === 1 ? "" : "s"} in <code>02-Workflow/evidence/</code>
+                    </b>{" "}
+                    (
+                    {Object.entries(e.intake!.byClass)
+                      .map(([k, n]) => `${n} ${k}`)
+                      .join(", ")}
+                    ){" "}
+                    — every other number on this page is derived from register rows, so
+                    none of them can see this yet. Run <code>/capture</code>.{" "}
+                  </>
+                )}
+                {(e.intake?.pendingProposals?.length ?? 0) > 0 && (
+                  <>
+                    <b>
+                      {e.intake!.pendingProposals.length} proposal
+                      {e.intake!.pendingProposals.length === 1 ? "" : "s"} awaiting a
+                      decision.
+                    </b>{" "}
+                    Nothing in them has been written to a register.{" "}
+                  </>
+                )}
+                {(e.intake?.needsService ?? 0) > 0 && (
+                  <>
+                    {e.intake!.needsService} of the files need a transcription or
+                    description pass first.{" "}
+                  </>
+                )}
+                {(e.intake?.unclassified?.length ?? 0) > 0 && (
+                  <>
+                    {e.intake!.unclassified.length} file
+                    {e.intake!.unclassified.length === 1 ? " sits" : "s sit"} outside a
+                    class folder — the evidence class is reported, never guessed, so
+                    {e.intake!.unclassified.length === 1 ? " it" : " they"} will not be
+                    read until moved.
+                  </>
+                )}
+              </p>
+            </div>
+          ) : null}
+
           {(labour === "works-council" || labour === "union" || labour === "unknown") && (
             <div className="banner">
               <div className="k">Monitoring</div>

@@ -66,6 +66,18 @@ export interface EngagementState {
   deliverables: { name: string; stage: string; rendered: boolean }[];
   datasources: { name: string; sizeBytes: number; classification: string }[];
   skills: { practice: number; engagement: number; function: number; supersedes: unknown[] };
+  /**
+   * Work waiting on a person. Optional because an engagement whose state.json
+   * predates the intake loop simply has none — the console must render, not
+   * crash, on a schema it is ahead of.
+   */
+  intake?: {
+    waiting: number;
+    byClass: Record<string, number>;
+    unclassified: string[];
+    needsService: number;
+    pendingProposals: string[];
+  };
   harnessImprover: {
     lastRun: string | null; openProposals: number;
     feedbackFilesWithEntries: number; pendingPromptEdits: number;

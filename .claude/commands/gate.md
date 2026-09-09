@@ -1,6 +1,6 @@
 ---
 description: Gates G1 (03 to 04), G2 (06 to 07) and G3 (08 to 09). Invoke the engagement-manager in gate mode to produce a stage-gate readiness memo. G1 discovery (03 to 04), G2 build (06 to 07), G3 production (08 to 09), using the bootcamp's Week 1, Week 2 and capstone bars. Assesses criteria and behaviours with evidence, names what closes each gap and who owns it. Recommends; never decides.
-allowed-tools: Read Write Glob Grep Agent
+allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
 Use the Agent tool to dispatch the `engagement-manager` agent in **`gate` mode**. Pass the gate number (`/gate 1`, `/gate 2`, `/gate 3`).

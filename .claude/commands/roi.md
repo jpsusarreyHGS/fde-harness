@@ -1,6 +1,6 @@
 ---
 description: Stage 08. Invoke the engagement-manager in roi mode to populate the engagement ROI model with actuals against the stage-04 baseline, and draft the executive readout. Nine inputs, four outputs, plus counter-metrics and an agreed attribution basis.
-allowed-tools: Read Write Glob Grep Agent
+allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
 Use the Agent tool to dispatch the `engagement-manager` agent in **`roi` mode**. It loads `skills-practice/roi-and-readout`.

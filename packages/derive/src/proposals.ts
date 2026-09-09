@@ -140,6 +140,16 @@ export async function acceptProposal(
       `${proposalName} was already accepted. Accepting twice would duplicate every row.`,
     );
   }
+  // A declined proposal is not a draft to reconsider by accident. Someone
+  // decided these rows should not exist, and writing them anyway is the
+  // silent damage the whole propose-then-confirm split exists to prevent.
+  const declined = /<!--\s*rejected[^>]*reason=([^>]*?)\s*-->/.exec(md);
+  if (declined) {
+    throw new WriteRefused(
+      `${proposalName} was rejected: ${declined[1]!.trim()}. ` +
+        "Re-propose from the source if that decision has changed.",
+    );
+  }
 
   const lines = md.split(/\r?\n/);
   const blocks: { target: ProposalTarget; columns: string[]; rows: string[][] }[] = [];
@@ -261,7 +271,7 @@ export async function pendingProposals(engagementDir: string): Promise<string[]>
   for (const f of files.sort()) {
     if (!f.endsWith(".md")) continue;
     const md = await readFile(join(dir, f), "utf8");
-    if (!/<!--\s*accepted /.test(md)) out.push(f);
+    if (!/<!--\s*accepted /.test(md) && !/<!--\s*rejected /.test(md)) out.push(f);
   }
   return out;
 }
@@ -288,4 +298,113 @@ export async function previewProposal(
     out.push({ anchor: m[2]!, rows: n });
   }
   return out;
+}
+
+// --------------------------------------------------------------- propose spec
+
+/**
+ * The file an agent writes to propose rows.
+ *
+ * An agent has Write and Bash, not a TypeScript evaluator. Asking it to call
+ * `writeProposal()` meant improvising a `node -e` invocation with forty rows of
+ * client verbatim quoted through a Windows shell — the kind of thing that fails
+ * on row 23. It writes JSON with the tool it already has, and code does the
+ * rest.
+ */
+export interface ProposalSpec {
+  source: string;
+  agent: string;
+  blocks: ProposalBlock[];
+}
+
+/**
+ * Validate a spec against the instruments it targets, then write the proposal.
+ *
+ * Validation happens **here**, not at accept, because a column name the
+ * instrument does not have is silently dropped downstream — the agent's
+ * extraction disappears with no error and the FDE never learns a cell was
+ * lost. Refusing at propose time puts the real column list in front of the
+ * agent while it can still act on it.
+ */
+export async function proposeFromSpec(
+  engagementDir: string,
+  spec: ProposalSpec,
+  now?: Date,
+): Promise<{ name: string; rows: number }> {
+  if (!spec.source || !spec.agent) {
+    throw new WriteRefused("a proposal needs source and agent — the audit trail is the point");
+  }
+  if (!Array.isArray(spec.blocks) || spec.blocks.length === 0) {
+    throw new WriteRefused("no blocks — nothing to propose");
+  }
+
+  const resolved: ProposalBlock[] = [];
+
+  for (const b of spec.blocks) {
+    const real = await tableColumns(engagementDir, b.instrument, b.anchor);
+    const stray = (b.columns ?? []).filter((c) => !real.includes(c));
+    if (stray.length) {
+      throw new WriteRefused(
+        `${b.anchor} has no column ${stray.map((s) => JSON.stringify(s)).join(", ")}. ` +
+          `Its columns are: ${real.join(" | ")}`,
+        { instrument: b.instrument, anchor: b.anchor },
+      );
+    }
+    if (!b.rows?.length) continue;
+
+    // The id column is minted at accept. An agent filling it is the
+    // read-then-write race the allocator exists to remove, so it is refused
+    // rather than quietly overwritten.
+    if (b.idColumn) {
+      const filled = b.rows.filter((r) => (r[b.idColumn!] ?? "").trim() !== "");
+      if (filled.length) {
+        throw new WriteRefused(
+          `${b.anchor}: ${filled.length} row(s) carry a value in "${b.idColumn}". ` +
+            "Leave it blank — ids are minted at accept time.",
+          { instrument: b.instrument, anchor: b.anchor },
+        );
+      }
+    }
+
+    // Emit in the instrument's own column order so the proposal reads like the
+    // table it will become.
+    resolved.push({ ...b, columns: real, rows: b.rows });
+  }
+
+  if (!resolved.length) throw new WriteRefused("every block was empty — nothing to propose");
+
+  const name = await writeProposal({
+    engagementDir,
+    source: spec.source,
+    agent: spec.agent,
+    blocks: resolved,
+    now,
+  });
+  return { name, rows: resolved.reduce((n, b) => n + b.rows.length, 0) };
+}
+
+/**
+ * Mark a proposal declined so it stops showing as pending.
+ *
+ * Without this a proposal the FDE decided against sits in the queue forever,
+ * and a queue that shows work nobody will do is one people stop reading.
+ */
+export async function rejectProposal(
+  engagementDir: string,
+  proposalName: string,
+  reason: string,
+  now?: Date,
+): Promise<void> {
+  const path = join(engagementDir, ...PROPOSALS_DIR.split("/"), proposalName);
+  const md = await readFile(path, "utf8");
+  if (/<!--\s*accepted/.test(md)) {
+    throw new WriteRefused(`${proposalName} was already accepted — its rows are in the registers`);
+  }
+  if (/<!--\s*rejected/.test(md)) return;
+  const at = (now ?? new Date()).toISOString();
+  await writeFile(
+    path,
+    `${md.trimEnd()}\n\n<!-- rejected at=${at} reason=${reason.replace(/[\r\n]+/g, " ")} -->\n`,
+    "utf8",
+  );
 }

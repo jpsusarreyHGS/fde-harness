@@ -11,6 +11,8 @@ import {
   answeredRows, dataRows, findTable, parseAnchoredTables, type ParsedTable,
 } from "./anchors.ts";
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
+import { scanIntake } from "./intake.ts";
+import { pendingProposals } from "./proposals.ts";
 import {
   INSTRUMENTS, instrumentStatus, STAGES, type StageId,
 } from "./instruments.ts";
@@ -47,6 +49,25 @@ export interface State {
   harnessImprover: {
     lastRun: string | null; openProposals: number;
     feedbackFilesWithEntries: number; pendingPromptEdits: number;
+  };
+  /**
+   * Material and proposals waiting on a person.
+   *
+   * Every other number here is derived from register rows, which means a file
+   * an FDE dropped this morning is invisible to all of them. This block is the
+   * only part of state that can see the work that has not entered the chain
+   * yet, and it is the part most likely to have changed since the last read.
+   */
+  intake: {
+    /** Files under `02-Workflow/evidence/<class>/`, by class. */
+    waiting: number;
+    byClass: Record<string, number>;
+    /** Dropped outside a class folder — the class is reported, never guessed. */
+    unclassified: string[];
+    /** Needs a transcription or description pass before it can be read. */
+    needsService: number;
+    /** Proposals with neither an accept nor a reject marker. */
+    pendingProposals: string[];
   };
   sessions: {
     count: number; latest: string | null;
@@ -451,6 +472,16 @@ export async function deriveState(opts: {
     if (note && !/^none\.?$/i.test(note)) friction.push({ session: f.replace(/\.md$/, ""), note });
   }
 
+  // Raw material and proposals. Read from disk, not from registers — that is
+  // the whole point: this is the work that has not entered the chain yet.
+  const { items: intakeItems, unclassified: intakeUnclassified } =
+    await scanIntake(engagementDir);
+  const intakeByClass: Record<string, number> = {};
+  for (const i of intakeItems) {
+    intakeByClass[i.evidenceClass] = (intakeByClass[i.evidenceClass] ?? 0) + 1;
+  }
+  const waitingProposals = await pendingProposals(engagementDir);
+
   return {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: now.toISOString(),
@@ -466,6 +497,13 @@ export async function deriveState(opts: {
     deliverables,
     datasources,
     skills: { practice, engagement: engagementSkills.length, function: fn, supersedes: [] },
+    intake: {
+      waiting: intakeItems.length,
+      byClass: intakeByClass,
+      unclassified: intakeUnclassified,
+      needsService: intakeItems.filter((i) => i.handling === "needs-service").length,
+      pendingProposals: waitingProposals,
+    },
     harnessImprover: {
       lastRun: null, openProposals: 0,
       feedbackFilesWithEntries: withEntries, pendingPromptEdits,

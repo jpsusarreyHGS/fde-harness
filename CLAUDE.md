@@ -92,8 +92,15 @@ Read these **in order**, before any exploration:
 1. `engagements/<slug>/state.json` — machine-readable state; also what the dashboard renders
 2. `engagements/<slug>/chronicle/memory/MEMORY.md` — the index; follow its links
 3. `engagements/<slug>/chronicle/CHRONICLE.md`, then the latest `chronicle/sessions/YYYY-MM-DD-NNN.md`
+4. `node packages/derive/src/cli.ts intake engagements/<slug>` — and `pending` after it
 
-Full engagement state in three reads. **Do not Glob, Bash-enumerate, or dispatch an Explore subagent until you have read them** — the indexes *are* the directory map, and this overrides the generic "explore first" instinct. If `state.json` is missing, fall back to MEMORY + CHRONICLE plus one Glob, and tell the operator to run `/init-engagement`.
+Steps 1–3 are the *recorded* state. **Step 4 is the state nobody has recorded
+yet**, and it is the one an FDE is most likely to have just changed: `state.json`
+is derived from register rows, so a transcript dropped this morning is invisible
+to it. If material is waiting, say so first and offer `/capture` — reporting
+coverage over registers that do not contain it is a confident wrong answer.
+
+Full engagement state in three reads plus one command. **Do not Glob, Bash-enumerate, or dispatch an Explore subagent until you have read them** — the indexes *are* the directory map, and this overrides the generic "explore first" instinct. If `state.json` is missing, fall back to MEMORY + CHRONICLE plus one Glob, and tell the operator to run `/init-engagement`.
 
 ## Skills: load before you act
 
@@ -146,9 +153,12 @@ Drop whatever already exists into the folder that says what it is:
 Then `/capture` extracts rows and writes a **proposal**. Nothing reaches a register until the FDE accepts it, and **ids are minted by code at accept time** — never by an agent, never typed by a human.
 
 ```bash
-node packages/derive/src/cli.ts intake  <engagement-dir>   # what is waiting
-node packages/derive/src/cli.ts pending <engagement-dir>   # awaiting a decision
+node packages/derive/src/cli.ts intake  <engagement-dir>              # what is waiting
+node packages/derive/src/cli.ts anchors <engagement-dir> [filter]     # the real columns
+node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>  # agents write this
+node packages/derive/src/cli.ts pending <engagement-dir>              # awaiting a decision
 node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
+node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>"
 ```
 
 Three rules follow, none optional:
@@ -227,7 +237,12 @@ engagements/{slug}/
 │   ├── exception-register.md         # EX- rows; feeds shapes and golden sets
 │   ├── requirements-register.md      # REQ- rows, each carrying a Source:
 │   ├── open-questions.md             # Q- rows
-│   └── evidence/                     # raw and converted captures
+│   ├── evidence/                     # raw material; the folder sets the class
+│   │   ├── observed/                 #   an FDE watched it
+│   │   ├── system/                   #   a log, export or record
+│   │   ├── documented/               #   an SOP, policy or spec
+│   │   └── stated/                   #   an interview, call or transcript
+│   └── proposals/                    # extracted rows awaiting accept/reject
 ├── 03-Systems/
 │   ├── systems-inventory.md
 │   ├── readiness-scorecard.md        # availability, access, quality, landmines
@@ -294,6 +309,7 @@ A clean "not found" is itself the state signal.
 | Stakeholder map | `01-Organisation/stakeholder-map.md` |
 | Observation log · operating map | `02-Workflow/observation-log.md` · `02-Workflow/operating-map.md` |
 | Exceptions · requirements · questions | `02-Workflow/exception-register.md` · `02-Workflow/requirements-register.md` · `02-Workflow/open-questions.md` |
+| Raw material in · proposed rows out | `02-Workflow/evidence/{observed,system,documented,stated}/` · `02-Workflow/proposals/` |
 | Systems · readiness · vocabulary | `03-Systems/systems-inventory.md` · `03-Systems/readiness-scorecard.md` · `03-Systems/vocabulary-audit.md` |
 | Ontology contract | `03-Systems/ontology/glossary.md` · `personas.md` · `competency-questions.md` · `source-systems.md` |
 | Promotion log | `03-Systems/ontology/promotion-log.md` |

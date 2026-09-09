@@ -38,7 +38,7 @@ If a value is unknown, write `TBD` and raise a `Q-` in `02-Workflow/open-questio
 One batched call:
 
 ```
-engagements/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow/evidence,03-Systems/ontology,04-Placement,05-Build/builds,06-Evals/{golden-sets,runs},07-Production,08-ROI,09-Loop,skills-engagement,chronicle/{memory,sessions,run-events},harness-improver/{feedback,improvements},engagement-management}
+engagements/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow/{evidence/{observed,system,documented,stated},proposals},03-Systems/ontology,04-Placement,05-Build/builds,06-Evals/{golden-sets,runs},07-Production,08-ROI,09-Loop,skills-engagement,chronicle/{memory,sessions,run-events},harness-improver/{feedback,improvements},engagement-management}
 deliverables/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow,03-Systems,04-Placement,05-Build,06-Evals,07-Production,08-ROI,09-Loop}
 ```
 

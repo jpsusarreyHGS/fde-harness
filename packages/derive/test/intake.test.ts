@@ -19,7 +19,9 @@ import { scaffoldEngagement } from "../src/scaffold.ts";
 import { mintIds, scanIds, knownIds } from "../src/ids.ts";
 import { appendRows, retireRow, WriteRefused } from "../src/writer.ts";
 import { scanIntake, transcriptToText, handlingFor, intakeBrief } from "../src/intake.ts";
-import { writeProposal, acceptProposal, pendingProposals } from "../src/proposals.ts";
+import {
+  writeProposal, acceptProposal, pendingProposals, proposeFromSpec, rejectProposal,
+} from "../src/proposals.ts";
 import { deriveState } from "../src/state.ts";
 
 const HARNESS = resolve(import.meta.dirname, "..", "..", "..");
@@ -302,4 +304,116 @@ test("BURDEN: a 40-action session costs the FDE no id or citation typing", async
   const state = await deriveState({ engagementDir: dir, slug: "intake-co" });
   assert.equal(state.chain.evidence.total, 42);
   assert.equal(state.chain.audit.danglingCitations, 0, "code-minted ids cannot dangle");
+});
+
+// ------------------------------------------- the loop an agent actually walks
+
+test("propose validates against the real table instead of dropping cells", async () => {
+  // The failure this replaces was silent: a column the instrument does not
+  // have was discarded at accept, so an agent's extraction vanished and the
+  // FDE never learned a cell was lost.
+  await assert.rejects(
+    () =>
+      proposeFromSpec(dir, {
+        source: "probe.md",
+        agent: "discovery-analyst",
+        blocks: [{
+          instrument: "02-Workflow/observation-log.md",
+          anchor: "observation-log.rows",
+          prefix: "EV", idColumn: "Id",
+          columns: ["Id", "Timestamp"],
+          rows: [{ Timestamp: "09:00" }],
+        }],
+      }),
+    (err: Error) => {
+      assert.ok(err instanceof WriteRefused);
+      assert.match(err.message, /has no column "Timestamp"/);
+      assert.match(err.message, /Its columns are: Id \| Time \|/);
+      return true;
+    },
+  );
+});
+
+test("propose refuses an id the agent assigned itself", async () => {
+  await assert.rejects(
+    () =>
+      proposeFromSpec(dir, {
+        source: "probe.md",
+        agent: "discovery-analyst",
+        blocks: [{
+          instrument: "02-Workflow/observation-log.md",
+          anchor: "observation-log.rows",
+          prefix: "EV", idColumn: "Id",
+          columns: ["Id", "Time"],
+          rows: [{ Id: "EV-900", Time: "09:00" }],
+        }],
+      }),
+    (err: Error) => {
+      assert.match(err.message, /Leave it blank/);
+      return true;
+    },
+  );
+});
+
+test("propose fills the instrument's own column order", async () => {
+  const { name, rows } = await proposeFromSpec(dir, {
+    source: "shift-notes.md",
+    agent: "discovery-analyst",
+    blocks: [{
+      instrument: "02-Workflow/observation-log.md",
+      anchor: "observation-log.rows",
+      prefix: "EV", idColumn: "Id",
+      columns: ["Id", "Time", "Class"],
+      rows: [{ Time: "09:12", Class: "stated" }, { Time: "09:20", Class: "stated" }],
+    }],
+  });
+  assert.equal(rows, 2);
+  const md = await readFile(join(dir, "02-Workflow", "proposals", name), "utf8");
+  // Ten columns, not the three the agent named.
+  assert.match(md, /\| Id \| Time \| Actor \(role\) \|/);
+  assert.ok(await pendingProposals(dir).then((p) => p.includes(name)));
+
+  const res = await acceptProposal(dir, name);
+  assert.equal(res.danglingCitations.length, 0);
+  assert.equal(res.totalRows, 2);
+});
+
+test("a rejected proposal leaves the pending queue", async () => {
+  const { name } = await proposeFromSpec(dir, {
+    source: "duplicate.md",
+    agent: "discovery-analyst",
+    blocks: [{
+      instrument: "02-Workflow/observation-log.md",
+      anchor: "observation-log.rows",
+      prefix: "EV", idColumn: "Id",
+      columns: ["Id", "Time"],
+      rows: [{ Time: "10:00" }],
+    }],
+  });
+  assert.ok((await pendingProposals(dir)).includes(name));
+  await rejectProposal(dir, name, "duplicate of the accepted capture");
+  assert.ok(!(await pendingProposals(dir)).includes(name));
+  // And it stays refused afterwards — a rejected proposal is not a draft.
+  await assert.rejects(() => acceptProposal(dir, name), /rejected|no propose blocks|already/i);
+});
+
+test("state sees material waiting that no register can", async () => {
+  await writeFile(
+    join(dir, "02-Workflow", "evidence", "stated", "call-notes.md"),
+    "Ana: about forty a day come in.\n",
+    "utf8",
+  );
+  await writeFile(join(dir, "02-Workflow", "evidence", "loose-note.txt"), "x\n", "utf8");
+
+  const st = await deriveState({
+    engagementDir: dir, slug: "intake-co",
+    harnessRoot: HARNESS,
+    datasourcesDir: join(HARNESS, "datasources"),
+    deliverablesDir: join(HARNESS, "deliverables"),
+  });
+
+  assert.ok((st.intake.byClass["stated"] ?? 0) >= 1);
+  assert.deepEqual(st.intake.unclassified, ["02-Workflow/evidence/loose-note.txt"]);
+  // The point of the block: it is the one number derived from disk, not rows.
+  assert.ok(st.intake.waiting > 0);
 });

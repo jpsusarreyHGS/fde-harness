@@ -9,6 +9,9 @@
  *   cli.ts pending <engagement-dir>             proposals awaiting a decision
  *   cli.ts accept  <engagement-dir> <proposal>  mint ids and write the rows
  *   cli.ts mint    <engagement-dir> <PREFIX> [n]  next ids, without writing
+ *   cli.ts anchors <engagement-dir> [filter]    register tables and their columns
+ *   cli.ts propose <engagement-dir> <spec.json> validate and write a proposal
+ *   cli.ts reject  <engagement-dir> <proposal> <reason>  decline it
  *
  * Exit codes are meant for a runner and for CI:
  *   0  fine
@@ -17,17 +20,27 @@
  *   3  the engagement files claim something untrue (tampered)
  */
 
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
 import { mintIds, type IdPrefix } from "./ids.ts";
 import { scanIntake, CLASS_MEANING } from "./intake.ts";
-import { acceptProposal, pendingProposals } from "./proposals.ts";
+import {
+  acceptProposal,
+  pendingProposals,
+  proposeFromSpec,
+  rejectProposal,
+  type ProposalSpec,
+} from "./proposals.ts";
+import { INSTRUMENTS } from "./instruments.ts";
+import { dataRows, parseAnchoredTables } from "./anchors.ts";
 import { WriteRefused } from "./writer.ts";
 
 const argv = process.argv.slice(2);
-const SUBCOMMANDS = new Set(["intake", "pending", "accept", "mint"]);
+const SUBCOMMANDS = new Set([
+  "intake", "pending", "accept", "reject", "mint", "anchors", "propose",
+]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
 
@@ -101,6 +114,105 @@ if (sub === "accept") {
       console.log(`${w.anchor}: ${w.rows} row(s)${range}`);
     }
     console.log(`\n${res.totalRows} row(s) written. Run --audit to see what they need.`);
+    process.exit(0);
+  } catch (err) {
+    if (err instanceof WriteRefused) {
+      console.error(`Refused: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
+if (sub === "anchors") {
+  // An agent building a proposal needs the real column names. Making it grep
+  // HTML comments out of 41 instruments is how a typo silently drops a cell.
+  const filter = args.filter((a) => !a.startsWith("--"))[1]?.toLowerCase();
+  let shown = 0;
+  for (const inst of INSTRUMENTS) {
+    let md: string;
+    try {
+      md = await readFile(resolve(engagementDir, ...inst.path.split("/")), "utf8");
+    } catch {
+      continue;
+    }
+    for (const t of parseAnchoredTables(md)) {
+      if (t.anchor.role !== "register") continue;
+      if (filter && !t.anchor.name.toLowerCase().includes(filter) &&
+          !inst.path.toLowerCase().includes(filter)) continue;
+      console.log(t.anchor.name);
+      console.log(`  ${inst.path}`);
+      console.log(`  ${t.headers.join(" | ")}`);
+      // Only a prefixed key column is minted. `observation-log.sessions` keys
+      // on Date, which the FDE supplies — saying "leave it blank" there would
+      // be a lie the agent would obey.
+      if (t.anchor.idColumn) {
+        const minted = /^(EV|EX|REQ|AL|CQ|Q)-/.test(
+          dataRows(t)[0]?.[t.anchor.idColumn]?.replace(/~~/g, "") ?? "",
+        );
+        console.log(
+          minted
+            ? `  idColumn=${t.anchor.idColumn} — leave it blank; code mints it at accept`
+            : `  key column=${t.anchor.idColumn} — you supply it`,
+        );
+      }
+      console.log("");
+      shown++;
+    }
+  }
+  if (!shown) {
+    console.error(filter ? `No register table matches "${filter}".` : "No register tables found.");
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
+if (sub === "propose") {
+  const specPath = args.filter((a) => !a.startsWith("--"))[1];
+  if (!specPath) {
+    console.error("usage: cli.ts propose <engagement-dir> <spec.json>");
+    console.error("");
+    console.error('spec: { "source": "...", "agent": "...", "blocks": [');
+    console.error('  { "instrument": "02-Workflow/observation-log.md",');
+    console.error('    "anchor": "observation-log.rows", "prefix": "EV", "idColumn": "Id",');
+    console.error('    "columns": [...], "rows": [ { "Column": "value" } ] } ] }');
+    console.error("");
+    console.error("Run `anchors` first for the real column names.");
+    process.exit(2);
+  }
+  let spec: ProposalSpec;
+  try {
+    spec = JSON.parse(await readFile(resolve(specPath), "utf8")) as ProposalSpec;
+  } catch (err) {
+    console.error(`Cannot read spec: ${(err as Error).message}`);
+    process.exit(2);
+  }
+  try {
+    const { name, rows } = await proposeFromSpec(engagementDir, spec);
+    console.log(name);
+    console.error(`${rows} row(s) proposed. Nothing written to a register yet.`);
+    console.error(`Accept with: cli.ts accept ${dirArg} ${name}`);
+    process.exit(0);
+  } catch (err) {
+    if (err instanceof WriteRefused) {
+      console.error(`Refused: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
+if (sub === "reject") {
+  const rest = args.filter((a) => !a.startsWith("--"));
+  const name = rest[1];
+  const reason = rest.slice(2).join(" ");
+  if (!name || !reason) {
+    console.error("usage: cli.ts reject <engagement-dir> <proposal.md> <reason>");
+    process.exit(2);
+  }
+  try {
+    await rejectProposal(engagementDir, name, reason);
+    console.log(`${name} declined: ${reason}`);
     process.exit(0);
   } catch (err) {
     if (err instanceof WriteRefused) {

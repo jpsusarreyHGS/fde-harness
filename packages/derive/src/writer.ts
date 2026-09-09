@@ -23,6 +23,7 @@ export interface AppendResult {
 }
 
 export interface RefusalDetail {
+  instrument?: string;
   anchor?: string;
   column?: string;
   row?: number;

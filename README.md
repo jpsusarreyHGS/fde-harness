@@ -9,9 +9,9 @@ A Claude Code project harness implementing the HGS Forward Deployed Engineering 
 | | Stage | Command |
 |---|---|---|
 | `00` | Before you land | `/init-engagement` |
-| `01` | Map the organisation | `/discover` |
-| `02` | Gather the real workflow | `/discover` |
-| `03` | Analyse the systems | `/discover` · `/ontology` |
+| `01` | Map the organisation | `/capture` · `/discover` |
+| `02` | Gather the real workflow | `/capture` · `/discover` |
+| `03` | Analyse the systems | `/capture` · `/discover` · `/ontology` |
 | | **G1 — Discovery gate** | `/gate 1` |
 | `04` | Place the intelligence | `/allocate` |
 | `05` | Build the MVP | `/architect` · `/build` |
@@ -29,9 +29,9 @@ Plus `/dashboard` (rebuild state and render the GUI), `/render` (client delivera
 | | |
 |---|---|
 | **8 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, chronicle, harness-improver |
-| **13 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
+| **14 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
-| **49 templates** | every stage instrument, with machine-readable table anchors |
+| **50 templates** | every stage instrument, with machine-readable table anchors |
 | **A dashboard** | portfolio and per-engagement views, derived from `state.json` |
 
 ## The frameworks it implements

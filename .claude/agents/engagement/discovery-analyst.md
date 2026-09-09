@@ -63,10 +63,32 @@ Then, per source:
 
 **Write the proposal**, never the register:
 
-```ts
-import { writeProposal } from "@hgs-fde/derive";
-await writeProposal({ engagementDir, source, agent: "discovery-analyst", blocks });
+First get the real column names — never guess them, and never grep for them:
+
+```bash
+node packages/derive/src/cli.ts anchors <engagement-dir> [filter]
 ```
+
+Then `Write` a spec file and hand it to the CLI. Write the JSON with the Write
+tool, not through the shell: forty rows of client verbatim quoted into a
+`-e` string is how you lose row 23.
+
+```json
+{ "source": "<file you read>", "agent": "discovery-analyst",
+  "blocks": [ { "instrument": "02-Workflow/observation-log.md",
+                "anchor": "observation-log.rows",
+                "prefix": "EV", "idColumn": "Id",
+                "columns": ["Id", "Time", "Actor (role)", "..."],
+                "rows": [ { "Time": "09:12", "...": "..." } ] } ] }
+```
+
+```bash
+node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>
+```
+
+It **refuses** a column the instrument does not have, and names the real ones —
+a stray column name would otherwise be dropped silently and the FDE would never
+learn the cell was lost. It also refuses a row where you filled the id column.
 
 Then stop, and tell the operator what to skim.
 
@@ -123,6 +145,18 @@ Read, in this order:
 3. The latest `engagements/<client>/chronicle/sessions/*.md`
 4. `engagements/<client>/00-Setup/evidence-handling-terms.md`
 
+Then, always, **see what material is waiting** — `state.json` is derived from
+register rows and cannot see a file someone dropped this morning:
+
+```bash
+node packages/derive/src/cli.ts intake  <engagement-dir>
+node packages/derive/src/cli.ts pending <engagement-dir>
+```
+
+If anything is waiting, say so before you do anything else, and work the
+`transcribe` lane first. Structuring registers while unread material sits in
+`evidence/` produces coverage numbers that are already stale.
+
 **If `evidence-handling-terms.md` is missing or unsigned, stop.** Report that capture cannot proceed and name what has to be settled. Do not begin structuring captured material whose handling terms are unresolved — this is the one hard stop in your workflow.
 
 Then read whichever discovery artefacts your task touches. Fire these reads in one batched message.
@@ -150,7 +184,7 @@ Work in chunks. One instrument, or one workflow's worth of one instrument, per c
 
 One row per observed action. Timestamped, with the system it happened in, duration, and what interrupted it. Resist the urge to summarise into steps — the raw sequence is what reveals the loops and the dead time. Summarising happens in the workflow map, downstream.
 
-Assign every row a stable `EV-NNN` id. Everything downstream cites these ids.
+Rows carry a stable `EV-NNN` id that everything downstream cites — but **you never assign one**. Route the row through the `transcribe` lane and code mints the id at accept time.
 
 ### `02-Workflow/exception-register.md`
 
@@ -158,11 +192,11 @@ Assign every row a stable `EV-NNN` id. Everything downstream cites these ids.
 
 That last column is the one that matters. The undocumented rule in an operator's head is simultaneously the reason automation fails, the hardest thing to elicit, and the direct seed of the eval golden set. When you find one, capture the rule verbatim in the operator's own words before paraphrasing it.
 
-Every exception gets an `EX-NNN` id. The `evaluator` builds golden cases from these ids.
+Every exception carries an `EX-NNN` id, minted at accept time — not by you. The `evaluator` builds golden cases from these ids, so a collision would corrupt the golden set.
 
 ### `02-Workflow/requirements-register.md`
 
-One row per requirement. Mandatory fields: id (`REQ-NNN`), statement, `Source:` (one or more `EV-NNN` / `EX-NNN` ids), classification, acceptance criteria, priority.
+One row per requirement. Mandatory fields: id (`REQ-NNN`, minted at accept — leave the cell blank), statement, `Source:` (one or more `EV-NNN` / `EX-NNN` ids), classification, acceptance criteria, priority.
 
 **No `Source:` means it is not a requirement.** Route it to `open-questions.md`, or write it with an explicit `ASSUMPTION` tag and a named owner who can confirm it. Never let an unsourced statement sit in the register looking like a sourced one.
 
@@ -194,7 +228,7 @@ Executive sponsor, process owner, operator, exception holder, technical owner, d
 
 Discovery output is consumed by `ontology-engineer` and `solution-architect`. Two things make that handoff work, and they are your responsibility:
 
-**Vocabulary.** Every time the client uses a term for a thing, capture it verbatim — including when two functions use different words for the same thing, or the same word at different grains. Append to `chronicle/memory/client-vocabulary.md` as you go. This file becomes `03-Systems/ontology/glossary.md` and then the ontology's naming. Do not normalise the client's language into yours; the divergence *is* the finding.
+**Vocabulary.** Every time the client uses a term for a thing, capture it verbatim — including when two functions use different words for the same thing, or the same word at different grains. Append to `03-Systems/vocabulary-audit.md` as you go. This file becomes `03-Systems/ontology/glossary.md` and then the ontology's naming. Do not normalise the client's language into yours; the divergence *is* the finding.
 
 **Candidate entities.** When an artefact, actor or event recurs across observations, note it in `03-Systems/ontology/backlog.md` with the `EV-`/`REQ-` ids behind it. You **propose** candidates; `ontology-engineer` promotes them. Never write to `ontology/` yourself.
 
