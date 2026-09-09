@@ -2,6 +2,8 @@
 
 | | |
 |---|---|
+<!-- table:engagement-overview.identity role=kv -->
+
 | Client | {{CLIENT_NAME}} |
 | Slug | {{SLUG}} |
 | Scope | {{SCOPE}} |

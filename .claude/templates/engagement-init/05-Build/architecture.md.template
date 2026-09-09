@@ -6,6 +6,8 @@ Produced by `solution-architect` in `architect` mode. Six chunks, drafted in ord
 
 **Build on top of what the client already runs.** Proposing a replacement for a platform they spent years migrating to is how an FDE engagement dies.
 
+<!-- table:architecture.constraints role=labels key=Constraint -->
+
 | Constraint | Detail | Source |
 |---|---|---|
 | Existing platforms in scope | | |
@@ -31,9 +33,10 @@ flowchart LR
 
 Canonical Mermaid source lives in `architecture-diagram.md`; this is an embedded copy for reading convenience.
 
+<!-- table:architecture.components role=register id=Component -->
+
 | Component | Purpose | Technology | Hosted | Owner |
 |---|---|---|---|---|
-| | | | | |
 
 **Store choice rationale** — chosen from the competency questions, not from precedent. A graph store earns its place where relationship traversal and per-fact provenance are the point; where the questions are aggregations over known joins, a relational or warehouse layer with a semantic model on top is less machinery for the same answer.
 
@@ -41,9 +44,10 @@ Canonical Mermaid source lives in `architecture-diagram.md`; this is an embedded
 
 ## 3. Integration map
 
+<!-- table:architecture.integrations role=register id=Source -->
+
 | Source | Extract | Auth | Refresh | Owner | Failure behaviour | **Coverage verified by us** |
 |---|---|---|---|---|---|---|
-| | | | | | | |
 
 ## 4. Access model
 
@@ -53,11 +57,14 @@ Summarised here; the record of design is `access-model.md`.
 
 Written **now**, before any measurement exists, so it cannot be renegotiated later under delivery pressure.
 
+<!-- table:architecture.autonomy-plan role=register id=Workflow -->
+
 | Workflow | Target rung | **Measurement that earns it** | Threshold | Min sample | Window |
 |---|---|---|---|---|---|
-| | | shadow-mode agreement | | | |
 
 ## 6. Deployment and operations
+
+<!-- table:architecture.operations role=kv -->
 
 | Item | Value |
 |---|---|
@@ -73,6 +80,7 @@ Written **now**, before any measurement exists, so it cannot be renegotiated lat
 
 Every architecture decision, with the alternative rejected. Mirrored into `../chronicle/memory/decisions.md`.
 
+<!-- table:architecture.decisions role=register id=Decision -->
+
 | Decision | Alternative rejected | Why | Date | Decided by |
 |---|---|---|---|---|
-| | | | | |

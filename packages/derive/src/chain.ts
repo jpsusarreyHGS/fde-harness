@@ -56,7 +56,8 @@ export interface AuditFinding {
     | "unsourced-requirement"
     | "orphan-evidence"
     | "dangling-citation"
-    | "stale-unverified"
+    | "unverified-in-placement"
+    | "gap-without-question"
     | "unowned-assumption"
     | "allocation-without-reason"
     | "exception-without-rule-holder";
@@ -71,7 +72,8 @@ export interface ChainAudit {
   unsourcedRequirements: number;
   orphanEvidence: number;
   danglingCitations: number;
-  staleUnverified: number;
+  unverifiedInPlacement: number;
+  gapsWithoutQuestion: number;
   unownedAssumptions: number;
   allocationsWithoutReason: number;
   exceptionsWithoutRuleHolder: number;
@@ -89,6 +91,64 @@ export function extractIds(cell: string): string[] {
 }
 
 /**
+ * Expand an id range into the ids it covers.
+ *
+ * The observation log's session table records an `Ev range` like
+ * `EV-001-EV-040`, which cites all forty rows. Treating that as one citation
+ * (or none) makes the whole session look uncited.
+ */
+export function expandRange(cell: string): string[] {
+  const m = /\b([A-Z]{2,3})-(\d+)\s*[-–—to]+\s*(?:[A-Z]{2,3}-)?(\d+)\b/.exec(cell);
+  if (!m) return extractIds(cell);
+  const [, prefix, a, b] = m;
+  const lo = Number(a), hi = Number(b);
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi < lo || hi - lo > 5000) {
+    return extractIds(cell);
+  }
+  const width = a!.length;
+  const out: string[] = [];
+  for (let i = lo; i <= hi; i++) out.push(`${prefix}-${String(i).padStart(width, "0")}`);
+  return out;
+}
+
+/**
+ * Does this cell hold a list of choices rather than a chosen value?
+ *
+ * Deliberately narrow. A cell is an option list only when every segment is
+ * enum-shaped: an ALL-CAPS phrase, or one of the status vocabularies the
+ * templates document inline. Content that merely contains a separator — a
+ * multi-id `Source`, prose with a slash, anything using the house-style
+ * middle dot — is a value and must survive.
+ */
+export function isOptionList(s: string): boolean {
+  const segs = s
+    .split(/\s+[/·]\s+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (segs.length < 2) return false;
+  // Never treat harness ids as options — "EV-001 / EV-002" is a citation.
+  if (segs.every((x) => /^(EV|EX|REQ|AL|CQ|Q)-\d+$/.test(x))) return false;
+  const ENUM_TOKENS = new Set([
+    "ready", "not ready", "ready with caveats", "pass", "fail",
+    "pass with caveats", "high", "med", "medium", "low", "yes", "no",
+    "open", "closed", "met", "partial", "unmet", "observed", "system",
+    "documented", "stated", "verified", "unverified", "assumption",
+    "not-started", "active", "blocked", "done", "in-scope",
+    "change-request", "accepted", "deferred", "declined", "raw",
+    "converted", "redacted", "fold-in", "discard", "clustered",
+    "scattered", "measured", "modelled", "assumed", "deterministic",
+    "model-judgement", "human-gate", "leave-alone", "answerable",
+    "needs-data", "not-modelled", "risk", "issue", "dependency",
+    "shadowing", "task mining", "session replay", "meeting capture",
+    "before/after", "control group", "shadow-mode agreement",
+    "insight", "decision support", "system of record",
+  ]);
+  return segs.every(
+    (x) => ENUM_TOKENS.has(x.toLowerCase()) || (x === x.toUpperCase() && /[A-Z]/.test(x)),
+  );
+}
+
+/**
  * A cell counts as filled only if it holds real content.
  *
  * Template placeholder text is not content. A `Source` cell still reading
@@ -102,12 +162,18 @@ export function filled(cell: string | undefined): boolean {
   // bare prefixes left over from the template
   if (/^(EV|EX|REQ|AL|CQ|Q)-?(\s*[/,]\s*(EV|EX|REQ|AL|CQ|Q)-?)*$/.test(s)) return false;
   if (/^""$/.test(s)) return false;
-  // An option list is placeholder text, not a value. Templates document
-  // choices in prose and ship the cell empty, but a hand-edited file can
-  // still carry "READY · READY WITH CAVEATS · NOT READY" — reading that as a
-  // decision would silently fabricate a gate verdict.
-  if (s.includes("\u00b7")) return false;
-  if (s.split(/\s+\/\s+/).length >= 3) return false;
+  // An option list is placeholder text, not a value: a cell still reading
+  // "READY / READY WITH CAVEATS / NOT READY" must not be read as a decision.
+  //
+  // The first attempt at this rule was too blunt and caused worse bugs than
+  // it fixed. It voided any cell containing a middle dot — which the
+  // templates use as house style — and it read a legitimate multi-id Source
+  // ("EV-001 / EV-002 / EV-003") as unsourced. Both punished correct work.
+  //
+  // So: only reject when the segments look like an *enum* — repeated
+  // ALL-CAPS words or known status tokens — never merely because there are
+  // several of them.
+  if (isOptionList(s)) return false;
   return true;
 }
 
@@ -201,22 +267,26 @@ export function deriveChain(input: ChainInput): ChainCounts {
     const source = col(r, "Source");
     const conf = col(r, "Confidence").trim();
 
+    // Citation integrity is checked on whatever ids are present, whether or
+    // not the cell passes `filled()`. Nesting this inside the filled branch
+    // meant a cell the heuristic mis-read escaped the check entirely — the
+    // worst possible place to lose it.
+    for (const cited of extractIds(source)) {
+      const known =
+        (cited.startsWith("EV-") && evidenceIds.has(cited)) ||
+        (cited.startsWith("EX-") && exceptionIds.has(cited));
+      if (!known) {
+        findings.push({
+          kind: "dangling-citation",
+          id: id || "(unnamed requirement)",
+          location: "02-Workflow/requirements-register.md",
+          detail: `Source cites ${cited}, which does not exist. Usually a renumbering that should never have happened.`,
+        });
+      }
+    }
+
     if (filled(source)) {
       requirements.sourced++;
-      // dangling citation: a cited id that does not exist upstream
-      for (const cited of extractIds(source)) {
-        const known =
-          (cited.startsWith("EV-") && evidenceIds.has(cited)) ||
-          (cited.startsWith("EX-") && exceptionIds.has(cited));
-        if (!known) {
-          findings.push({
-            kind: "dangling-citation",
-            id: id || "(unnamed requirement)",
-            location: "02-Workflow/requirements-register.md",
-            detail: `Source cites ${cited}, which does not exist. Usually a renumbering that should never have happened.`,
-          });
-        }
-      }
     } else if (conf.toUpperCase() !== "ASSUMPTION") {
       findings.push({
         kind: "unsourced-requirement",
@@ -233,11 +303,36 @@ export function deriveChain(input: ChainInput): ChainCounts {
     if (filled(col(r, "Acceptance criteria"))) requirements.withAC++;
   }
 
-  // orphan evidence: captured but cited nowhere
+  // Orphan evidence: captured but cited nowhere.
+  //
+  // This gathered citations from two tables, so every row of a fresh
+  // shadowing session reported as an orphan — the loudest complaint firing
+  // exactly when the FDE had just done the most valuable work in the method.
+  // Every place an id can legitimately be cited is now consulted.
   const citedIds = new Set<string>();
-  for (const r of reqRows) for (const c of extractIds(col(r, "Source"))) citedIds.add(c);
-  for (const r of rowsOf("exception-register", "exception-register.rows")) {
-    for (const c of extractIds(col(r, "Source"))) citedIds.add(c);
+  const CITING: [string, string, string[]][] = [
+    ["requirements-register", "requirements-register.rows", ["Source"]],
+    ["exception-register",    "exception-register.rows",    ["Source"]],
+    ["exception-register",    "exception-register.undocumented", ["Ex id"]],
+    ["operating-map",         "operating-map.steps",        ["Source", "Exceptions"]],
+    ["operating-map",         "operating-map.triggers",     ["Source"]],
+    ["operating-map",         "operating-map.judgement",    ["Source"]],
+    ["operating-map",         "operating-map.undocumented", ["Ex id"]],
+    ["operating-map",         "operating-map.dead-ends",    ["Source"]],
+    ["open-questions",        "open-questions.contradictions", ["Doc source", "Obs source"]],
+    ["value-hypothesis",      "value-hypothesis.baseline-method", ["Ev ids"]],
+    ["allocation-grid",       "allocation-grid.rows",       ["Step #"]],
+  ];
+  for (const [instrument, table, columns] of CITING) {
+    for (const r of rowsOf(instrument, table)) {
+      for (const cname of columns) {
+        for (const c of extractIds(col(r, cname))) citedIds.add(c);
+      }
+    }
+  }
+  // An `Ev range` such as "EV-001–EV-040" cites everything between its ends.
+  for (const r of rowsOf("observation-log", "observation-log.sessions")) {
+    for (const id of expandRange(col(r, "Ev range"))) citedIds.add(id);
   }
   for (const ev of evidenceIds) {
     if (!citedIds.has(ev)) {
@@ -315,20 +410,69 @@ export function deriveChain(input: ChainInput): ChainCounts {
     }
   }
 
-  // ---- stale UNVERIFIED ---------------------------------------------------
-  // A stated-only requirement that has reached build is the class that
-  // surfaces at UAT. Flagged whenever anything has been allocated.
-  if (allocations.total > 0) {
-    for (const r of reqRows) {
-      if (col(r, "Confidence").trim() === "UNVERIFIED") {
-        findings.push({
-          kind: "stale-unverified",
-          id: col(r, "Id").trim() || "(unnamed requirement)",
-          location: "02-Workflow/requirements-register.md",
-          detail: "Stated-only evidence, and placement has begun. Verify before build.",
-        });
-      }
+  // ---- unverified requirements that have been allocated -------------------
+  // Stated-only evidence carried into placement is the class that surfaces at
+  // UAT. This previously fired for every UNVERIFIED row the moment anything
+  // was allocated, and called it "stale" without any notion of age — so it
+  // was noise on a healthy engagement. It now fires only for a requirement
+  // whose own step has actually been allocated, which is the point at which
+  // not having verified it starts to cost something.
+  const allocatedReqs = new Set<string>();
+  for (const r of alRows) {
+    for (const cited of extractIds(col(r, "Step #", "Step"))) allocatedReqs.add(cited);
+  }
+  for (const r of reqRows) {
+    if (col(r, "Confidence").trim() !== "UNVERIFIED") continue;
+    const rid = col(r, "Id").trim();
+    const reachedPlacement = allocations.total > 0 && (allocatedReqs.size === 0 || allocatedReqs.has(rid));
+    if (!reachedPlacement) continue;
+    findings.push({
+      kind: "unverified-in-placement",
+      id: rid || "(unnamed requirement)",
+      location: "02-Workflow/requirements-register.md",
+      detail: "Stated-only evidence, and placement has begun. Verify before build.",
+    });
+  }
+
+  // ---- gap-without-question ----------------------------------------------
+  // Four places in the harness instruct raising a `Q-` when a gap is found —
+  // an exception with no rule holder, an unquantified frequency, an
+  // unresolved term. Nothing checked that the question was ever raised, so
+  // the gap-to-question link the whole coaching loop depends on was doctrine
+  // only. A gap with no question behind it is a gap nobody will be asked.
+  const questionText = rowsOf("open-questions", "open-questions.rows")
+    .map((r) => `${col(r, "Question")} ${col(r, "Why it matters")} ${col(r, "Blocks")}`)
+    .join("\n");
+  const questionedIds = new Set(extractIds(questionText));
+
+  const shouldHaveQuestion: { id: string; location: string; why: string }[] = [];
+  for (const r of exRows) {
+    const id = col(r, "Id").trim();
+    if (!id) continue;
+    if (!filled(col(r, "Rule holder (role)", "Rule holder"))) {
+      shouldHaveQuestion.push({
+        id,
+        location: "02-Workflow/exception-register.md",
+        why: "no rule holder named",
+      });
     }
+    const freq = col(r, "Frequency").trim();
+    if (!filled(freq) || norm(freq) === "unquantified") {
+      shouldHaveQuestion.push({
+        id,
+        location: "02-Workflow/exception-register.md",
+        why: "frequency unquantified",
+      });
+    }
+  }
+  for (const g of shouldHaveQuestion) {
+    if (questionedIds.has(g.id)) continue;
+    findings.push({
+      kind: "gap-without-question",
+      id: g.id,
+      location: g.location,
+      detail: `${g.why}, and no open question cites ${g.id}. The harness says raise a Q- — nobody will be asked otherwise.`,
+    });
   }
 
   const count = (k: AuditFinding["kind"]) => findings.filter((f) => f.kind === k).length;
@@ -345,7 +489,8 @@ export function deriveChain(input: ChainInput): ChainCounts {
       unsourcedRequirements: count("unsourced-requirement"),
       orphanEvidence: count("orphan-evidence"),
       danglingCitations: count("dangling-citation"),
-      staleUnverified: count("stale-unverified"),
+      unverifiedInPlacement: count("unverified-in-placement"),
+      gapsWithoutQuestion: count("gap-without-question"),
       unownedAssumptions: count("unowned-assumption"),
       allocationsWithoutReason: count("allocation-without-reason"),
       exceptionsWithoutRuleHolder: count("exception-without-rule-holder"),

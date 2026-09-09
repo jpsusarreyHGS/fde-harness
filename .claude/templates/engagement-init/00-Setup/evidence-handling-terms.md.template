@@ -4,6 +4,8 @@
 
 Evidence captured under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.
 
+<!-- table:evidence-handling-terms.status role=kv -->
+
 | Status | |
 |---|---|
 | Agreed | no |
@@ -12,6 +14,8 @@ Evidence captured under unresolved terms may have to be destroyed, and destroyin
 | Review date | |
 
 ## The six terms
+
+<!-- table:evidence-handling-terms.terms role=labels key=Term  answer=Agreed position -->
 
 | Term | Agreed position | Default if unstated |
 |---|---|---|
@@ -28,6 +32,8 @@ Ask for onward use at the start, while goodwill is high and the request is abstr
 
 **Desktop task mining and session replay are employee monitoring, whatever the vendor's deck calls them.** In EU works-council jurisdictions and unionised environments they require **consultation, not notice** — a process with a counterparty who can say no, taking weeks.
 
+<!-- table:evidence-handling-terms.monitoring role=kv -->
+
 | Item | Value |
 |---|---|
 | Jurisdiction(s) | |
@@ -41,6 +47,8 @@ Ask for onward use at the start, while goodwill is high and the request is abstr
 
 ## Observation consent
 
+<!-- table:evidence-handling-terms.observation-consent role=kv -->
+
 | Item | Value |
 |---|---|
 | Operators briefed on purpose and handling | |
@@ -49,6 +57,8 @@ Ask for onward use at the start, while goodwill is high and the request is abstr
 | Verbatim quotes attributed to role, not person | yes |
 
 ## Close-out
+
+<!-- table:evidence-handling-terms.close-out role=labels key=Step  answer=Done -->
 
 | Step | Done | Date | Confirmed by |
 |---|---|---|---|

@@ -6,34 +6,44 @@ Scored 1-5 per `skills-practice/allocation-grid/scoring-model.md`.
 
 **This score caps feasibility** in the use-case matrix. A high-value use case sitting on inaccessible data is blocked, not top-ranked.
 
+<!-- table:readiness-scorecard.rows role=register id=Source -->
+
 | Source | Available | Accessible | Quality | Score | Blocker | Blocker owner | Target date |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
 
 ## Quality checks we ran ourselves
 
 "IT says the data is clean" is not a quality check.
 
+<!-- table:readiness-scorecard.quality-checks role=register id=Source -->
+
 | Source | Check | Result | Sample | Date |
 |---|---|---|---|---|
-| | completeness / uniqueness / format / freshness | | | |
 
 ## Access status
 
 Possible is not agreed. Agreed is not provisioned. This distinction costs more pilots their first three weeks than any other single thing.
 
+<!-- table:readiness-scorecard.access-status role=register id=Source -->
+
 | Source | Status | Requested | Granted | Notes |
 |---|---|---|---|---|
-| | not-requested / requested / agreed / **provisioned** | | | |
 
 ## Security and residency constraints
 
+<!-- table:readiness-scorecard.security role=register id=Source -->
+
 | Source | Classification | Residency requirement | Redaction needed | Approver |
 |---|---|---|---|---|
-| | | | | |
 
 ## Delivery blockers
 
+<!-- table:readiness-scorecard.blockers role=register id=Blocker -->
+
 | Blocker | Owner | Impact | Mitigation | In RAID? |
 |---|---|---|---|---|
-| | | | | |
+
+## Allowed values
+
+- `completeness` · `uniqueness` · `format` · `freshness`
+- `not-requested` · `requested` · `agreed` · `provisioned`

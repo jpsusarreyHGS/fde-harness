@@ -8,7 +8,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, sep } from "node:path";
 import {
-  dataRows, findTable, parseAnchoredTables, type ParsedTable,
+  answeredRows, dataRows, findTable, parseAnchoredTables, type ParsedTable,
 } from "./anchors.ts";
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
 import {
@@ -68,6 +68,8 @@ export interface Gate {
   decidedBy: string | null;
   criteria: { name: string; status: string; evidence: string; toClose: string; owner: string }[];
   behaviours: { name: string; observed: boolean; where: string }[];
+  /** The memo's own self-check. Four cells were typed and none consumed. */
+  antiPatterns: { name: string; confirmed: boolean }[];
 }
 
 const GATE_META: Record<Gate["id"], { label: string; between: string }> = {
@@ -103,7 +105,7 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
   const base: Gate = {
     id, label: meta.label, between: meta.between,
     status: "not-run", date: null, decidedBy: null,
-    criteria: [], behaviours: [],
+    criteria: [], behaviours: [], antiPatterns: [],
   };
   if (!md) return base;
 
@@ -146,10 +148,26 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
     for (const r of beh.rows) {
       const name = col(r, "Behaviour");
       if (!filled(name)) continue;
+      // `filled("no")` is true, so a presence check marked "no" as observed.
+      // Parse the affirmative explicitly and treat anything else as not yet.
+      const raw = col(r, "Observed").trim().toLowerCase();
       base.behaviours.push({
         name,
-        observed: filled(col(r, "Observed")),
+        observed: /^(y|yes|true|done|observed|✓|x)$/.test(raw),
         where: col(r, "Where"),
+      });
+    }
+  }
+
+  const anti = findTable(tables, `${prefix}.anti-patterns`);
+  if (anti) {
+    for (const r of anti.rows) {
+      const name = col(r, "Check");
+      if (!filled(name)) continue;
+      const raw = col(r, "Confirmed").trim().toLowerCase();
+      base.antiPatterns.push({
+        name,
+        confirmed: /^(y|yes|true|done|✓|x)$/.test(raw),
       });
     }
   }
@@ -187,12 +205,19 @@ export async function deriveState(opts: {
     }
 
     const registerTables = tables.filter((t) => t.anchor.role === "register");
-    const rows = def.primaryTable
-      ? (() => {
-          const t = findTable(tables, def.primaryTable!);
-          return t ? dataRows(t).length : 0;
-        })()
-      : registerTables.reduce((n, t) => n + dataRows(t).length, 0);
+    let rows: number;
+    if (def.coverageMode === "fields") {
+      // Not row-shaped. Coverage is the number of answered labels rows — the
+      // template's own key and hint columns are schema and must not count.
+      rows = tables
+        .filter((t) => t.anchor.role === "labels" && t.anchor.answerColumn)
+        .reduce((n, t) => n + answeredRows(t).length, 0);
+    } else if (def.primaryTable) {
+      const pt = findTable(tables, def.primaryTable);
+      rows = pt ? dataRows(pt).length : 0;
+    } else {
+      rows = registerTables.reduce((n, t) => n + dataRows(t).length, 0);
+    }
 
     instruments.push({
       id: def.id, label: def.label, path: def.path, stage: def.stage,

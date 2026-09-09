@@ -50,17 +50,27 @@ export interface InstrumentDef {
   primaryTable?: string;
   /** Counts toward the stage-coverage ratio for stages 00-03. */
   coverage?: boolean;
+  /**
+   * How "populated" is measured.
+   *
+   * `rows` (default) counts data rows in the primary register table.
+   * `fields` counts filled values across the instrument's kv and labels
+   * tables — for instruments that are genuinely not row-shaped, such as the
+   * evidence-handling terms or the sponsor brief. Without this they would
+   * read `empty` however completely they were filled in.
+   */
+  coverageMode?: "rows" | "fields";
 }
 
 export const INSTRUMENTS: readonly InstrumentDef[] = [
   // 00 — Before you land
   { id: "pilot-charter",          label: "Pilot charter",          stage: "00", path: "00-Setup/pilot-charter.md",           primaryTable: "pilot-charter.acceptance", coverage: true },
-  { id: "evidence-handling-terms",label: "Evidence-handling terms",stage: "00", path: "00-Setup/evidence-handling-terms.md",                                          coverage: true },
+  { id: "evidence-handling-terms",label: "Evidence-handling terms",stage: "00", path: "00-Setup/evidence-handling-terms.md",   coverage: true, coverageMode: "fields" },
   { id: "stack-decision",         label: "Stack decision",         stage: "00", path: "00-Setup/stack-decision.md",          primaryTable: "stack-decision.client-platforms", coverage: true },
 
   // 01 — Map the organisation
   { id: "stakeholder-map",        label: "Stakeholder map",        stage: "01", path: "01-Organisation/stakeholder-map.md",   primaryTable: "stakeholder-map.decision-rights", coverage: true },
-  { id: "sponsor-brief",          label: "Sponsor brief",          stage: "01", path: "01-Organisation/sponsor-brief.md",                                             coverage: true },
+  { id: "sponsor-brief",          label: "Sponsor brief",          stage: "01", path: "01-Organisation/sponsor-brief.md",       coverage: true, coverageMode: "fields" },
 
   // 02 — Gather the real workflow
   { id: "observation-log",        label: "Observation log",        stage: "02", path: "02-Workflow/observation-log.md",       primaryTable: "observation-log.rows",      coverage: true },
@@ -70,14 +80,14 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "open-questions",         label: "Open questions",         stage: "02", path: "02-Workflow/open-questions.md",        primaryTable: "open-questions.rows",       coverage: true },
 
   // 03 — Analyse the systems
-  { id: "systems-inventory",      label: "Systems inventory",      stage: "03", path: "03-Systems/systems-inventory.md",      coverage: true },
-  { id: "readiness-scorecard",    label: "Readiness scorecard",    stage: "03", path: "03-Systems/readiness-scorecard.md",    coverage: true },
+  { id: "systems-inventory",      label: "Systems inventory",      stage: "03", path: "03-Systems/systems-inventory.md",      primaryTable: "systems-inventory.applications", coverage: true },
+  { id: "readiness-scorecard",    label: "Readiness scorecard",    stage: "03", path: "03-Systems/readiness-scorecard.md",    primaryTable: "readiness-scorecard.rows", coverage: true },
   { id: "vocabulary-audit",       label: "Vocabulary audit",       stage: "03", path: "03-Systems/vocabulary-audit.md",       primaryTable: "vocabulary-audit.terms", coverage: true },
-  { id: "glossary",               label: "Glossary",               stage: "03", path: "03-Systems/ontology/glossary.md",      coverage: true },
-  { id: "personas",               label: "Personas",               stage: "03", path: "03-Systems/ontology/personas.md",      coverage: true },
+  { id: "glossary",               label: "Glossary",               stage: "03", path: "03-Systems/ontology/glossary.md",      primaryTable: "glossary.terms", coverage: true },
+  { id: "personas",               label: "Personas",               stage: "03", path: "03-Systems/ontology/personas.md",      primaryTable: "personas.rows", coverage: true },
   { id: "competency-questions",   label: "Competency questions",   stage: "03", path: "03-Systems/ontology/competency-questions.md", primaryTable: "competency-questions.rows", coverage: true },
-  { id: "source-systems",         label: "Source systems",         stage: "03", path: "03-Systems/ontology/source-systems.md",coverage: true },
-  { id: "entities",               label: "Entities",               stage: "03", path: "03-Systems/ontology/entities.md",      coverage: true },
+  { id: "source-systems",         label: "Source systems",         stage: "03", path: "03-Systems/ontology/source-systems.md",primaryTable: "source-systems.sources", coverage: true },
+  { id: "entities",               label: "Entities",               stage: "03", path: "03-Systems/ontology/entities.md",      primaryTable: "entities.rows", coverage: true },
   { id: "ontology-backlog",       label: "Ontology backlog",       stage: "03", path: "03-Systems/ontology/backlog.md",       primaryTable: "ontology-backlog.rows" },
   { id: "promotion-log",          label: "Promotion log",          stage: "03", path: "03-Systems/ontology/promotion-log.md", primaryTable: "promotion-log.rows" },
 
@@ -85,13 +95,13 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "allocation-grid",        label: "Allocation grid",        stage: "04", path: "04-Placement/allocation-grid.md",      primaryTable: "allocation-grid.rows" },
   { id: "prioritisation",         label: "Prioritisation",         stage: "04", path: "04-Placement/prioritisation.md",       primaryTable: "prioritisation.rows" },
   { id: "cost-envelope",          label: "Cost envelope",          stage: "04", path: "04-Placement/cost-envelope.md",        primaryTable: "cost-envelope.rows" },
-  { id: "value-hypothesis",       label: "Value hypothesis",       stage: "04", path: "04-Placement/value-hypothesis.md" },
+  { id: "value-hypothesis",       label: "Value hypothesis",       stage: "04", path: "04-Placement/value-hypothesis.md",     primaryTable: "value-hypothesis.metrics" },
 
   // 05 — Build the MVP
-  { id: "spec",                   label: "Spec",                   stage: "05", path: "05-Build/spec.md" },
-  { id: "architecture",           label: "Architecture",           stage: "05", path: "05-Build/architecture.md" },
+  { id: "spec",                   label: "Spec",                   stage: "05", path: "05-Build/spec.md",                     primaryTable: "spec.steps" },
+  { id: "architecture",           label: "Architecture",           stage: "05", path: "05-Build/architecture.md",              primaryTable: "architecture.components" },
   { id: "architecture-diagram",   label: "Architecture diagram",   stage: "05", path: "05-Build/architecture-diagram.md" },
-  { id: "access-model",           label: "Access model",           stage: "05", path: "05-Build/access-model.md" },
+  { id: "access-model",           label: "Access model",           stage: "05", path: "05-Build/access-model.md",              primaryTable: "access-model.matrix" },
   { id: "manual-tasks",           label: "Manual tasks",           stage: "05", path: "05-Build/manual-tasks.md",             primaryTable: "manual-tasks.rows" },
 
   // 06 — Prove it with evals
@@ -112,9 +122,9 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "library-contribution",   label: "Library contribution",   stage: "09", path: "09-Loop/library-contribution.md",       primaryTable: "library-contribution.rows" },
 
   // Engagement management — not stage-scoped
-  { id: "roadmap",                label: "Roadmap",                stage: "00", path: "engagement-management/roadmap.md" },
+  { id: "roadmap",                label: "Roadmap",                stage: "00", path: "engagement-management/roadmap.md",       primaryTable: "roadmap.slices" },
   { id: "raid-log",               label: "RAID log",               stage: "00", path: "engagement-management/raid-log.md",     primaryTable: "raid-log.risks" },
-  { id: "scope-changes",          label: "Scope changes",          stage: "00", path: "engagement-management/scope-changes.md" },
+  { id: "scope-changes",          label: "Scope changes",          stage: "00", path: "engagement-management/scope-changes.md", primaryTable: "scope-changes.rows" },
 ] as const;
 
 export function instrumentById(id: string): InstrumentDef | undefined {

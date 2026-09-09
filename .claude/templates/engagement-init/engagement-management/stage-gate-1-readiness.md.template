@@ -15,7 +15,7 @@ Between stages `03` and `04`. The bootcamp's Week 1 bar. **A gate is a stop, not
 
 **Code never sets `passed`.** A person does, with a name.
 
-<!-- table:stage-gate-1.criteria role=labels key=Criterion -->
+<!-- table:stage-gate-1.criteria role=labels key=Criterion  answer=Status -->
 
 ## Criteria
 
@@ -29,7 +29,7 @@ Evidence must cite **rows or facts**, not just a filename.
 | Draft ontology — **canonical grain chosen and defended**; grain mismatches identified as the cause of what breaks weekly | | | | |
 | Evidence-handling terms signed; monitoring constraint checked | | | | |
 
-<!-- table:stage-gate-1.behaviours role=labels key=Behaviour -->
+<!-- table:stage-gate-1.behaviours role=labels key=Behaviour  answer=Observed -->
 
 ## Behaviours
 
@@ -44,7 +44,7 @@ Artefacts alone do not pass this gate.
 
 The last one is the sharpest test in the gate. If the team can only restate the request, discovery has not happened yet.
 
-<!-- table:stage-gate-1.anti-patterns role=labels key=Check -->
+<!-- table:stage-gate-1.anti-patterns role=labels key=Check  answer=Confirmed -->
 
 ## Anti-pattern check
 

@@ -10,32 +10,41 @@
 
 A value score above 3 in the use-case matrix requires a baseline in this table.
 
+<!-- table:value-hypothesis.metrics role=register id=Metric -->
+
 | Metric | Baseline | **Measured by us?** | Source | Target | By when | Owner | Cadence |
 |---|---|---|---|---|---|---|---|
-| | | yes / client-reported | | | | | |
 
 A client-reported baseline nobody has validated is not a baseline. Say which is which.
 
 ## How the baseline was measured
 
+<!-- table:value-hypothesis.baseline-method role=register id=Metric -->
+
 | Metric | Method | Sample | Window | Date | Ev ids |
 |---|---|---|---|---|---|
-| | | | | | |
 
 ## Counter-metrics
 
 What must **not** get worse. A pilot that improves throughput and quietly degrades quality has not succeeded, and without a counter-metric nobody will notice until a customer does.
 
+<!-- table:value-hypothesis.counter-metrics role=register id=Counter-metric -->
+
 | Counter-metric | Baseline | Acceptable floor | Owner |
 |---|---|---|---|
-| | | | |
 
 ## Attribution
 
 How you will tell this pilot caused the change rather than something else that happened that quarter.
+
+<!-- table:value-hypothesis.attribution role=kv -->
 
 | Item | Value |
 |---|---|
 | Comparison basis | |
 | Confounders known | |
 | Agreed with sponsor | |
+
+## Allowed values
+
+- `yes` · `client-reported`

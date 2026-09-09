@@ -2,17 +2,19 @@
 
 ## Applications
 
+<!-- table:systems-inventory.applications role=register id=System -->
+
 | System | Purpose | Owner (named person) | Users | Integration surface | In scope |
 |---|---|---|---|---|---|
-| | | | | API / DB / file / none | |
 
 **Owner must be a named person, not a team.** A team does not grant access.
 
 ## Data sources
 
+<!-- table:systems-inventory.data-sources role=register id=Source -->
+
 | Source | Type | Extract method | Auth | Refresh | **Staleness at point of use** | Owner |
 |---|---|---|---|---|---|---|
-| | API / DB / file / stream | | | | | |
 
 Staleness at the point of use is the column teams forget. Data refreshed nightly and consulted at 4pm is up to 16 hours old at the moment a decision depends on it.
 
@@ -20,13 +22,16 @@ Staleness at the point of use is the column teams forget. Data refreshed nightly
 
 **Get this wrong and every downstream join is wrong**, in a way that surfaces months later and is expensive to unwind. State it explicitly even when it seems obvious.
 
+<!-- table:systems-inventory.identity-rules role=register id=Entity -->
+
 | Entity | Minted by | Referenced by | Key | Key stable? | On disagreement |
 |---|---|---|---|---|---|
-| | | | | | survivorship / adjudicator |
 
 Ingestion must run in identity order — the minting system first. This is a hard dependency.
 
 ## Identity and access
+
+<!-- table:systems-inventory.identity-access role=kv -->
 
 | Item | Value |
 |---|---|
@@ -37,14 +42,22 @@ Ingestion must run in identity order — the minting system first. This is a har
 
 ## Dependencies
 
+<!-- table:systems-inventory.dependencies role=register id=System -->
+
 | System | Depends on | Nature | Fails how |
 |---|---|---|---|
-| | | | |
 
 ## API reality check
 
 Documented coverage and real coverage differ. Record which claims were actually verified.
 
+<!-- table:systems-inventory.api-reality role=register id=System -->
+
 | System | Documented | Verified by us | Gap |
 |---|---|---|---|
-| | | | |
+
+## Allowed values
+
+- `API` · `DB` · `file` · `none`
+- `API` · `DB` · `file` · `stream`
+- `survivorship` · `adjudicator`

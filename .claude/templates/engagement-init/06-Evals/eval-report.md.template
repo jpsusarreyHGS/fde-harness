@@ -24,7 +24,7 @@ NN runs · NN passed · NN failed
 
 **Failures are not something to minimise.** They are the input to the next iteration, and showing them is what makes the passes credible. A report with no failures reads as a report that was not run honestly.
 
-<!-- table:eval-report.four-tests role=labels key=Test -->
+<!-- table:eval-report.four-tests role=labels key=Test  answer=Passed -->
 
 ## The four tests
 

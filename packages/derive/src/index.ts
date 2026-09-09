@@ -4,7 +4,7 @@
  * Zero runtime dependencies. Used by the runner today and by the web app's
  * ingest endpoint next, so the parse lives in exactly one place.
  */
-export { parseAnchoredTables, dataRows, registerRows, findTable, splitRow } from "./anchors.ts";
+export { parseAnchoredTables, dataRows, registerRows, answeredRows, findTable, splitRow } from "./anchors.ts";
 export type { ParsedTable, TableAnchor, TableRole } from "./anchors.ts";
 export { deriveChain, extractIds, filled } from "./chain.ts";
 export type { ChainCounts, ChainAudit, AuditFinding } from "./chain.ts";

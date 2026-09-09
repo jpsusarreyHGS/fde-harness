@@ -6,26 +6,34 @@ Where two functions use different words for the same thing, both appear as synon
 
 Where the same word is used at different grains, **that is two terms.** Naming them apart is often the single most valuable thing the engagement delivers — the client has been having a recurring argument nobody could resolve because both sides were right about different things.
 
+<!-- table:glossary.terms role=register id=Term -->
+
 | Term | Definition | **Grain — one row is one what?** | Synonyms | Used by | Owner | Worked example | Source |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | EV- / Q- |
 
 ## Grain splits
 
+<!-- table:glossary.grain-splits role=register id=Word -->
+
 | Word | Meaning A (grain) | Meaning B (grain) | New names | Decided by |
 |---|---|---|---|---|
-| | | | | |
 
 ## Canonical-term decisions
 
+<!-- table:glossary.canonical role=register id=Concept -->
+
 | Concept | Candidates | Chosen | Rationale | Approved by |
 |---|---|---|---|---|
-| | | | | |
 
 ## Not yet defined
 
 Terms in use with no agreed definition. A glossary cannot be "approved" while a term here has no owner.
 
+<!-- table:glossary.not-yet-defined role=register id=Term -->
+
 | Term | Blocked on | Owner |
 |---|---|---|
-| | | |
+
+## Allowed values
+
+- `EV-` · `Q-`

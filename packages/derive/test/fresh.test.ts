@@ -72,11 +72,26 @@ test("scaffold seeds every registry instrument", () => {
   assert.deepEqual(absent, [], `registry instruments with no file: ${absent.join(", ")}`);
 });
 
-test("every instrument derives empty", () => {
+test("no register-shaped instrument derives anything at init", () => {
+  // Templates ship zero data rows. Any register row here is seeded fake data.
   const nonEmpty = state.instruments
-    .filter((i) => i.status !== "empty")
-    .map((i) => `${i.id}(${i.rows} rows via ${i.tables.filter((t) => t.role === "register").map((t) => `${t.name}=${t.rows}`).join(",")})`);
-  assert.deepEqual(nonEmpty, [], `templates ship data rows: ${nonEmpty.join(" · ")}`);
+    .filter((i) => i.rows > 0)
+    .filter((i) => i.tables.some((t) => t.role === "register"))
+    .map((i) => `${i.id}(${i.rows})`);
+  assert.deepEqual(nonEmpty, [], `templates ship register rows: ${nonEmpty.join(" · ")}`);
+});
+
+test("field-shaped instruments reflect init metadata and nothing else", () => {
+  // An earlier version of this test asserted every instrument was `empty`.
+  // That encoded an assumption that init provides nothing — but it provides
+  // real metadata, and recording it is not fake data. Residency is one of the
+  // six evidence terms, and it IS known at init. `thin` is the honest answer.
+  const terms = state.instruments.find((i) => i.id === "evidence-handling-terms")!;
+  assert.equal(terms.rows, 1, "residency is the one evidence term known at init");
+  assert.equal(terms.status, "thin");
+
+  const sponsor = state.instruments.find((i) => i.id === "sponsor-brief")!;
+  assert.equal(sponsor.rows, 0, "the seven sponsor questions are unanswered at init");
 });
 
 test("every chain count is zero", () => {
@@ -96,14 +111,26 @@ test("the chain audit reports nothing on an empty engagement", () => {
   assert.deepEqual(a.findings, [], `unexpected findings: ${a.findings.map((f) => f.kind).join(", ")}`);
 });
 
-test("all ten stages present, in order, none started", () => {
+test("all ten stages present and in order", () => {
   assert.equal(state.stages.length, 10);
   assert.deepEqual(
     state.stages.map((s) => s.id),
     ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09"],
   );
-  const started = state.stages.filter((s) => s.pct !== 0).map((s) => `${s.id}=${s.pct}%`);
-  assert.deepEqual(started, [], `stages non-zero at init: ${started.join(", ")}`);
+});
+
+test("only stage 00 has progress at init, and only from real metadata", () => {
+  // Stage 00 is genuinely part-done the moment residency is recorded, so
+  // asserting 0% there would be asserting a falsehood. Everything downstream
+  // of the metadata must be untouched.
+  const s00 = state.stages.find((s) => s.id === "00")!;
+  assert.ok(s00.pct > 0 && s00.pct < 100, `stage 00 should be partial, got ${s00.pct}%`);
+
+  const later = state.stages
+    .filter((s) => s.id !== "00")
+    .filter((s) => s.pct !== 0)
+    .map((s) => `${s.id}=${s.pct}%`);
+  assert.deepEqual(later, [], `stages beyond 00 non-zero at init: ${later.join(", ")}`);
 });
 
 test("stage labels are the runbook's, not paraphrased", () => {

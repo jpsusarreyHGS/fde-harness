@@ -4,17 +4,19 @@ Derived from `../01-Organisation/stakeholder-map.md`. Becomes the role module in
 
 ## Personas
 
+<!-- table:personas.rows role=register id=Role -->
+
 | Role | What they do | Systems today | Questions they ask (CQ ids) | Source |
 |---|---|---|---|---|
-| | | | CQ- | |
 
 The **exception holder must appear here.** Their questions are usually the ones the ontology exists to answer.
 
 ## Permission matrix
 
+<!-- table:personas.permissions role=register id=Role -->
+
 | Role | Read | Create | Modify | Approve | Close |
 |---|---|---|---|---|---|
-| | | | | | |
 
 Rules, inherited from the reference architecture and non-negotiable:
 
@@ -27,14 +29,16 @@ Rules, inherited from the reference architecture and non-negotiable:
 
 The complete set of things an agent may change. Enumerated here, derived from approved use cases.
 
+<!-- table:personas.write-allow-list role=register id=Write -->
+
 | Write | Object | Roles permitted | Approver | Reversible | Use case |
 |---|---|---|---|---|---|
-| | | | | | |
 
 ## Impersonation test list
 
 For the evaluator: one authorisation-denied test per role per write.
 
+<!-- table:personas.impersonation role=register id=Role -->
+
 | Role | Attempted write | Expected | Test case |
 |---|---|---|---|
-| | | denied + audited | |

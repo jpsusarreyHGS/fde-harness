@@ -4,23 +4,26 @@ Field-level mappings and identity rules. Feeds the ingestion pipelines.
 
 ## Sources
 
+<!-- table:source-systems.sources role=register id=Id -->
+
 | Id | System | Type | Extract | Auth | Refresh | Owner |
 |---|---|---|---|---|---|---|
-| S1 | | CRM / docs / stream / DB | | | | |
 
 ## Identity rules
 
 **Ingestion runs in identity order — the minting system first.** This is a hard dependency, not a preference.
 
+<!-- table:source-systems.identity-rules role=register id=Entity -->
+
 | Entity | Minted by | Referenced by | Key | Stable? | On disagreement |
 |---|---|---|---|---|---|
-| | S1 | S2, S3 | | | survivorship rule + adjudicator |
 
 ## Field mappings
 
+<!-- table:source-systems.field-mappings role=register id=Field -->
+
 | Source | Field | Type | Maps to object | Maps to property | Transform | Nullable | Notes |
 |---|---|---|---|---|---|---|---|
-| S1 | | | | | | | |
 
 **Record every transform, however trivial.** Reformatting a date or mapping one code to another is undocumented logic today and a silent data defect tomorrow. Transforms discovered in a copy-paste tell (`paste` rows in the observation log) belong here.
 
@@ -28,22 +31,25 @@ Field-level mappings and identity rules. Feeds the ingestion pipelines.
 
 One helper module constructs identifiers; pipelines and the query layer both use it. **Divergent identifier logic between ingestion and query is very hard to see and very easy to prevent.**
 
+<!-- table:source-systems.identifier-convention role=register id=Entity -->
+
 | Entity | Pattern | Example |
 |---|---|---|
-| | | |
 
 ## Provenance
 
 Every source contributes an activity record so any fact can be attributed.
 
+<!-- table:source-systems.provenance role=register id=Source -->
+
 | Source | Activity record | Captured |
 |---|---|---|
-| | | |
 
 ## Validation
 
+<!-- table:source-systems.validation role=register id=Shape -->
+
 | Shape | Constrains | From exception | Blocking |
 |---|---|---|---|
-| | | EX- | yes |
 
 A build that has not passed validation is not built.

@@ -158,8 +158,8 @@ test("AUDIT: exception with no rule holder detected", () => {
   assert.deepEqual(f.map((x) => x.id), ["EX-002"]);
 });
 
-test("AUDIT: stale UNVERIFIED flagged once placement has begun", () => {
-  const f = state.chain.audit.findings.filter((x) => x.kind === "stale-unverified");
+test("AUDIT: unverified requirement flagged once placement has begun", () => {
+  const f = state.chain.audit.findings.filter((x) => x.kind === "unverified-in-placement");
   assert.equal(f.length, 1, "REQ-002 is stated-only and allocation has started");
 });
 

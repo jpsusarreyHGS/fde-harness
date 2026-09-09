@@ -6,6 +6,8 @@ End-to-end flows. Each write-back becomes a governed write template and an entry
 
 | | |
 |---|---|
+<!-- table:spec.header role=kv -->
+
 | Persona | |
 | Trigger | |
 | Requirements | REQ- |
@@ -18,15 +20,17 @@ Rungs, per `skills-practice/autonomy-ladder`: `1` controlled environment · `2` 
 
 **Steps**
 
+<!-- table:spec.steps role=register id=# -->
+
 | # | Actor | Action | Data touched | Human gate |
 |---|---|---|---|---|
-| 1 | | | | |
 
 **Write-backs**
 
+<!-- table:spec.write-backs role=register id=Write -->
+
 | Write | Object | Approver role | Reversible | Provenance stamped |
 |---|---|---|---|---|
-| | | | | |
 
 **Out of scope for this use case**
 
@@ -38,6 +42,8 @@ State plainly what the system is **not**. Without this sentence, scope expands i
 
 | Item | Value |
 |---|---|
+<!-- table:spec.scope-boundary role=kv -->
+
 | The system is | |
 | Explicitly out of scope | |
 | The agent may assemble evidence for, but never decide | |

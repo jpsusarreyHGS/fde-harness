@@ -4,14 +4,21 @@ Candidate entities, relationships, events and rules awaiting promotion. Proposed
 
 A candidate is promotable only when **all five preconditions** hold. The failing precondition is named here — that note is what makes the backlog useful rather than a graveyard.
 
+<!-- table:ontology-backlog.rows role=register id=Candidate -->
+
 | Candidate | Kind | Source | Grain stated | Req cites it | In glossary | Identity rule known | CQ needs it | Failing precondition |
 |---|---|---|---|---|---|---|---|---|
-| | entity / relationship / event / action / rule | EV- / EX- | | REQ- | | | CQ- | |
 
 ## Parked
 
 Candidates that will not be promoted in this pilot, with what evidence would change that.
 
+<!-- table:ontology-backlog.parked role=register id=Candidate -->
+
 | Candidate | Why parked | Would be justified by |
 |---|---|---|
-| | | |
+
+## Allowed values
+
+- `entity` · `relationship` · `event` · `action` · `rule`
+- `EV-` · `EX-`

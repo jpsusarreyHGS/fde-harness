@@ -4,20 +4,25 @@ Every request assessed against the pilot charter: **in scope, or a change reques
 
 **Scope creep in an FDE engagement almost never arrives as a scope request.** It arrives as a small helpful addition during a working session. Log it anyway — the register's entire value is in having been kept when it felt unnecessary.
 
+<!-- table:scope-changes.rows role=register id=Date -->
+
 | Date | Request | Asked by | Verdict | Reasoning | Delivery impact | Decision | Decided by |
 |---|---|---|---|---|---|---|---|
-| | | | in-scope / change-request | | | accepted / deferred / declined | |
 
 ## Charter reference
 
 | | |
 |---|---|
+<!-- table:scope-changes.charter role=kv -->
+
 | Scope | {{SCOPE}} |
 | Non-goals | {{NON_GOALS}} |
 
 ## Cumulative impact
 
 Individually reasonable additions are how a pilot window is lost. Track the total.
+
+<!-- table:scope-changes.cumulative role=labels -->
 
 | | Count | Days impact |
 |---|---|---|

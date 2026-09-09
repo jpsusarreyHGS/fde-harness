@@ -14,7 +14,7 @@ Between stages `06` and `07`. The bootcamp's Week 2 bar. The system runs live ag
 
 `Recommendation` is one of `READY`, `READY WITH CAVEATS` or `NOT READY`. Leave it blank until assessed. **Code never sets `passed`** — a person does, with a name.
 
-<!-- table:stage-gate-2.criteria role=labels key=Criterion -->
+<!-- table:stage-gate-2.criteria role=labels key=Criterion  answer=Status -->
 
 ## Criteria
 
@@ -26,7 +26,7 @@ Between stages `06` and `07`. The bootcamp's Week 2 bar. The system runs live ag
 
 Three of these are adversarial and must be rehearsed, not assumed: *any run the reviewer picks*, *a deliberately broken change*, and *survives challenge*.
 
-<!-- table:stage-gate-2.behaviours role=labels key=Behaviour -->
+<!-- table:stage-gate-2.behaviours role=labels key=Behaviour  answer=Observed -->
 
 ## Behaviours
 

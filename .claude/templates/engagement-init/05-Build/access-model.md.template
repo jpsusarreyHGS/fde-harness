@@ -4,23 +4,26 @@ The record of design for access and permissions. Derived from `../03-Systems/ont
 
 ## Roles
 
+<!-- table:access-model.roles role=register id=Role -->
+
 | Role | Source of truth | Session-derived | Notes |
 |---|---|---|---|
-| | IdP group / app role | yes | |
 
 **Role comes from the authenticated session only** — never from client input, a header, or a request body. This is not configurable.
 
 ## Matrix
 
+<!-- table:access-model.matrix role=register id=Role -->
+
 | Role | Object | Read | Create | Modify | Approve | Close |
 |---|---|---|---|---|---|---|
-| | | | | | | |
 
 ## Write allow-list
 
+<!-- table:access-model.write-allow-list role=register id=Write id -->
+
 | Write id | Object | Roles permitted | Approver role | Reversible | Provenance | Use case |
 |---|---|---|---|---|---|---|
-| | | | | | stamped | UC- |
 
 ## Two-phase write
 
@@ -35,19 +38,23 @@ Every write follows this path. Drawing or building it differently breaks the sec
 
 An approval path that becomes a bottleneck will be routed around, and a gate that is routed around is worse than no gate because it is still on the architecture diagram.
 
+<!-- table:access-model.approval-load role=register id=Write -->
+
 | Write | Expected volume | Approvers available | Target latency | Measured latency |
 |---|---|---|---|---|
-| | | | | |
 
 ## Impersonation tests
 
 One authorisation-denied test per role per write, run by the `evaluator`.
 
+<!-- table:access-model.impersonation role=register id=Role -->
+
 | Role | Attempted | Expected | Test case | Result |
 |---|---|---|---|---|
-| | | denied + audited | | |
 
 ## Audit
+
+<!-- table:access-model.audit role=labels key=Path -->
 
 | Path | Audited | Degrades to | Retention |
 |---|---|---|---|

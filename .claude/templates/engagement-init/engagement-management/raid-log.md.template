@@ -8,28 +8,32 @@ A register of generic project risks is not a risk register. Where are the risks 
 
 ## Risks
 
+<!-- table:raid-log.risks role=register id=Id -->
+
 | Id | Risk | Impact | Likelihood | Owner | Mitigation | Review | Status |
 |---|---|---|---|---|---|---|---|
-| R-01 | | high/med/low | | | | | open |
 
 ## Assumptions
 
 Mirrored from `../02-Workflow/requirements-register.md`. Reviewed at every gate.
 
+<!-- table:raid-log.assumptions role=register id=Id -->
+
 | Id | Assumption | Owner | Confirm by | **What breaks if wrong** | Status |
 |---|---|---|---|---|---|
-| A-01 | | | | | open |
 
 ## Issues
 
+<!-- table:raid-log.issues role=register id=Id -->
+
 | Id | Issue | Impact | Owner | Raised | Target | Status |
 |---|---|---|---|---|---|---|
-| I-01 | | | | | | open |
 
 ## Dependencies
 
 Client-side dependencies are the most common cause of a missed pilot date, and the least visible in a build plan.
 
+<!-- table:raid-log.dependencies role=register id=Id -->
+
 | Id | Dependency | On whom | Needed by | Status | Escalation |
 |---|---|---|---|---|---|
-| D-01 | | | | | |

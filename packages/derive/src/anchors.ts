@@ -28,6 +28,13 @@ export interface TableAnchor {
   idColumn?: string;
   /** `key=` for labels tables — the fixed-dimension column */
   keyColumn?: string;
+  /**
+   * `answer=` for labels tables — the column an FDE fills in.
+   *
+   * A labels table's rows are schema, not data, so counting rows says
+   * nothing. Counting filled answers says everything.
+   */
+  answerColumn?: string;
   /** 1-based line number of the anchor, for error messages */
   line: number;
 }
@@ -83,12 +90,18 @@ export function splitRow(line: string): string[] {
   return cells;
 }
 
-function parseAttrs(rest: string): { idColumn?: string; keyColumn?: string } {
-  const out: { idColumn?: string; keyColumn?: string } = {};
+function parseAttrs(rest: string): {
+  idColumn?: string;
+  keyColumn?: string;
+  answerColumn?: string;
+} {
+  const out: { idColumn?: string; keyColumn?: string; answerColumn?: string } = {};
   const id = /\bid=([^\s>]+(?:[ \t]+[^\s=>]+)*?)(?=[ \t]+\w+=|[ \t]*$)/.exec(rest);
   if (id?.[1]) out.idColumn = id[1].trim();
   const key = /\bkey=([^\s>]+(?:[ \t]+[^\s=>]+)*?)(?=[ \t]+\w+=|[ \t]*$)/.exec(rest);
   if (key?.[1]) out.keyColumn = key[1].trim();
+  const ans = /\banswer=([^\s>]+(?:[ \t]+[^\s=>]+)*?)(?=[ \t]+\w+=|[ \t]*$)/.exec(rest);
+  if (ans?.[1]) out.answerColumn = ans[1].trim();
   return out;
 }
 
@@ -182,4 +195,19 @@ export function findTable(
   name: string,
 ): ParsedTable | undefined {
   return tables.find((t) => t.anchor.name === name);
+}
+
+/**
+ * Rows of a labels table whose answer column is filled.
+ *
+ * This is what "populated" means for a table whose rows are fixed: the six
+ * evidence terms, the seven sponsor questions, the five gate criteria.
+ */
+export function answeredRows(t: ParsedTable): Record<string, string>[] {
+  const col = t.anchor.answerColumn;
+  if (!col) return [];
+  return t.rows.filter((r) => {
+    const v = (r[col] ?? "").trim();
+    return v !== "" && v !== "-" && v !== "\u2014" && v !== "n/a";
+  });
 }

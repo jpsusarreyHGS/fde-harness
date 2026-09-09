@@ -4,11 +4,15 @@ Owned by `engagement-manager`. `solution-architect` reads it at session start an
 
 | | |
 |---|---|
+<!-- table:roadmap.header role=kv -->
+
 | Current phase | {{STAGE}} |
 | Next gate | G1 |
 | Updated | |
 
 ## Phases
+
+<!-- table:roadmap.stages role=labels key=Phase -->
 
 | Phase | Status | Started | Target | Gate |
 |---|---|---|---|---|
@@ -21,15 +25,17 @@ Owned by `engagement-manager`. `solution-architect` reads it at session start an
 
 ## Slices
 
+<!-- table:roadmap.slices role=register id=# -->
+
 | # | Slice | Use case | Status | Requirements | Depends on | Target |
 |---|---|---|---|---|---|---|
-| | | UC- | not-started / active / blocked / done | REQ- | | |
 
 ## Milestones
 
+<!-- table:roadmap.milestones role=register id=Milestone -->
+
 | Milestone | Date | Owner | Client-visible |
 |---|---|---|---|
-| | | | |
 
 ## Critical path
 

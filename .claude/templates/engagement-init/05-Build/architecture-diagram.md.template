@@ -59,6 +59,8 @@ flowchart LR
 
 ## Legend
 
+<!-- table:architecture-diagram.legend role=labels key=Shape  -->
+
 | Shape | Means |
 |---|---|
 | `[ ]` | Service or component |

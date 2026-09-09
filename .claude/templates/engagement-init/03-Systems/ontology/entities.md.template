@@ -4,36 +4,46 @@ Working draft before promotion into the ontology repo. **Never drafted from a bl
 
 ## Entities
 
+<!-- table:entities.rows role=register id=Name -->
+
 | Name | **Grain — one row is one what?** | Minted by | Key | Requirements | Glossary term | Promoted |
 |---|---|---|---|---|---|---|
-| | | | | REQ- | | |
 
 If the grain needs an "or", it is two entities. The most common failure is promoting an entity at the grain of the **source table** rather than the business object — that exports the source system's assumptions into the client's vocabulary permanently.
 
 ## Properties
 
+<!-- table:entities.properties role=register id=Property -->
+
 | Entity | Property | Type | Required | Source field | Transform |
 |---|---|---|---|---|---|
-| | | | | | |
 
 ## Relationships
 
+<!-- table:entities.relationships role=register id=From -->
+
 | From | Relationship | To | Cardinality | Requirements | Inferred or asserted |
 |---|---|---|---|---|---|
-| | | | | REQ- | |
 
 Inferred relationships are **proposed for human confirmation**, never automatically accepted.
 
 ## Events and actions
 
+<!-- table:entities.events role=register id=Name -->
+
 | Name | Kind | Actor | Object | Preconditions | Approver |
 |---|---|---|---|---|---|
-| | event / action | | | | |
 
 ## Shapes
 
 Derived from the exception register — every exception representing an invalid state becomes a constraint.
 
+<!-- table:entities.shapes role=register id=Shape -->
+
 | Shape | Constrains | From exception | Severity |
 |---|---|---|---|
-| | | EX- | violation / warning |
+
+## Allowed values
+
+- `event` · `action`
+- `violation` · `warning`

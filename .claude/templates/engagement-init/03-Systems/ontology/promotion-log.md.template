@@ -4,22 +4,32 @@ Every write into the ontology repo. Append-only.
 
 This log is how the requirement traceability map gets assembled, and it is what you show a client who asks why an entity exists. **Maintained at write time it costs nothing; reconstructed later it cannot be done accurately.**
 
+<!-- table:promotion-log.rows role=register id=Date -->
+
 | Date | What | Kind | Source ids | Repo path | Commit | Approved by |
 |---|---|---|---|---|---|---|
-| | | entity / relationship / shape / read template / write template | REQ- / EV- | | | |
 
 ## Reversals
 
 **Never silently remove a promoted object.** Something downstream cites it, and a dangling citation is how a build fails in a way nobody can trace.
 
+<!-- table:promotion-log.reversals role=register id=Date -->
+
 | Date | What | Reason | Blast radius checked | Downstream decisions | Reported to |
 |---|---|---|---|---|---|
-| | | | CQ / shapes / templates / eval cases / build tasks | | solution-architect |
 
 ## Version changes
 
+<!-- table:promotion-log.version-changes role=register id=Date -->
+
 | Date | Change | Compatibility class | Migration | Deprecation window | Client signed off |
 |---|---|---|---|---|---|
-| | | additive / rename / grain-change / removal | | | |
 
 A rename keeps the old term in the glossary as a synonym **permanently** — people will keep using it. A grain change is a new entity, not a change.
+
+## Allowed values
+
+- `entity` · `relationship` · `shape` · `read template` · `write template`
+- `REQ-` · `EV-`
+- `CQ` · `shapes` · `templates` · `eval cases` · `build tasks`
+- `additive` · `rename` · `grain-change` · `removal`

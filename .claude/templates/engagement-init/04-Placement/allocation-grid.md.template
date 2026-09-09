@@ -4,6 +4,8 @@ Every step of the operating map assigned to **exactly one** of four categories, 
 
 **Deterministic is the default.** Reach for model judgement only where the input genuinely varies.
 
+<!-- table:allocation-grid.categories role=labels key=Category -->
+
 | Category | Belongs here |
 |---|---|
 | `deterministic` | Rules, thresholds, lookups, transformations, routing on structured fields |

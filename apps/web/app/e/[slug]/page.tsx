@@ -412,7 +412,8 @@ export default async function Engagement({ params }: { params: Promise<{ slug: s
           <div className="sec-h">
             <h2>Questions and RAID</h2>
             <div className="note">
-              Ranked by what is blocked, not by curiosity. Age computed at read time.
+              Sorted by age, oldest first. Age computed at read time — never stored.
+              Ranking by what is blocked lands with the coach.
             </div>
           </div>
           <div className="grid g2">
