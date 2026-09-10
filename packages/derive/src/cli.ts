@@ -13,6 +13,8 @@
  *   cli.ts propose <engagement-dir> <spec.json> validate and write a proposal
  *   cli.ts reject  <engagement-dir> <proposal> <reason>  decline it
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
+ *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
+ *                                              create it, or bring it forward
  *
  * Exit codes are meant for a runner and for CI:
  *   0  fine
@@ -25,7 +27,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
-import { mintIds, type IdPrefix } from "./ids.ts";
+import { mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
 import { scanIntake, CLASS_MEANING } from "./intake.ts";
 import {
   acceptProposal,
@@ -37,11 +39,13 @@ import {
 import { INSTRUMENTS } from "./instruments.ts";
 import { dataRows, parseAnchoredTables } from "./anchors.ts";
 import { deskWork, nextConversations } from "./coach.ts";
+import { initEngagement, InitRefused, validateVars } from "./init.ts";
 import { WriteRefused } from "./writer.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
+  "scaffold",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -55,6 +59,73 @@ const engagementDir = resolve(dirArg);
 const harnessRoot = resolve(engagementDir, "..", "..");
 
 // --------------------------------------------------------------- subcommands
+
+if (sub === "scaffold") {
+  const jsonAt = args.indexOf("--json");
+  const specPath = jsonAt >= 0 ? args[jsonAt + 1] : undefined;
+  if (!specPath) {
+    console.error("usage: cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]");
+    console.error("");
+    console.error("vars: { \"CLIENT_NAME\": \"...\", \"SPONSOR\": \"...\",");
+    console.error("        \"SCOPE\": \"...\", \"NON_GOALS\": \"...\",");
+    console.error("        \"SYSTEMS\"?, \"ONTOLOGY_REPO\"?,");
+    console.error("        \"RESIDENCY\"? client-tenant|hgs-tenant|tbd,");
+    console.error("        \"LABOUR\"? works-council|union|none|unknown }");
+    console.error("");
+    console.error("SLUG comes from the directory name. Safe to re-run: existing");
+    console.error("files are never overwritten, so this also brings an old");
+    console.error("engagement forward onto new templates.");
+    process.exit(2);
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(await readFile(resolve(specPath), "utf8"));
+  } catch (err) {
+    console.error(`Cannot read vars: ${(err as Error).message}`);
+    process.exit(2);
+  }
+  try {
+    const vars = validateVars(raw, basename(engagementDir));
+    const res = await initEngagement({
+      engagementDir,
+      harnessRoot,
+      vars,
+      dryRun: args.includes("--dry-run"),
+    });
+
+    if (args.includes("--dry-run")) {
+      console.log(`${res.slug} — dry run (${res.backfill ? "backfill" : "new"})`);
+      for (const f of res.backfilled) console.log(`  would create  ${f}`);
+      if (!res.backfilled.length) console.log("  nothing to create — already complete");
+    } else {
+      console.log(`${res.slug} — ${res.backfill ? "brought forward" : "created"}`);
+      console.log(`  ${res.directories} directories`);
+      console.log(`  ${res.created.length} file(s) written, ${res.skipped.length} already present`);
+      if (res.questionsRaised.length) {
+        console.log(`  ${res.questionsRaised.join(", ")} raised for values left as TBD`);
+      }
+      console.log("  state.json derived");
+    }
+
+    if (res.survivingPlaceholders.length) {
+      console.error("");
+      console.error("Unresolved placeholders still on disk:");
+      for (const s of res.survivingPlaceholders) {
+        console.error(`  ${s.file}: ${s.keys.map((k) => `{{${k}}}`).join(" ")}`);
+      }
+      console.error("");
+      console.error("Each one is a value nobody has supplied. Fill it or raise a Q-.");
+      process.exit(1);
+    }
+    process.exit(0);
+  } catch (err) {
+    if (err instanceof InitRefused) {
+      console.error(`Refused: ${err.message}`);
+      process.exit(2);
+    }
+    throw err;
+  }
+}
 
 if (sub === "intake") {
   const { items, unclassified } = await scanIntake(engagementDir);
@@ -148,14 +219,20 @@ if (sub === "anchors") {
       // Only a prefixed key column is minted. `observation-log.sessions` keys
       // on Date, which the FDE supplies — saying "leave it blank" there would
       // be a lie the agent would obey.
+      //
+      // Taken from the prefix registry, not from an existing row: a fresh
+      // engagement has no rows, and reading the first one made every register
+      // look FDE-supplied on exactly the day that matters.
       if (t.anchor.idColumn) {
-        const minted = /^(EV|EX|REQ|AL|CQ|Q)-/.test(
-          dataRows(t)[0]?.[t.anchor.idColumn]?.replace(/~~/g, "") ?? "",
-        );
+        // Only the instrument's *primary* register mints. The secondary
+        // tables key on an existing id — `exception-register.promoted` says
+        // what EX-004 became, it does not create EX-005.
+        const prefix = prefixMintedBy(inst.path);
+        const minted = prefix !== null && t.anchor.name === inst.primaryTable;
         console.log(
           minted
-            ? `  idColumn=${t.anchor.idColumn} — leave it blank; code mints it at accept`
-            : `  key column=${t.anchor.idColumn} — you supply it`,
+            ? `  idColumn=${t.anchor.idColumn} — leave it blank; code mints ${prefix}- at accept`
+            : `  key column=${t.anchor.idColumn} — you supply it (an existing id, or a value)`,
         );
       }
       console.log("");

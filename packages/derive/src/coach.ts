@@ -121,6 +121,17 @@ const OWNER_ROLE: Record<string, string> = {
   "gap-without-question": "Process owner",
 };
 
+/**
+ * Where a gate's memo actually lives.
+ *
+ * `G1` → `stage-gate-1-readiness.md`. The obvious construction — `gate-g1.md`
+ * — is a file that does not exist, and a queue that tells the operator to
+ * write into a nonexistent path teaches them to stop reading the path.
+ */
+function gateMemo(id: string): string {
+  return `engagement-management/stage-gate-${id.replace(/^G/i, "")}-readiness.md`;
+}
+
 function cell(r: Record<string, string>, ...names: string[]): string {
   for (const n of names) {
     const v = r[n];
@@ -242,7 +253,7 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
         who: "Executive sponsor",
         whoName: names.get("executive sponsor") ?? null,
         blocks: `${g.id} — ${g.between}`,
-        location: `engagement-management/gate-${g.id.toLowerCase()}.md`,
+        location: gateMemo(g.id),
         why: `${g.id} cannot be assessed while its criteria have nobody to chase`,
         score: 110,
         work: "ask",
@@ -263,7 +274,7 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
         who,
         whoName: names.get(who.toLowerCase()) ?? null,
         blocks: `${g.id} — ${g.between}`,
-        location: `engagement-management/gate-${g.id.toLowerCase()}.md`,
+        location: gateMemo(g.id),
         why: `${g.id} criterion owned by ${who}`,
         score: 100 + (has(c.toClose) ? 0 : 5),
         work: "ask",

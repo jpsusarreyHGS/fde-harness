@@ -194,3 +194,46 @@ test("the order is stable across runs on unchanged files", () => {
   };
   assert.deepEqual(coach(input).map((q) => q.key), coach(input).map((q) => q.key));
 });
+
+test("every location the coach prints is a real path", async () => {
+  // A queue that sends the operator to a file that does not exist teaches them
+  // to stop reading the path. This shipped once: `gate-g1.md` for a memo that
+  // lives at `stage-gate-1-readiness.md`.
+  const { readdir } = await import("node:fs/promises");
+  const { join, resolve, sep } = await import("node:path");
+  const templates = resolve(import.meta.dirname, "..", "..", "..", ".claude", "templates", "engagement-init");
+
+  const known = new Set<string>();
+  const walk = async (dir: string) => {
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) await walk(full);
+      else if (e.name.endsWith(".template")) {
+        known.add(full.slice(templates.length + 1).split(sep).join("/").replace(/\.template$/, ""));
+      }
+    }
+  };
+  await walk(templates);
+
+  const gates: Gate[] = (["G1", "G2", "G3"] as const).map((id) => ({
+    id, label: id, between: "x→y", status: "not-ready" as const,
+    date: null, decidedBy: null,
+    criteria: [{ name: "c", status: "unmet", evidence: "", toClose: "", owner: "Ana" }],
+    behaviours: [], antiPatterns: [],
+  }));
+
+  const kinds: AuditFinding["kind"][] = [
+    "unsourced-requirement", "orphan-evidence", "dangling-citation",
+    "unverified-in-placement", "gap-without-question", "unowned-assumption",
+    "allocation-without-reason", "exception-without-rule-holder",
+  ];
+
+  for (const g of gates) {
+    for (const q of coach({ findings: kinds.map((k) => finding(k, "X-001")), gates: [g], tables: TABLES })) {
+      // Chain findings carry the audit's own location, which is exercised by
+      // the seeded fixtures; this test owns the ones the coach composes.
+      if (q.source === "chain") continue;
+      assert.ok(known.has(q.location), `${q.key} points at ${q.location}, which no template creates`);
+    }
+  }
+});

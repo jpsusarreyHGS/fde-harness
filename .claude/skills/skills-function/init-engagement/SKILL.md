@@ -1,61 +1,122 @@
 ---
 name: init-engagement
-description: One-shot content initialisation for an FDE engagement. Creates the ten stage folders under engagements/<slug>/ and the mirrored deliverables/<slug>/ structure, gathers engagement metadata, seeds every starter artefact from .claude/templates/engagement-init/, and writes the initial all-zero state.json. Idempotent — fills missing pieces, never overwrites.
+description: One-shot content initialisation for an FDE engagement. Interviews the operator for engagement metadata, then hands the whole scaffold to code — the ten stage folders under engagements/<slug>/, the mirrored deliverables/<slug>/ structure, every starter artefact seeded from .claude/templates/engagement-init/, a Q- for anything left TBD, and the initial state.json. Idempotent, so it also brings an old engagement forward onto new templates.
 user-invocable: true
 allowed-tools: Read Write Glob Bash AskUserQuestion
 ---
 
 # Init engagement
 
-## Properties to preserve
+**You conduct the interview. Code does the scaffolding.**
 
-- **Idempotent.** Fill what is missing; never overwrite. Operators will re-run this on live engagements.
-- **Template-seeded.** Every artefact comes from `.claude/templates/engagement-init/`. If a template is missing, **say so and stop for that artefact** — do not improvise it. A hand-rolled instrument will not carry the table anchors the parser needs, so the dashboard will not read it.
+That split is deliberate and it is new. This skill used to carry its own
+directory list and its own template loop, which meant two implementations of
+one thing: the tested code in `packages/derive/src/scaffold.ts`, and prose here
+that an agent interpreted. The prose version's `mkdir` block used bash brace
+expansion, and this harness's primary shell is PowerShell — which does not
+expand brace lists, and instead created a single directory whose name was the
+whole comma-separated list.
+
+So there is now one scaffold, and it is the one with tests.
 
 ## Step 1 — Gather metadata in one batch
 
 Use `AskUserQuestion` once, not one question at a time.
 
-| Field | Placeholder | Notes |
+| Field | Key | Notes |
 |---|---|---|
-| Client name | `{{CLIENT_NAME}}` | Display name |
-| Slug | `{{SLUG}}` | kebab-case; becomes the folder name |
-| Executive sponsor | `{{SPONSOR}}` | Role and name if known |
-| Scope, one line | `{{SCOPE}}` | What the pilot is |
-| Non-goals | `{{NON_GOALS}}` | At least one. A scope with no non-goals has not been bounded |
-| Starting stage | `{{STAGE}}` | Usually `00-Setup` |
-| Target systems | `{{SYSTEMS}}` | Comma-separated |
-| Ontology repo | `{{ONTOLOGY_REPO}}` | URL, or `tbd` |
-| Data residency | `{{RESIDENCY}}` | `client-tenant` / `hgs-tenant` / `tbd` |
-| Labour representation | `{{LABOUR}}` | `works-council` / `union` / `none` / `unknown` — drives the monitoring constraint |
+| Client name | `CLIENT_NAME` | Display name |
+| Slug | *(the folder name)* | kebab-case. Not a JSON field — it comes from the path |
+| Executive sponsor | `SPONSOR` | Role and name if known |
+| Scope, one line | `SCOPE` | What the pilot is |
+| Non-goals | `NON_GOALS` | At least one. A scope with no non-goals has not been bounded |
+| Starting stage | `STAGE` | Usually `00-Setup` |
+| Target systems | `SYSTEMS` | Comma-separated, or `TBD` |
+| Ontology repo | `ONTOLOGY_REPO` | URL, or `tbd` |
+| Data residency | `RESIDENCY` | `client-tenant` / `hgs-tenant` / `tbd` |
+| Labour representation | `LABOUR` | `works-council` / `union` / `none` / `unknown` — drives the monitoring constraint |
 
-If a value is unknown, write `TBD` and raise a `Q-` in `02-Workflow/open-questions.md`. **Do not guess a sponsor or a residency posture** — both have consequences.
+**Do not guess a sponsor or a residency posture.** Both have consequences: one
+names who can settle a dispute, the other decides whether capture can legally
+begin. Unknown is `TBD`, and the scaffolder turns each `TBD` into a `Q-` with an
+owner — you do not have to write those yourself.
 
-*(In the target platform this interview is replaced by a web intake form; the placeholders are the form's fields.)*
+*(In the target platform this interview is replaced by a web intake form; the
+keys are the form's fields.)*
 
-## Step 2 — Create the skeleton
+## Step 2 — Write the vars file and run the scaffold
 
-One batched call:
+Write the answers as JSON into the scratch directory, then:
 
+```bash
+node packages/derive/src/cli.ts scaffold engagements/<slug> --json <vars.json>
 ```
-engagements/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow/{evidence/{observed,system,documented,stated},proposals},03-Systems/ontology,04-Placement,05-Build/builds,06-Evals/{golden-sets,runs},07-Production,08-ROI,09-Loop,skills-engagement,chronicle/{memory,sessions,run-events},harness-improver/{feedback,improvements},engagement-management}
-deliverables/{{SLUG}}/{00-Setup,01-Organisation,02-Workflow,03-Systems,04-Placement,05-Build,06-Evals,07-Production,08-ROI,09-Loop}
+
+```json
+{
+  "CLIENT_NAME": "Northwind Insurance",
+  "SPONSOR": "Director, Claims Operations",
+  "SCOPE": "First-notice-of-loss triage for motor claims",
+  "NON_GOALS": "No adjudication. No customer-facing correspondence.",
+  "SYSTEMS": "Guidewire, Outlook",
+  "ONTOLOGY_REPO": "tbd",
+  "RESIDENCY": "client-tenant",
+  "LABOUR": "none"
+}
 ```
 
-## Step 3 — Seed the artefacts
+Add `--dry-run` first if you want to see what it would create without writing.
 
-Read every template in **one batched call**, substitute placeholders, write all files in **one batched call** — the 4-step pattern from `CLAUDE.md`. Roughly three round-trips, not fifty.
+What the command does, so you can report it accurately:
 
-Skip anything that already exists. Seed all **50** templates under `engagement-init/`, plus the **8** per-role feedback files from `.claude/templates/harness-improver/feedback/`. If those counts do not match what you find on disk, say so — a missing template is a defect, not something to work around.
+- Creates all 22 subdirectories under `engagements/<slug>/`, plus the ten stage
+  folders under `deliverables/<slug>/`.
+- Seeds all 50 templates from `engagement-init/` and the 8 per-role feedback
+  files. **Existing files are never overwritten** — it reports them as already
+  present.
+- Raises a `Q-` for each of `SYSTEMS`, `RESIDENCY`, `LABOUR` and
+  `ONTOLOGY_REPO` left unresolved, with who can answer and what it blocks.
+  Only on a first run: re-running does not duplicate them.
+- Derives `state.json` from the tree rather than hand-writing it.
+- **Exits 1 if any `{{PLACEHOLDER}}` survives anywhere in the engagement**, and
+  names the file. That is the one failure worth stopping for: a placeholder in
+  a live instrument is a value nobody supplied, sitting where a reader will
+  take it for content.
 
-## Step 4 — Write the initial `state.json`
+It refuses, with exit 2, on a missing required field, an out-of-range
+`RESIDENCY` or `LABOUR`, or a `SLUG` in the JSON that disagrees with the path.
 
-Per `../render-dashboard/state-schema.md`.
+## Step 3 — Report
 
-**Every count is zero at init and every instrument is `empty`.** That is correct and the dashboard should show it. An engagement that looks half-populated at init has been seeded with fake numbers — and note that the templates deliberately ship **no data rows**, only `role=labels` tables whose fixed rows the parser does not count.
+Repeat what the command printed: directories, files written, files already
+present, the `Q-` ids raised, and any surviving placeholder.
 
-## Step 5 — Report
+If it exited non-zero, **say so plainly and do not describe the engagement as
+ready.**
 
-State what was created, what already existed, which templates were missing, and what came back `TBD` with the question ids raised.
+Then tell the operator the two things that must happen before capture: **sign
+the evidence-handling terms**, and **check the monitoring constraint** if labour
+representation is anything other than `none`. Desktop task mining and session
+replay are employee monitoring; in works-council and unionised environments
+they require consultation, not notice.
 
-Then tell the operator the two things that must happen before capture: **sign the evidence-handling terms**, and **check the monitoring constraint** if labour representation is anything other than `none`.
+## Bringing an old engagement forward
+
+The same command. It is idempotent by construction, so running it on a live
+engagement backfills anything a newer template added and touches nothing else:
+
+```bash
+node packages/derive/src/cli.ts scaffold engagements/<slug> --json <vars.json> --dry-run
+```
+
+Read the dry run, then drop the flag.
+
+## What is correct at init, and looks wrong
+
+**Almost every count is zero and almost every instrument is `empty`.** That is
+the honest picture and the dashboard should show it. An engagement that looks
+half-populated at init has been seeded with fake numbers.
+
+The exceptions are real, not defects: stage `00` reports partial coverage
+because residency and the other setup fields are genuinely answered, and stage
+`02` moves off zero when `Q-` rows are raised — a question is content.

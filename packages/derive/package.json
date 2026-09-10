@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Derives state.json from an FDE engagement's markdown instruments. Zero runtime dependencies.",
   "engines": {
-    "node": ">=22.6"
+    "node": ">=24"
   },
   "exports": {
     ".": "./src/index.ts"

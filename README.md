@@ -49,6 +49,7 @@ Straight from the runbook, not invented:
 
 ## Prerequisites
 
+- **Node 24 or newer.** Everything under `packages/` runs TypeScript directly, with no build step — that is on by default from v24, and on v22 the documented commands fail with a syntax error that looks like a bug in the harness.
 - [Claude Code](https://claude.com/claude-code) (`npm install -g @anthropic-ai/claude-code`)
 - [`uv`](https://docs.astral.sh/uv/) — for `scripts/convert_to_md.py` (PDF, Word, PowerPoint, Excel)
 - `git`

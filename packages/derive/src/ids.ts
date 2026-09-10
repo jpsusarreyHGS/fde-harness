@@ -123,3 +123,19 @@ export async function knownIds(
 export function homeOf(prefix: IdPrefix): string {
   return HOME[prefix].path;
 }
+
+/**
+ * The prefix an instrument mints, if it mints one.
+ *
+ * Asked by anything that has to tell an agent whether to leave a key column
+ * blank. Inferring it from the first existing row looked equivalent and was
+ * not: on a fresh engagement every register is empty, so every key column
+ * reads as one the FDE supplies — which is exactly the wrong instruction at
+ * exactly the moment it is followed.
+ */
+export function prefixMintedBy(instrumentPath: string): IdPrefix | null {
+  for (const prefix of Object.keys(HOME) as IdPrefix[]) {
+    if (HOME[prefix].path === instrumentPath) return prefix;
+  }
+  return null;
+}

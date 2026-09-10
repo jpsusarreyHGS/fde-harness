@@ -20,16 +20,34 @@ echo
 
 # --- prerequisites ---------------------------------------------------------
 missing=()
-for tool in git uv; do
+for tool in git uv node npm; do
   command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
 done
 if [[ ${#missing[@]} -gt 0 ]]; then
   echo "Missing prerequisites: ${missing[*]}"
-  echo "  git : https://git-scm.com/downloads"
-  echo "  uv  : https://docs.astral.sh/uv/  (needed to read PDF/Office documents)"
+  echo "  git  : https://git-scm.com/downloads"
+  echo "  node : https://nodejs.org/  (v24 or newer)"
+  echo "  uv   : https://docs.astral.sh/uv/  (needed to read PDF/Office documents)"
   echo
 else
-  echo "Prerequisites: git, uv — OK"
+  echo "Prerequisites: git, node, npm, uv - present"
+fi
+
+# Presence is not enough. Every documented command is a bare
+# `node packages/derive/src/cli.ts ...`, which needs Node 24's default
+# TypeScript stripping. On 22 those commands fail with a syntax error that
+# looks like a bug in the harness rather than a version problem.
+if command -v node >/dev/null 2>&1; then
+  node_major=$(node -p 'process.versions.node.split(".")[0]')
+  if [[ "$node_major" -lt 24 ]]; then
+    echo
+    echo "Node $(node -v) is too old. This harness needs v24 or newer."
+    echo "  Every 'node packages/derive/src/cli.ts ...' command runs TypeScript"
+    echo "  directly, with no build step. That is on by default from v24."
+    echo
+    exit 1
+  fi
+  echo "Node $(node -v) - OK"
 fi
 
 # --- layout check ----------------------------------------------------------
@@ -47,6 +65,19 @@ for dir in engagements deliverables datasources; do
   if [[ ! -d "$dir" ]]; then
     mkdir -p "$dir"
     echo "Created $dir/"
+  fi
+done
+
+# --- dependencies ----------------------------------------------------------
+# Lockfiles are committed and node_modules/ is gitignored, so a fresh clone has
+# nothing installed and `npm test` fails on a missing typescript.
+echo
+for pkg in packages/derive apps/web; do
+  if [[ -d "$pkg/node_modules" ]]; then
+    echo "$pkg - dependencies already installed"
+  else
+    echo "Installing $pkg ..."
+    (cd "$pkg" && npm ci --silent)
   fi
 done
 
@@ -74,5 +105,9 @@ echo
 echo "Next steps (see README.md):"
 echo "  1. Start Claude Code in this directory:  claude"
 echo "  2. Scaffold an engagement:               /init-engagement"
-echo "  3. Before any capture, settle the evidence-handling terms and check"
-echo "     the monitoring constraint for the client jurisdiction."
+echo "  3. Settle the evidence-handling terms and check the monitoring"
+echo "     constraint for the client jurisdiction. Capture is blocked until"
+echo "     the terms are signed, on purpose."
+echo "  4. Then the loop: drop material in 02-Workflow/evidence/<class>/,"
+echo "     run /capture to turn it into proposed rows, accept them, and run"
+echo "     /next to see what to ask about tomorrow."

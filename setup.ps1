@@ -22,17 +22,36 @@ Write-Host ''
 
 # --- prerequisites ---------------------------------------------------------
 $missing = @()
-foreach ($tool in 'git', 'uv') {
+foreach ($tool in 'git', 'uv', 'node', 'npm') {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { $missing += $tool }
 }
 if ($missing.Count -gt 0) {
     Write-Host ("Missing prerequisites: {0}" -f ($missing -join ', '))
-    Write-Host '  git : https://git-scm.com/downloads'
-    Write-Host '  uv  : https://docs.astral.sh/uv/  (needed to read PDF/Office documents)'
+    Write-Host '  git  : https://git-scm.com/downloads'
+    Write-Host '  node : https://nodejs.org/  (v24 or newer)'
+    Write-Host '  uv   : https://docs.astral.sh/uv/  (needed to read PDF/Office documents)'
     Write-Host ''
 }
 else {
-    Write-Host 'Prerequisites: git, uv - OK'
+    Write-Host 'Prerequisites: git, node, npm, uv - present'
+}
+
+# Presence is not enough. Every documented command is a bare
+# `node packages/derive/src/cli.ts ...`, which needs Node 24's default
+# TypeScript stripping. On 22 those commands fail with a syntax error that
+# looks like a bug in the harness rather than a version problem.
+if (Get-Command node -ErrorAction SilentlyContinue) {
+    $nodeMajor = [int](node -p 'process.versions.node.split(".")[0]')
+    if ($nodeMajor -lt 24) {
+        $nodeVersion = node -v
+        Write-Host ''
+        Write-Host "Node $nodeVersion is too old. This harness needs v24 or newer."
+        Write-Host "  Every 'node packages/derive/src/cli.ts ...' command runs TypeScript"
+        Write-Host '  directly, with no build step. That is on by default from v24.'
+        Write-Host ''
+        exit 1
+    }
+    Write-Host ("Node {0} - OK" -f (node -v))
 }
 
 # --- layout check ----------------------------------------------------------
@@ -55,6 +74,22 @@ foreach ($dir in 'engagements', 'deliverables', 'datasources') {
     if (-not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
         Write-Host "Created $dir/"
+    }
+}
+
+# --- dependencies ----------------------------------------------------------
+# Lockfiles are committed and node_modules/ is gitignored, so a fresh clone has
+# nothing installed and `npm test` fails on a missing typescript.
+Write-Host ''
+foreach ($pkg in 'packages/derive', 'apps/web') {
+    if (Test-Path (Join-Path $pkg 'node_modules')) {
+        Write-Host "$pkg - dependencies already installed"
+    }
+    else {
+        Write-Host "Installing $pkg ..."
+        Push-Location $pkg
+        npm ci --silent
+        Pop-Location
     }
 }
 
@@ -86,5 +121,9 @@ Write-Host ''
 Write-Host 'Next steps (see README.md):'
 Write-Host '  1. Start Claude Code in this directory:  claude'
 Write-Host '  2. Scaffold an engagement:               /init-engagement'
-Write-Host '  3. Before any capture, settle the evidence-handling terms and check'
-Write-Host '     the monitoring constraint for the client jurisdiction.'
+Write-Host '  3. Settle the evidence-handling terms and check the monitoring'
+Write-Host '     constraint for the client jurisdiction. Capture is blocked until'
+Write-Host '     the terms are signed, on purpose.'
+Write-Host '  4. Then the loop: drop material in 02-Workflow/evidence/<class>/,'
+Write-Host '     run /capture to turn it into proposed rows, accept them, and run'
+Write-Host '     /next to see what to ask about tomorrow.'
