@@ -4,6 +4,53 @@ A Claude Code project harness implementing the HGS Forward Deployed Engineering 
 
 **The runbook is canon.** This harness implements it. Where the two disagree, the runbook wins and the divergence is a defect to report.
 
+---
+
+## Why this exists
+
+**The gap.** Our FDEs are good at discovery — sitting with the client, mapping how the business actually works, capturing what people call things and what they ask every day. Right now that knowledge dies in documents. There is no clean path from *"we understand your business"* to *"your AI systems understand your business."*
+
+That path is an **ontology**: the client's business, written down in a form software can use. Building one by hand, from scratch, every engagement, is the gap.
+
+**The plan, in three pieces.**
+
+**1. `fde-harness` captures discovery in a structured way.** Instead of loose notes and decks, discovery lands in six standard files: the client's vocabulary, who does what, the questions their people actually ask, what the AI is allowed to write, where the data lives, and the rules for what "clean" data looks like. **Every line traces back to evidence** — something we saw or someone said. No guessing.
+
+**2. The `ontology-engineer` promotes those six files into a real model.** Deliberate, logged, human-approved. This is the quality gate: nothing enters the model that discovery did not earn.
+
+**3. The ontology compiler turns that model into a working system** on whatever platform the client already runs. Same six files in; out comes a Databricks build or a Fabric build. **We do not pick the platform** — the client's estate and their questions pick it.
+
+### Where each piece actually stands
+
+Being precise about this matters more than the pitch, because an FDE picking this up needs to know which parts will carry weight today.
+
+| Piece | State |
+|---|---|
+| **1 — capture** | **Built and in use.** Ten stages, 50 instrument templates, the evidence chain enforced in code, an intake loop that turns raw material into proposed rows, and a coach that tells you what to ask next |
+| **2 — promote** | **Built as a discipline, not yet as automation.** All six kinds of content have a home and a table to land in. `ontology-engineer` is the only agent permitted to write to an ontology repo, and every write is logged in `promotion-log.md` against the requirement that justified it. What is still manual is the promotion itself — a person reads the contract and models |
+| **3 — compile** | **Not built.** The reference implementation is [`AI_Ontology_Credit_Union`](https://github.com/Abishek-Hariharan-HGS/AI_Ontology_Credit_Union); the platform-targeted compiler is the next repository, not this one |
+
+### The six files, and where they come from
+
+The contract between discovery and the ontology. Each one is a **discovery deliverable filled from the field**, not a modelling artefact invented at a desk — that is the load-bearing idea in the whole method.
+
+All of it lives under `engagements/<slug>/03-Systems/ontology/`.
+
+| In plain terms | Where it lands | Filled from |
+|---|---|---|
+| The client's vocabulary | `glossary.md` | Terms captured verbatim during observation |
+| Who does what | `personas.md` | `01-Organisation/stakeholder-map.md` |
+| The questions their people actually ask | `competency-questions.md` | `02-Workflow/open-questions.md` and observed asks |
+| What the AI is allowed to write | `personas.md` — the write allow-list | `04-Placement/prioritisation.md` and the allocation grid |
+| Where the data lives | `source-systems.md` | `03-Systems/systems-inventory.md` |
+| What "clean" data looks like | `entities.md` — the shapes table | `02-Workflow/exception-register.md` |
+
+Two of the six share a file with a neighbour rather than standing alone: the write allow-list sits with the personas that hold the permissions, and the shapes sit with the entities they constrain. `skills-practice/ontology-first-delivery` names them as separate contract files, so **the naming is worth reconciling before the compiler is built** — the content is all there, the filenames are not what the method says.
+
+**Competency questions are the acceptance test.** A question the model cannot answer is either a modelling gap or a data gap — and which one it is must be stated, because they have completely different remedies and completely different costs.
+
+---
+
 ## The ten stages
 
 | | Stage | Command |
@@ -54,25 +101,176 @@ Straight from the runbook, not invented:
 - [`uv`](https://docs.astral.sh/uv/) — for `scripts/convert_to_md.py` (PDF, Word, PowerPoint, Excel)
 - `git`
 
-## Setup
+## Using it — step by step
+
+If you read nothing else, read this. **You produce raw material and have conversations. The harness produces structure and tells you what is missing.**
+
+### Step 0 — Get set up (once)
 
 ```powershell
-.\setup.ps1        # Windows
+git clone https://github.com/jpsusarreyHGS/fde-harness.git
+cd fde-harness
+.\setup.ps1
 ```
 
 ```bash
-./setup.sh         # macOS / Linux / WSL
+git clone https://github.com/jpsusarreyHGS/fde-harness.git
+cd fde-harness
+./setup.sh
 ```
 
-Then start Claude Code in this directory and scaffold an engagement:
+The script checks your Node version, installs dependencies, and stops with an explanation if something is missing. It should finish with no manual steps. Then:
 
 ```bash
 claude
 ```
 
+Everything below happens inside Claude Code, in this directory.
+
+### Step 1 — Create the engagement
+
 ```
 /init-engagement
 ```
+
+You will be asked ten things in one go: client name, slug, sponsor, one-line scope, non-goals, target systems, ontology repo, data residency, and whether there is a works council or union.
+
+**Say `TBD` when you do not know.** Do not guess a sponsor or a residency posture — one names who settles a dispute, the other decides whether you can legally start capturing. Every `TBD` becomes an open question with an owner and a note about what it blocks, so nothing quietly goes missing.
+
+You get `engagements/<slug>/` with ten stage folders, 58 seeded instruments, a mirrored `deliverables/<slug>/`, and a `state.json` that honestly reports almost everything as empty. **That is correct.** An engagement that looks half-full on day one was seeded with fake numbers.
+
+### Step 2 — Settle two things before you capture anything
+
+Neither is optional, and the harness will stop you.
+
+1. **Sign the evidence-handling terms** — `00-Setup/evidence-handling-terms.md`. Residency, retention, redaction, access, deletion, onward use. `discovery-analyst` hard-stops without them, because evidence captured under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.
+2. **Check the monitoring constraint.** Desktop task mining and session replay are employee monitoring. In works-council jurisdictions and unionised environments they need **consultation, not notice** — a process with a counterparty who can say no. Getting this wrong ends an engagement rather than delaying it.
+
+### Step 3 — Go and watch. Come back with material.
+
+This is the part only you can do, and the reason the rest exists: **eight hours beside the operator gets you the job.** Spend them watching, not typing.
+
+Bring back whatever you actually produced — shift notes, a call transcript, an SOP, a system export, a photograph of a whiteboard — and drop each file into the folder that says what it is:
+
+```
+engagements/<slug>/02-Workflow/evidence/
+├── observed/      you watched it happen        → primary evidence
+├── system/        a log, export, record        → primary for volume and frequency
+├── documented/    an SOP, policy, spec, deck   → aspirational until observed
+└── stated/        an interview, call, meeting  → corroborating only
+```
+
+**The folder decides the class, never the content.** A confident-sounding transcript in `stated/` stays Stated evidence, and anything sourced only from it gets labelled `UNVERIFIED`. That discipline is the difference between a requirement that survives UAT and one that does not — so it is structural, not something you have to remember at the end of a long day.
+
+A file dropped outside a class folder is **reported, never guessed at**.
+
+PDFs, Word, PowerPoint and Excel need converting first:
+
+```bash
+uv run --script --frozen scripts/convert_to_md.py "<path>" --out ./tmp_conversion.md
+```
+
+For a spreadsheet, `--formulas` extracts the cell logic (`=B2*C2`) instead of the computed numbers — that is how you reverse-engineer a client's model rather than read its output:
+
+```bash
+uv run --script --frozen scripts/convert_to_md.py "<path>.xlsx" --formulas --out ./tmp_formulas.md
+```
+
+Write the conversion into the engagement folder, read it, delete it. A stray conversion is an unredacted copy of client material sitting outside its intended store.
+
+Audio and images need a transcript or a description written first — the harness has no transcription service and will say so rather than fail confusingly.
+
+### Step 4 — Turn it into structure
+
+```
+/capture
+```
+
+The agent reads what is waiting, extracts observations, exceptions, requirements, map elements and questions, and writes a **proposal** — an ordinary markdown file of rows for you to skim.
+
+**Nothing reaches a register until you accept it.** Fix a cell, delete a row that is wrong, then:
+
+```bash
+node packages/derive/src/cli.ts pending engagements/<slug>
+```
+
+```bash
+node packages/derive/src/cli.ts accept engagements/<slug> <proposal.md>
+```
+
+Decided against it? `reject` it with a reason, so the queue stops showing work nobody will do.
+
+**Ids are blank on purpose.** Code mints `EV-`, `EX-`, `REQ-` and `Q-` at accept time, so the sequence stays contiguous even if another session wrote in between — and you never type or sequence one. An accept that cites an id which does not exist is refused whole, because a partial accept leaves the register in a state nobody chose.
+
+### Step 5 — Ask what to ask
+
+```
+/next
+```
+
+This is the half that talks back. It reads the evidence chain and the open gate's criteria and gives you **the conversations to have tomorrow, grouped by who can answer them** — with names attached where the stakeholder map has them, what each question blocks, and where to write the answer down.
+
+```
+Ana Fuentes — Exception holder
+  · EX-002: who actually decides this one? Not the team — the person you
+    go to when it is not obvious.
+      why: blocks the #1 workflow (claims triage); exception without rule holder
+      write it to: 02-Workflow/exception-register.md
+```
+
+It is ranked by **what each question blocks** — joined to your prioritisation table — and by **how fast the answer perishes**. An operator's undocumented rule is elicitable while you are sitting beside them and effectively gone three weeks later; a broken citation costs minutes at a desk in November. Every line says why it ranks where it does. If the reason looks wrong, fix the prioritisation table rather than the order.
+
+Things nobody at the client can answer come out separately, under *"yours to fix"*.
+
+### Step 6 — Go back and ask. Then repeat.
+
+Answers go **into the instrument, not into chat**. A question answered in conversation and not written down is a question you will ask twice. The easiest route is the loop you already know: bring back the notes, drop them in `evidence/`, and run `/capture` again.
+
+```
+watch → drop in evidence/<class>/ → /capture → accept → /next → ask → repeat
+```
+
+### Step 7 — See where you stand
+
+```
+/dashboard
+```
+
+Rebuilds `state.json` from what is actually on disk, then renders self-contained HTML. Opens by double-click; no server, no build step.
+
+**A red gate or an empty instrument is the harness working.** Never hand-edit `state.json` to make it look better — it is derived, and if it disagrees with the files, the files are right.
+
+### Step 8 — The gate, when discovery feels done
+
+```
+/gate 1
+```
+
+A gate is a **stop, not a status update**. The memo recommends READY / READY WITH CAVEATS / NOT READY, and **a person decides** — code never sets `passed`, and a state file claiming otherwise is refused as tampered. An all-green memo on first pass usually means it was written from intent rather than evidence.
+
+Past G1, the pipeline continues: `/allocate` (place the intelligence), `/architect` and `/build`, `/evaluate`, `/gate 2`, `/roi`, `/gate 3`.
+
+### Bringing an old engagement forward
+
+Templates change. To backfill an existing engagement onto the current set without touching anything you have written:
+
+```bash
+node packages/derive/src/cli.ts scaffold engagements/<slug> --json vars.json --dry-run
+```
+
+Read what it would create, then drop the flag. Existing files are never overwritten.
+
+### If you get stuck
+
+| Symptom | What it means |
+|---|---|
+| A command fails with a TypeScript syntax error | You are on Node 22. This needs 24 — check with `node -v` |
+| `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
+| The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
+| An accept is refused | It cites an id that does not exist. The message names it |
+| `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
+
+Anything the harness gets wrong is worth logging: `/harness-improver`. **Nothing enters the shared library without a named engagement that needed it.**
 
 ## Two ideas worth understanding first
 
@@ -115,24 +313,6 @@ Derivation is driven by table anchors (`<!-- table:<instrument>.<table> role=reg
 The reference implementation is [`Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`](https://github.com/Abishek-Hariharan-HGS/AI_Ontology_Credit_Union). Its `docs/00-business/` layer is a **discovery deliverable**, not a modelling artefact — `03-Systems/ontology/` is where it is assembled before promotion. See `skills-practice/ontology-first-delivery/reference-architecture.md`.
 
 `ontology-engineer` is the only agent that writes to an ontology repo, and every write is logged in `03-Systems/ontology/promotion-log.md` against the requirement that justified it.
-
-## Reading binary documents
-
-```bash
-uv run --script --frozen scripts/convert_to_md.py "<path>" --out ./tmp_conversion.md
-uv run --script --frozen scripts/convert_to_md.py "<path>.xlsx" --formulas --out ./tmp_formulas.md
-```
-
-Write into the engagement folder, read it, delete it — a stray conversion is an unredacted copy of client material outside its intended store.
-
-## Before your first capture
-
-Two things, in order, neither optional:
-
-1. **Sign the evidence-handling terms** — residency, retention, redaction, access, deletion, onward use. `discovery-analyst` hard-stops without them, because evidence captured under unresolved terms may have to be destroyed.
-2. **Check the monitoring constraint.** Desktop task mining and session replay are employee monitoring. In works-council jurisdictions and unionised environments they need **consultation, not notice** — and getting it wrong ends an engagement rather than delaying it.
-
-See `.claude/skills/skills-practice/evidence-handling/SKILL.md`.
 
 ## Extending it
 
