@@ -13,6 +13,14 @@ Rules:
 | Id | Question | Asked by | Evidence they ask it | Entities needed | Status | Template | Gap type |
 |---|---|---|---|---|---|---|---|
 
+## Allowed values
+
+- `Status`: `answerable` · `needs-data` · `not-modelled`
+- `Gap type`: `modelling` · `data` · `—`
+
+**Hyphenated, exactly.** `needs data` with a space counts toward the total and
+toward no bucket, silently, which reads as coverage nobody has.
+
 ## Coverage
 
 Derived at derive time — **do not maintain by hand.**

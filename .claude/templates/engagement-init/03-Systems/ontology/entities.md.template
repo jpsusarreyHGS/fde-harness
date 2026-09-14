@@ -13,7 +13,7 @@ If the grain needs an "or", it is two entities. The most common failure is promo
 
 ## Properties
 
-<!-- table:entities.properties role=register id=Property -->
+<!-- table:entities.properties role=register id=Entity -->
 
 | Entity | Property | Type | Required | Source field | Transform |
 |---|---|---|---|---|---|

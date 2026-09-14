@@ -166,12 +166,19 @@ node packages/derive/src/cli.ts pending <engagement-dir>              # awaiting
 node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
 node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>"
 node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to ask
+node packages/derive/src/cli.ts contract-check <engagement-dir>       # will the compiler take it?
 ```
 
 Three rules follow, none optional:
 
 - **Never hand-write a register row when `/capture` could propose it**, and never hand-assign an id. Minting by eye is a read-then-write race, and a collision corrupts every citation pointing at it.
 - **An accept whose citations dangle is refused whole.** A partial accept leaves the register in a state nobody chose.
+- **`03-Systems/ontology/` is a published interface, not a working folder.**
+  `jpsusarreyHGS/ontology-compiler` reads it and says so in its own source:
+  *"The harness is the authority for this format; if the two ever diverge, the
+  harness wins."* An anchor rename or a column rename there is an API change
+  in another repository — read `docs/contract.md` first, and bump
+  `CONTRACT_SCHEMA` when you make one.
 - **Never re-rank the queue by hand.** `/next` joins what a question blocks to
   the prioritisation table and says so in its `why:` line. Presenting a
   different order, or the same order with a better-sounding reason, is the
@@ -323,7 +330,8 @@ A clean "not found" is itself the state signal.
 | Exceptions · requirements · questions | `02-Workflow/exception-register.md` · `02-Workflow/requirements-register.md` · `02-Workflow/open-questions.md` |
 | Raw material in · proposed rows out | `02-Workflow/evidence/{observed,system,documented,stated}/` · `02-Workflow/proposals/` |
 | Systems · readiness · vocabulary | `03-Systems/systems-inventory.md` · `03-Systems/readiness-scorecard.md` · `03-Systems/vocabulary-audit.md` |
-| Ontology contract | `03-Systems/ontology/glossary.md` · `personas.md` · `competency-questions.md` · `source-systems.md` |
+| Ontology contract | `03-Systems/ontology/glossary.md` · `personas.md` · `competency-questions.md` · `source-systems.md` · `entities.md` |
+| What that contract promises | `docs/contract.md` — **read before editing any ontology template** |
 | Promotion log | `03-Systems/ontology/promotion-log.md` |
 | Allocation grid · prioritisation | `04-Placement/allocation-grid.md` · `04-Placement/prioritisation.md` |
 | Value · cost | `04-Placement/value-hypothesis.md` · `04-Placement/cost-envelope.md` |

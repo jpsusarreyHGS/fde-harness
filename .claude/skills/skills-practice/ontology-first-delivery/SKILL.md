@@ -26,16 +26,18 @@ If you find yourself modelling something you cannot trace to a `REQ-`, park it i
 
 ## The discovery-to-ontology contract
 
-The reference implementation is `Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`. Its `docs/00-business/` layer is the contract, and **the load-bearing insight is that this layer is a discovery deliverable, not a modelling artefact.** It is filled from the field.
+**The contract is `03-Systems/ontology/`, and it is a published interface** — `jpsusarreyHGS/ontology-compiler` reads it directly and compiles it into a governed assistant. **The load-bearing insight is that this layer is a discovery deliverable, not a modelling artefact.** It is filled from the field.
+
+`docs/contract.md` in the harness root is canonical for what that folder has promised — the anchor names, the filenames, the id rules and the four preconditions the compiler refuses to build past. **Where this table and that file disagree, `docs/contract.md` wins**; the table below is the discovery half of the mapping, and two of its rows name files that exist under other names.
 
 | Discovery artefact | Contract file | Becomes |
 |---|---|---|
 | `chronicle/memory/client-vocabulary.md` | `glossary.md` | Approved terms, synonyms, owners |
 | `01-Organisation/stakeholder-map.md` | `personas.md` | Roles + permission matrix → the app's role module |
 | `02-Workflow/open-questions.md` + observed asks | `competency-questions.md` | One governed read template per question |
-| `04-Placement/prioritisation.md` | `use-cases.md` | Flows + the write allow-list → governed write templates |
+| `04-Placement/prioritisation.md` | **`05-Build/spec.md`** | Flows + the write allow-list → governed write templates. The compiler reads it from stage 05; there is no `use-cases.md` |
 | `03-Systems/systems-inventory.md` | `source-systems.md` | Field mappings + identity rules → the ingestion pipelines |
-| `02-Workflow/exception-register.md` | `shapes/` + golden sets | Validation constraints + eval cases |
+| `02-Workflow/exception-register.md` | **`entities.md`** (the shapes table) + golden sets | Validation constraints + eval cases. There is no `shapes/` directory |
 
 Assemble these in `03-Systems/ontology/` in dependency order, then promote. `promotion-rules.md` carries the mechanics; `reference-architecture.md` carries the repo's structure and conventions.
 

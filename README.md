@@ -27,25 +27,26 @@ Being precise about this matters more than the pitch, because an FDE picking thi
 | Piece | State |
 |---|---|
 | **1 — capture** | **Built and in use.** Ten stages, 50 instrument templates, the evidence chain enforced in code, an intake loop that turns raw material into proposed rows, and a coach that tells you what to ask next |
-| **2 — promote** | **Built as a discipline, not yet as automation.** All six kinds of content have a home and a table to land in. `ontology-engineer` is the only agent permitted to write to an ontology repo, and every write is logged in `promotion-log.md` against the requirement that justified it. What is still manual is the promotion itself — a person reads the contract and models |
-| **3 — compile** | **Not built.** The reference implementation is [`AI_Ontology_Credit_Union`](https://github.com/Abishek-Hariharan-HGS/AI_Ontology_Credit_Union); the platform-targeted compiler is the next repository, not this one |
+| **2 — promote** | **Built as a discipline, not yet as automation.** `ontology-engineer` is the only agent permitted to write to an ontology repo, and every write is logged in `promotion-log.md` against the requirement that justified it. What is still manual is the modelling itself — a person reads the contract and builds the graph |
+| **3 — compile** | **Built.** [`jpsusarreyHGS/ontology-compiler`](https://github.com/jpsusarreyHGS/ontology-compiler) reads an engagement's contract layer directly and emits a governed assistant. **Jena** and **Databricks** are stable; **Fabric** is configured in the instance file but not implemented — its own README says the first task there is research, not code |
 
-### The six files, and where they come from
+### The contract layer
 
-The contract between discovery and the ontology. Each one is a **discovery deliverable filled from the field**, not a modelling artefact invented at a desk — that is the load-bearing idea in the whole method.
+The handoff between discovery and the build. Every file is a **discovery deliverable filled from the field**, not a modelling artefact invented at a desk — that is the load-bearing idea in the whole method, and the reason the compiler can read it at all.
 
-All of it lives under `engagements/<slug>/03-Systems/ontology/`.
+All of it lives in `engagements/<slug>/03-Systems/ontology/`, except the flows, which stay where they are written.
 
-| In plain terms | Where it lands | Filled from |
-|---|---|---|
-| The client's vocabulary | `glossary.md` | Terms captured verbatim during observation |
-| Who does what | `personas.md` | `01-Organisation/stakeholder-map.md` |
-| The questions their people actually ask | `competency-questions.md` | `02-Workflow/open-questions.md` and observed asks |
-| What the AI is allowed to write | `personas.md` — the write allow-list | `04-Placement/prioritisation.md` and the allocation grid |
-| Where the data lives | `source-systems.md` | `03-Systems/systems-inventory.md` |
-| What "clean" data looks like | `entities.md` — the shapes table | `02-Workflow/exception-register.md` |
+| In plain terms | File | Filled from | Required |
+|---|---|---|---|
+| The client's vocabulary | `glossary.md` | Terms captured verbatim during observation | **yes** |
+| Who does what, and what they may change | `personas.md` | `01-Organisation/stakeholder-map.md` | **yes** |
+| The questions their people actually ask | `competency-questions.md` | `02-Workflow/open-questions.md` and observed asks | **yes** |
+| Where the data lives, and what mints each id | `source-systems.md` | `03-Systems/systems-inventory.md` | **yes** |
+| The objects, and what "clean" looks like | `entities.md` | `02-Workflow/exception-register.md` | no |
+| What the AI is allowed to do, end to end | `05-Build/spec.md` | `04-Placement/prioritisation.md` | no |
+| What is waiting, and what was promoted | `backlog.md` · `promotion-log.md` | The promotion decisions themselves | no |
 
-Two of the six share a file with a neighbour rather than standing alone: the write allow-list sits with the personas that hold the permissions, and the shapes sit with the entities they constrain. `skills-practice/ontology-first-delivery` names them as separate contract files, so **the naming is worth reconciling before the compiler is built** — the content is all there, the filenames are not what the method says.
+**`CQ-` and `WR-` ids are the join key.** A competency question numbered `CQ-01` here becomes `cq-01-<slug>` as a read template, a filename, a registry id and a coverage row in every target. Changing an id changes a filename in another repository — which is why code mints them and nobody types one.
 
 **Competency questions are the acceptance test.** A question the model cannot answer is either a modelling gap or a data gap — and which one it is must be stated, because they have completely different remedies and completely different costs.
 
@@ -79,6 +80,7 @@ Plus `/next` (the three conversations to have tomorrow, with names attached), `/
 | **15 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
+| **A published contract** | `03-Systems/ontology/` compiles to a governed assistant — see [`docs/contract.md`](docs/contract.md) |
 | **A dashboard** | portfolio and per-engagement views, derived from `state.json` |
 
 ## The frameworks it implements
@@ -248,7 +250,27 @@ Rebuilds `state.json` from what is actually on disk, then renders self-contained
 
 A gate is a **stop, not a status update**. The memo recommends READY / READY WITH CAVEATS / NOT READY, and **a person decides** — code never sets `passed`, and a state file claiming otherwise is refused as tampered. An all-green memo on first pass usually means it was written from intent rather than evidence.
 
-Past G1, the pipeline continues: `/allocate` (place the intelligence), `/architect` and `/build`, `/evaluate`, `/gate 2`, `/roi`, `/gate 3`.
+Past G1, the pipeline continues: `/allocate` (place the intelligence), `/architect` and `/build`, `/evaluate`, `/gate 2`, `/roi`, `/gate 3` — and the contract layer goes to the compiler, below.
+
+### Step 9 — Hand discovery to the build
+
+Past G1, the contract layer is what the build is made from. Check it will be accepted before you hand it over:
+
+```bash
+node packages/derive/src/cli.ts contract-check engagements/<slug>
+```
+
+Four things stop a build downstream, and all four are questions for a person rather than defects in your typing: a glossary term nobody owns, a competency question nobody was observed asking, a write with no approver, an entity with no system that mints it. They appear in `/next` with a name attached, ranked above everything else — a refusal is not advice, it is a build that will not happen.
+
+Everything merely thin is a warning and does not block. A question with no template yet is progress you can see.
+
+When it passes, [`ontology-compiler`](https://github.com/jpsusarreyHGS/ontology-compiler) reads the folder directly:
+
+```bash
+python -m core.importer engagements/<slug>/03-Systems/ontology --instance <slug> --target databricks
+```
+
+See [`docs/contract.md`](docs/contract.md) for what that folder has promised, and read it before you change anything in it — a template edit there is an API change in another repository.
 
 ### Bringing an old engagement forward
 
@@ -310,9 +332,27 @@ Derivation is driven by table anchors (`<!-- table:<instrument>.<table> role=reg
 
 ## Ontology pipeline
 
-The reference implementation is [`Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`](https://github.com/Abishek-Hariharan-HGS/AI_Ontology_Credit_Union). Its `docs/00-business/` layer is a **discovery deliverable**, not a modelling artefact — `03-Systems/ontology/` is where it is assembled before promotion. See `skills-practice/ontology-first-delivery/reference-architecture.md`.
+`03-Systems/ontology/` is not a working folder. **It is a published interface**, read by [`jpsusarreyHGS/ontology-compiler`](https://github.com/jpsusarreyHGS/ontology-compiler) — which states the ownership plainly: *"The harness is the authority for this format; if the two ever diverge, the harness wins."* So a template edit here is an API change there.
 
-`ontology-engineer` is the only agent that writes to an ontology repo, and every write is logged in `03-Systems/ontology/promotion-log.md` against the requirement that justified it.
+**[`docs/contract.md`](docs/contract.md) is what we have promised** — the anchor names, the filenames, the id rules, the parser semantics, and the four preconditions the compiler refuses to build past. Read it before changing anything in that folder.
+
+Check before you hand over:
+
+```bash
+node packages/derive/src/cli.ts contract-check engagements/<slug>
+```
+
+It runs the compiler's own four refusals locally, so a gap is found on the day it was created rather than in a Python traceback weeks later. **Thinness is a warning; a missing owner is a refusal** — a question with no template yet is visible progress, a glossary term nobody owns is an unanswered question about who decides. Every refusal a person can answer carries a role, and `/next` ranks it above ordinary findings.
+
+Then:
+
+```bash
+python -m core.importer engagements/<slug>/03-Systems/ontology --instance <slug> --target databricks
+```
+
+The target comes from `00-Setup/stack-decision.md`. **Choose it from the competency questions, not from precedent** — a triple store earns its place where relationship traversal and per-fact provenance are the point; where the questions are aggregations over known joins, a warehouse with a semantic model on top is less machinery for the same answer.
+
+`ontology-engineer` is the only agent that writes to an ontology repo, and every write is logged in `03-Systems/ontology/promotion-log.md` against the requirement that justified it. The credit-union reference implementation now lives inside the compiler as `examples/srcu/`.
 
 ## Extending it
 

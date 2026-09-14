@@ -20,7 +20,7 @@ Then read the ontology repo's own conventions before writing anything into it �
 
 ## The reference architecture
 
-The practice's reference implementation is `Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`. Its shape is the target shape:
+The compiler emits this shape; you do not build it by hand. `jpsusarreyHGS/ontology-compiler` reads `03-Systems/ontology/` and generates the model, the read and write templates, the constraints and the assistant surface for Jena or Databricks. Know the shape so you know what your contract layer becomes:
 
 ```
 docs/00-business/     the SME layer — every artefact traces back to it
@@ -98,7 +98,7 @@ Promoted this chunk
 - Repo paths written: <paths>
 
 Competency-question coverage
-- CQ-NN: answerable ✅ / needs data ⚠️ / not modelled ⬜   (N of M answerable)
+- CQ-NN: `answerable` ✅ / `needs-data` ⚠️ / `not-modelled` ⬜   (N of M answerable)
 
 Decisions needing a logged owner
 - <canonical-term choices, grain splits, identity-rule calls>

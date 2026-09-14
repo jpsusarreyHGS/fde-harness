@@ -392,8 +392,17 @@ export function deriveChain(input: ChainInput): ChainCounts {
   }
 
   // ---- ontology + competency questions ------------------------------------
+  // A reversal is logged in its own table but names the same object as the
+  // promotion it undoes, so counting rows counted a withdrawal as an arrival.
+  const reversed = new Set(
+    rowsOf("promotion-log", "promotion-log.reversals")
+      .map((r) => col(r, "What").trim().toLowerCase())
+      .filter(Boolean),
+  );
   const ontologyObjects = {
-    promoted: rowsOf("promotion-log", "promotion-log.rows").length,
+    promoted: rowsOf("promotion-log", "promotion-log.rows").filter(
+      (r) => !reversed.has(col(r, "What").trim().toLowerCase()),
+    ).length,
     backlog: rowsOf("ontology-backlog", "ontology-backlog.rows").length,
   };
 

@@ -1,6 +1,6 @@
 # Reference architecture
 
-The practice's reference ontology implementation is `Abishek-Hariharan-HGS/AI_Ontology_Credit_Union`. Read its `CLAUDE.md` before writing into it or into a repo derived from it — **repo conventions are authoritative and are never inferred from filenames.**
+The reference implementation is `jpsusarreyHGS/ontology-compiler`, which generates this shape from a harness contract layer. Its `examples/srcu/` is the credit-union build the practice started from; `examples/minimal/` is a second domain, kept deliberately small to prove the engine carries none of its own. Read its `CLAUDE.md` before writing into it or into a repo derived from it — **repo conventions are authoritative and are never inferred from filenames.**
 
 ## Shape
 

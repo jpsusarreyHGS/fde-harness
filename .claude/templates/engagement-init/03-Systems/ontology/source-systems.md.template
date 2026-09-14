@@ -20,7 +20,7 @@ Field-level mappings and identity rules. Feeds the ingestion pipelines.
 
 ## Field mappings
 
-<!-- table:source-systems.field-mappings role=register id=Field -->
+<!-- table:source-systems.field-mappings role=register id=Source -->
 
 | Source | Field | Type | Maps to object | Maps to property | Transform | Nullable | Notes |
 |---|---|---|---|---|---|---|---|
@@ -47,9 +47,17 @@ Every source contributes an activity record so any fact can be attributed.
 
 ## Validation
 
+**Shapes live in `entities.md`.** This table says only which of them stop an
+ingestion run, because that is an ingestion decision rather than a modelling
+one. The `Shape` column cites a row there; it does not restate it.
+
+Two tables that both described a constraint, one ending in `Severity` and the
+other in `Blocking`, could disagree about whether a violation halts a load —
+and nothing reconciled them.
+
 <!-- table:source-systems.validation role=register id=Shape -->
 
-| Shape | Constrains | From exception | Blocking |
+| Shape | Blocking | Quarantine or reject | Notes |
 |---|---|---|---|
 
 A build that has not passed validation is not built.
