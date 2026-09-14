@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FDE Bootcamp — The complete three-week programme — HGS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{--navy:#26476B;--navy-deep:#15283C;--grey:#E7E6E6;--charcoal:#2D2D2D;--lime:#ABCF02;
+--teal:#3D9B99;--teal-light:#85BEBC;--sage:#9AAC94;--slate:#5C6D72;--white:#FFF;
+--shadow:0 4px 20px rgba(0,0,0,.10);--shadow-lg:0 6px 28px rgba(0,0,0,.14);--radius:6px;--rail:270px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--grey);color:var(--charcoal);font-family:Kanit,Raleway,system-ui,sans-serif;
+font-weight:300;font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-weight:600;line-height:1.18;margin:0}p{margin:0 0 15px}a{color:var(--teal)}
+.rail{position:fixed;top:0;left:0;width:var(--rail);height:100vh;background:var(--navy-deep);color:var(--white);padding:32px 26px;overflow-y:auto;z-index:50}
+.rail .mark{font-size:19px;font-weight:600;letter-spacing:.14em}.rail .mark span{color:var(--lime)}
+.rail .sub{font-size:11.5px;color:var(--teal-light);letter-spacing:.09em;text-transform:uppercase;margin-top:6px}
+.rail .wk{margin-top:22px;padding:12px 14px;background:rgba(171,207,2,.12);border-left:3px solid var(--lime);border-radius:0 4px 4px 0;font-size:12.5px;color:rgba(255,255,255,.85)}
+.rail .wk b{display:block;color:var(--lime);font-weight:500;font-size:13.5px}
+.rail nav{margin-top:24px;border-top:1px solid rgba(255,255,255,.14);padding-top:16px}
+.rail a{display:flex;gap:11px;align-items:baseline;text-decoration:none;color:rgba(255,255,255,.74);font-size:13px;
+padding:7px 0 7px 12px;margin-left:-12px;border-left:2px solid transparent;transition:.18s}
+.rail a:hover,.rail a:focus-visible,.rail a.on{color:var(--white);border-left-color:var(--lime)}
+.rail a i{font-style:normal;font-size:11px;color:var(--lime);min-width:26px;font-weight:500}
+.rail .foot{margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.42);line-height:1.6}
+.page{margin-left:var(--rail)}.wrap{max-width:940px;margin:0 auto;padding:0 46px}
+.hero{background:var(--navy);color:var(--white);padding:82px 0 66px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-190px;top:-200px;width:620px;height:620px;border-radius:50%;
+border:1px solid rgba(171,207,2,.20);box-shadow:0 0 0 60px rgba(255,255,255,.028),0 0 0 145px rgba(255,255,255,.02)}
+.hero .wrap{position:relative;z-index:2}
+.eyebrow{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);font-weight:500}
+.hero h1{font-size:42px;color:var(--lime);margin:16px 0 0;max-width:20ch}
+.hero .lede{font-size:18.5px;font-weight:200;color:rgba(255,255,255,.9);max-width:62ch;margin-top:20px}
+.hero .meta{margin-top:34px;display:flex;flex-wrap:wrap;gap:32px;border-top:1px solid rgba(255,255,255,.18);padding-top:20px}
+.hero .meta div{font-size:12.5px;color:rgba(255,255,255,.62)}
+.hero .meta b{display:block;font-weight:500;color:var(--white);font-size:14.5px}
+.arc{height:5px;background:linear-gradient(90deg,var(--lime) 0 22%,var(--teal) 22% 46%,var(--teal-light) 46% 66%,var(--sage) 66% 84%,var(--slate) 84% 100%)}
+.sec{padding:58px 0 6px}
+.day{display:flex;gap:20px;align-items:flex-start;margin-bottom:8px}
+.dnum{flex:0 0 auto;width:52px;height:52px;border-radius:var(--radius);background:var(--navy);color:var(--lime);
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;box-shadow:var(--shadow)}
+.day h2{font-size:29px;padding-top:6px}
+.day .tag{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:500;display:block;margin-bottom:4px}
+h3{font-size:19px;margin:34px 0 12px;color:var(--navy)}h4{font-size:14.5px;margin:20px 0 8px}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 30px;margin:20px 0}
+.card>:first-child{margin-top:0}.card>:last-child{margin-bottom:0}
+.grid{display:grid;gap:16px;margin:20px 0}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+.tile{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+.tile .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px}
+.tile p:last-child{margin-bottom:0}
+.rule{background:var(--navy-deep);color:var(--white);border-radius:var(--radius);padding:24px 28px;margin:24px 0;border-left:4px solid var(--lime);box-shadow:var(--shadow-lg)}
+.rule .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);font-weight:500;margin-bottom:8px}
+.rule p{margin:0;font-size:16.5px;font-weight:200;color:rgba(255,255,255,.95)}
+.rule p+p{margin-top:11px;font-size:14px;color:rgba(255,255,255,.74)}
+.warn{background:var(--white);border-left:4px solid var(--teal);border-radius:var(--radius);padding:18px 22px;margin:20px 0;box-shadow:var(--shadow)}
+.warn .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:6px}
+.warn p:last-child{margin-bottom:0}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+th{background:var(--navy);color:var(--white);text-align:left;padding:11px 14px;font-weight:500;font-size:12px;letter-spacing:.05em}
+td{padding:11px 14px;border-top:1px solid var(--grey);vertical-align:top}
+tbody tr:nth-child(even) td{background:#FAFAFA}td strong{font-weight:500;color:var(--navy)}
+ul,ol{margin:0 0 15px;padding-left:20px}li{margin-bottom:7px}
+ul.qs{list-style:none;padding-left:0}
+ul.qs li{padding-left:22px;position:relative;margin-bottom:10px}
+ul.qs li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;background:var(--lime);border-radius:2px}
+ul.qs li b{font-weight:500;color:var(--navy)}
+.sched td:first-child{white-space:nowrap;color:var(--slate);font-size:12.5px}
+.deliv{background:var(--navy);color:var(--white);border-radius:var(--radius);padding:20px 26px;margin:22px 0;box-shadow:var(--shadow-lg);display:flex;gap:18px;align-items:flex-start}
+.deliv .ic{flex:0 0 auto;width:38px;height:38px;border-radius:var(--radius);background:var(--lime);color:var(--navy-deep);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.deliv b{font-weight:500;color:var(--lime);display:block;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.deliv p{margin:0;font-size:14.5px;color:rgba(255,255,255,.92);font-weight:200}
+.gate{background:var(--navy-deep);color:var(--white);padding:52px 0;margin-top:54px}
+.gate h2{color:var(--lime);font-size:27px}
+.gate p{color:rgba(255,255,255,.88);max-width:66ch}
+.gate ul{color:rgba(255,255,255,.88)}
+.gate .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.gate .steps div{background:rgba(255,255,255,.07);border-radius:var(--radius);padding:18px;border-top:3px solid var(--lime)}
+.gate .steps b{display:block;font-weight:500;font-size:15px;margin-bottom:5px}
+.gate .steps span{font-size:13px;color:rgba(255,255,255,.76);font-weight:200}
+footer{background:var(--navy-deep);color:rgba(255,255,255,.5);padding:26px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:1080px){:root{--rail:0px}.rail{position:static;width:100%;height:auto;padding:22px 26px}
+.rail nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px}
+.page{margin-left:0}.wrap{padding:0 26px}.hero h1{font-size:31px}.g2,.g3,.gate .steps{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.g2,.g3,.gate .steps{grid-template-columns:1fr}.hero h1{font-size:26px}.day h2{font-size:23px}}
+@media print{.rail{display:none}.page{margin-left:0}body{background:#fff}.card,.tile,table{box-shadow:none;border:1px solid #ddd}.sec{page-break-inside:avoid}}
+
+.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12.5px}
+ul,ol{margin:0 0 15px;padding-left:20px}li{margin-bottom:7px}
+.alloc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:22px 0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.alloc div{padding:18px 16px;color:var(--white)}
+.alloc div:nth-child(1){background:var(--navy-deep)}.alloc div:nth-child(2){background:var(--navy)}
+.alloc div:nth-child(3){background:var(--teal)}.alloc div:nth-child(4){background:var(--slate)}
+.alloc .k{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--lime);font-weight:500;margin-bottom:6px}
+.alloc p{font-size:12.5px;margin:0;color:rgba(255,255,255,.92);font-weight:200}
+
+.ladder{counter-reset:s;margin:20px 0;padding:0}
+.ladder li{list-style:none;position:relative;padding:14px 0 14px 58px;border-bottom:1px solid rgba(0,0,0,.08)}
+.ladder li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:12px;width:32px;height:32px;
+border-radius:var(--radius);background:var(--white);color:var(--navy);font-weight:600;font-size:13px;
+display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.ladder li b{display:block;font-weight:500;color:var(--navy);font-size:15px}
+.ladder li span{font-size:13.5px}
+
+@media(max-width:1080px){.g3,.g4,.alloc{grid-template-columns:1fr 1fr}}@media(max-width:640px){.g3,.g4,.alloc{grid-template-columns:1fr}}
+.rail .nsec{display:block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-light);font-weight:500;margin:18px 0 4px;opacity:.85}.rail nav .nsec:first-child{margin-top:0}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <div class="mark">HGS<span>.</span></div>
+  <div class="sub">FDE bootcamp</div>
+  <div class="wk"><b>Complete programme</b>Three weeks · 15 days · certification by shipped project</div>
+  <nav id="nav">
+    <span class="nsec">Week 1 · Discovery and the domain</span>
+    <a href="#client"><i>—</i>The running client</a>
+    <a href="#d1"><i>D1</i>The discipline</a>
+    <a href="#d2"><i>D2</i>Observation craft</a>
+    <a href="#d3"><i>D3</i>Stakeholders</a>
+    <a href="#d4"><i>D4</i>Systems and data</a>
+    <a href="#d5"><i>D5</i>Ontology</a>
+    <a href="#gate1"><i>—</i>Week 1 gate</a>
+    <span class="nsec">Week 2 · Judgment and the build</span>
+    <a href="#d6"><i>D6</i>Placement judgment</a>
+    <a href="#d7"><i>D7</i>Architecture</a>
+    <a href="#d8"><i>D8</i>The harness</a>
+    <a href="#d9"><i>D9</i>Unhappy paths</a>
+    <a href="#d10"><i>D10</i>Evals</a>
+    <a href="#gate2"><i>—</i>Week 2 gate</a>
+    <span class="nsec">Week 3 · Deployment and value</span>
+    <a href="#d11"><i>D11</i>Into production</a>
+    <a href="#d12"><i>D12</i>Adoption and ops</a>
+    <a href="#d13"><i>D13</i>Value and readout</a>
+    <a href="#d14"><i>D14–15</i>The capstone</a>
+    <a href="#cert"><i>—</i>Certification</a>
+    <a href="#after"><i>—</i>After the bootcamp</a>
+  </nav>
+  <div class="foot">Internal enablement.<br>Bootcamp v1 · single-document edition.</div>
+</aside>
+
+<main class="page">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">FDE bootcamp · Week 1 of 3</div>
+    <h1>Discovery and the domain</h1>
+    <p class="lede">Before anyone builds anything: how to recover the real workflow from the stated one, map an organisation, read its systems, and turn its vocabulary into a domain model. Every technique this week is platform-agnostic — the principles come from the best FDE practices in the industry, the tooling is whatever the engagement allows.</p>
+    <div class="meta">
+      <div><b>5 days · ~40 hrs</b>Classroom, lab and simulation</div>
+      <div><b>Domains 1, 4, 5</b>Discovery · Ontology · Stakeholder</div>
+      <div><b>Gate artefact</b>Operating map + draft ontology</div>
+    </div>
+  </div>
+</section>
+<div class="arc"></div>
+
+<!-- CLIENT -->
+<section class="sec" id="client">
+  <div class="wrap">
+    <div class="day"><div class="dnum">MD</div>
+      <div><span class="tag">The running client</span><h2>Meridian Distribution</h2></div>
+    </div>
+    <p>One fictional client carries the entire bootcamp. Everything you produce this week — the operating map, the exception inventory, the ontology — is the foundation Week 2 builds on and Week 3 deploys against. Treat it as cumulative: sloppy discovery now becomes your problem in ten days.</p>
+    <div class="card">
+      <p><strong>Meridian Distribution</strong> is a mid-size specialty distributor: ~2,400 employees, 11 warehouses, ~40,000 orders a month. On-time fulfilment sits at 81%; the COO has promised the board 93% within two quarters. The order desk is drowning in email — orders arrive from 40+ customer formats, half of them exceptions. Finance migrated to a new ERP eighteen months ago at a cost nobody will repeat. Sales runs a CRM that disagrees with the ERP about who the customers even are. A legacy AR system nobody will decommission holds nine years of history. And one senior order-desk analyst, there since the beginning, is the only person who knows how the ambiguous cases get routed.</p>
+      <p>Facilitators play five Meridian characters across the week: the COO (sponsor), the order desk analyst (operator and exception holder), the order desk manager (process owner), the platform lead (systems gatekeeper), and a finance systems manager. Each has a public position, a private reality, and unlock conditions. What they tell you depends entirely on how you ask.</p>
+    </div>
+    <div class="rule"><div class="k">The week in one sentence</div>
+      <p>By Friday you can walk into an organisation cold and leave with a defensible picture of how it actually works — which is the half of the job no platform does for you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DAY 1 -->
+<section class="sec" id="d1">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D1</div>
+      <div><span class="tag">Monday</span><h2>The discipline and its failure modes</h2></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>What forward deployed means</strong></td><td>The history and the vintages: platform stability (2008) → data integration (2012) → custom solutioning (2016) → enablement (2020) → agentic delivery (today). The jobs accumulated; they never replaced each other. Which vintage this practice hires and why the term means everything and therefore almost nothing.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>FDE as product strategy</strong></td><td>The core doctrine: an FDE is an extension of the product function, not go-to-market. What distinguishes an FDE from a solutions architect, a consultant, and a sales engineer. Product return as an obligation: at every engagement close, <em>what did we generalise, and where did it land?</em></td></tr>
+        <tr><td>13:15–14:45</td><td><strong>Why pilots fail</strong></td><td>The token-maxing era and its wreckage: budgets burned in a quarter, with published estimates of generative AI pilot failure running from ~70% to ~95% depending on the study — the precise figure matters less than the pattern. Root causes: no placement judgment, no evals, forced migrations, no sponsor de-risking, discovery done by survey. Case study: the 47-page requirements document that was really a four-hour alert.</td></tr>
+        <tr><td>15:00–16:30</td><td><strong>The engagement shape</strong></td><td>Assessment → evals → deployment, then loop. The commercial logic of the paid assessment, why it's worth multiples of its price, and why "audit" is the wrong word to sell it with. The sub-day rule and the eighteen-month rule, and why holding both at once is the job.</td></tr>
+        <tr><td>16:30–17:30</td><td><strong>Meridian kickoff</strong></td><td>Cohort receives the Meridian brief: the COO's stated request (a "real-time fulfilment command centre dashboard"), an org chart, and a 2023 data dictionary. Nothing else. First reactions logged — they get revisited on Friday.</td></tr>
+      </tbody>
+    </table>
+    <div class="warn"><div class="k">Pre-reading assigned tonight</div>
+      <p>The Definitive Guide to Forward Deployed Engineering (nextplay / Vinoo Ganesh — the builder of Palantir's Project Frontline training programme), and the practice's own cross-source synthesis. Both are short. Come Tuesday knowing the seven convergent principles — and pay particular attention to the guide's six traits of great FDEs (curiosity, calibration, communication, calm under failure, ownership without authority, and pushing back with an alternative), because they are graded behaviours across all three weeks.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 1 deliverable</b><p>One page: what the COO asked for, three hypotheses about what Meridian actually needs, and the evidence you'd want before believing any of them.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 2 -->
+<section class="sec" id="d2">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D2</div>
+      <div><span class="tag">Tuesday</span><h2>Observation craft — the real workflow</h2></div>
+    </div>
+    <p>The documented process is very rarely the real process. Today is the single most important day of the bootcamp: learning to recover what actually happens rather than what people say happens. It is the first of the three crafts an FDE practises on day one of every engagement — the interview craft, the modelling craft, and the scoping craft — and the other two are only as good as this one, because you can't model or scope a workflow you never actually saw.</p>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>Why "an email arrives" is never one step</strong></td><td>Decomposition drill: 40+ senders, no two alike, payloads in PDFs and screenshots and forwarded threads, half of them exceptions, routing rules in one person's head. The happy path is the part the client already controls; the long tail is where you're needed.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>The observation method</strong></td><td>Interview vs. observation and why the second recovers what the first cannot. The four behavioural tells: repeated tasks, copy-paste between tools, tab-switching, phone-out-mid-task. The question set: <em>what's the most annoying part of your morning · can I watch you do it · what happens after this step · when did it last go wrong · how do you know where to look · what do you ignore.</em></td></tr>
+        <tr><td>13:15–16:00</td><td><strong>Simulation: the order desk</strong></td><td>Live role-play with the Meridian order-desk analyst (SCN-01 pattern). Nine discoveries are seeded behind unlock conditions; most only open if you ask to observe rather than interview. The facilitator will repeat the public position indefinitely if you don't change approach — that repetition is feedback.</td></tr>
+        <tr><td>16:15–17:30</td><td><strong>Debrief + exception inventory</strong></td><td>Ground truth revealed, discoveries scored by tier. Then the craft of the exception inventory as a first-class artefact: every deviation, its frequency, its current handling, and whose head holds the rule. This inventory becomes Week 2's eval golden set — quality here propagates forward.</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">Field rule of the day</div>
+      <p>Residents get the truth. Your badge and your contractor email address are your data-mining permits — you cannot survey your way to the real workflow.</p>
+      <p>Capture tooling (process mining, screen recording, meeting transcription) tells you where to look. It never substitutes for sitting beside the operator, because it records what fires, not why, and never what someone stopped mentioning because nobody listened last time.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 2 deliverable</b><p>Meridian order-desk operating map v1 with a structured exception inventory: trigger variants, steps, volumes, judgment points, dead ends, failure modes, and what lives only in the analyst's head.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 3 -->
+<section class="sec" id="d3">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D3</div>
+      <div><span class="tag">Wednesday</span><h2>Organisation mapping and stakeholder craft</h2></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The five roles</strong></td><td>Executive sponsor, process owner, operator, exception holder, systems gatekeeper — what each gives you, how to find them, and why the org chart shows reporting lines but not where knowledge sits. Building the stakeholder and decision-rights map as a working instrument, not a slide.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Sponsor psychology</strong></td><td>The sponsor's actual calculation: status quo is safe, you are the risk, and they want to get promoted, not just avoid getting fired. De-risking moves: never open with migration, give them the sentence they'll repeat upward, structure the first engagement so their downside is near zero. Question set: <em>what happens if we do nothing · who else can do this work · what have you already committed to, and to whom.</em></td></tr>
+        <tr><td>13:15–15:45</td><td><strong>Simulation: the resister</strong></td><td>A Meridian warehouse supervisor has blocked the last two "digitisation" attempts and is described internally as difficult (SCN-02 pattern). Persuasion makes it worse; observation opens it. The seeded truth: her resistance encodes a real, unstated operational constraint that every prior vendor missed.</td></tr>
+        <tr><td>16:00–17:30</td><td><strong>Debrief: resistance is data</strong></td><td>The doctrine: when someone is viscerally opposed and can't articulate why, go and watch them work. The person with the workaround is not stupid — they have a requirement you haven't found. How the finding routes back as a product-level insight, not an account-level accommodation.</td></tr>
+      </tbody>
+    </table>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 3 deliverable</b><p>Meridian stakeholder map with decision rights, each person's public position vs. observed reality, and a one-paragraph de-risking plan for the COO.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 4 -->
+<section class="sec" id="d4">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D4</div>
+      <div><span class="tag">Thursday</span><h2>Systems, data and readiness</h2></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The systems inventory</strong></td><td>Layer by layer: system of record (immovable — recently migrated at great cost), CRM, spend and revenue tooling, data platform, collaboration, identity. The six questions per system: real API coverage vs. documented, record vs. copy, access lead time, honest data quality, migration history, and the translation layer to the next system.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Data reality</strong></td><td>Nulls, duplicates, drift, and defaults — anchored by the canonical field story: an empty date column read as the Unix epoch caused a Palantir deployment to generate 2.3 million Cassandra keyspaces spanning 1970 to the present, needing ~14&nbsp;TB of RAM just to boot. The system did exactly what it was designed to do. The team had simply never seen the data it would actually process. Why integration seams are where things break. The build-on-top doctrine: you only get to refuse migrations if integrating with the incumbent is cheap for you.</td></tr>
+        <tr><td>13:15–15:30</td><td><strong>Lab: Meridian landscape</strong></td><td>Cohort receives simulated access: ERP schema extracts, CRM exports, the legacy AR system's CSV dumps, and 45 minutes with the platform lead. Inventory the landscape, score integration feasibility, find the three seeded data-quality landmines.</td></tr>
+        <tr><td>15:45–17:30</td><td><strong>Readiness scorecard</strong></td><td>Assembling the data and integration readiness assessment: availability, quality, access, integration paths, security constraints, delivery blockers — and the honest lead-time estimate for credentials, which is the top schedule risk on real engagements.</td></tr>
+      </tbody>
+    </table>
+    <div class="warn"><div class="k">Tech-agnostic note</div>
+      <p>Platform-native stacks bundle ingestion, transformation and modelling into one opinionated pipeline. We teach the pipeline as a shape — ingest → transform → model → application → writeback — and implement it with whatever the client's estate and our harness allow. The shape is the transferable asset; the tool is a detail of the account.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 4 deliverable</b><p>Meridian system and data landscape map plus a readiness scorecard with a ranked risk list.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 5 -->
+<section class="sec" id="d5">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D5</div>
+      <div><span class="tag">Friday</span><h2>Ontology — nouns, verbs and the canonical model</h2></div>
+    </div>
+    <p>The most Foundry-shaped day of the programme, taught without Foundry. Every organisation is nouns and verbs — entities and operations — and the same real-world thing is usually named differently, at different grains, by every function. Modelling that once, canonically, is the highest-leverage act in the whole engagement.</p>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The vocabulary collision</strong></td><td>Sales says <em>account</em>, finance says <em>billing entity</em>, delivery says <em>client</em>, engineering says <em>org_id</em> — one thing, four grains, zero maintained mappings. Why this breaks integrations weekly and why it's a feature of human organisations, not a bug. The four questions: which terms are overloaded, where are the integration points, what are the translation layers, which systems of record will never move.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Canonical modelling</strong></td><td>Entities, attributes, relationships, events, actions and rules. Choosing the canonical grain — prefer the externally verifiable key. Building translation instead of forcing vocabulary change, and letting the model win adoption through the tooling rather than by mandate. Writeback: a model that can't act on the business is a glossary; actions and permissions make it operational.</td></tr>
+        <tr><td>13:15–16:00</td><td><strong>Simulation: four words for one customer</strong></td><td>SCN-03 against Meridian: 30 minutes each with sales ops, finance systems, the platform lead and a customer success manager. The seeded truth: the CRM–ERP integration breaks weekly on the 22% of customers with multiple legal entities, and three prior vendors fixed the failing job instead of the grain mismatch.</td></tr>
+        <tr><td>16:15–17:30</td><td><strong>Draft the Meridian ontology</strong></td><td>Cohort produces the draft ontology backlog: core entities with canonical grain and key, term mappings per function, candidate relationships, and the first ten business rules extracted from the exception inventory. This artefact is Week 2's foundation.</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">The strategic point</div>
+      <p>Users adopt your vocabulary along with your product. Whoever defines the terms owns the frame — and the linguistic foundation outlasts any single workflow you automate.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 5 deliverable</b><p>Meridian draft ontology: entities, grains, keys, per-function term map, candidate relationships, and business rules v1.</p></div></div>
+  </div>
+</section>
+
+<!-- GATE -->
+<section class="gate" id="gate1">
+  <div class="wrap">
+    <div class="eyebrow">End of week 1</div>
+    <h2 style="margin-top:12px">The Week 1 gate</h2>
+    <p>Friday close: each trainee presents their Meridian discovery package in 15 minutes to a panel playing the COO and the practice lead. Passing requires all three artefacts at standard, plus the behaviours below observed at least once during the week.</p>
+    <div class="steps">
+      <div><b>Operating map + exception inventory</b><span>Scored against the hidden ground truth. Bar: ≥75% of easy discoveries, ≥50% of medium, at least one hard.</span></div>
+      <div><b>Stakeholder map + readiness scorecard</b><span>Five roles identified correctly, decision rights defensible, the three data landmines found.</span></div>
+      <div><b>Draft ontology</b><span>Canonical grain chosen and defended, the CRM–ERP grain mismatch identified as the real cause of the weekly breakage.</span></div>
+    </div>
+    <ul style="margin-top:26px">
+      <li>Asked to <strong>observe</strong> rather than only interview, unprompted, at least once</li>
+      <li>Treated resistance as information at least once — went and watched instead of persuading</li>
+      <li>Correctly identified at least one thing that should <strong>not</strong> be built</li>
+      <li>Can state the COO's real problem in one sentence that is not the dashboard she asked for</li>
+    </ul>
+    <p style="margin-top:20px;font-size:14.5px;color:rgba(255,255,255,.72)">Trainees who miss the gate repeat the relevant simulation on Monday morning with a fresh finding set before joining Week 2. <strong style="color:var(--lime);font-weight:500">Week 2: placement judgment, architecture, and the agentic build — turning this week's map into a working, evaluated MVP.</strong></p>
+  </div>
+</section>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">FDE bootcamp · Week 2 of 3</div>
+    <h1>Judgment and the build</h1>
+    <p class="lede">Week 1 established what's true at Meridian. This week decides where intelligence belongs — and where it doesn't — then builds a working, evaluated MVP against the exception inventory. The bar is not a demo. It's a system that works when prompted badly, fails legibly, and comes with the evidence to prove both.</p>
+    <div class="meta">
+      <div><b>5 days · ~40 hrs</b>Heavy lab time</div>
+      <div><b>Domains 2, 3</b>Placement · Build &amp; Ship · Evals</div>
+      <div><b>Gate artefact</b>Working MVP + eval report</div>
+    </div>
+  </div>
+</section>
+<div class="arc"></div>
+
+<!-- DAY 6 -->
+<section class="sec" id="d6">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D6</div>
+      <div><span class="tag">Monday</span><h2>Placement judgment — where intelligence belongs</h2></div>
+    </div>
+    <p>This is the judgment that separates an FDE from an implementer, and the one the last cycle got wrong. Handing everything to the model produced hallucinations, blown budgets and a ~95% pilot failure rate. The correction: most of a good solution is still deterministic software.</p>
+    <div class="alloc">
+      <div><div class="k">Deterministic</div><p>Rules, thresholds, lookups, routing on structured fields. Exactly right every time, at negligible cost. Default here.</p></div>
+      <div><div class="k">Model judgment</div><p>Classification of genuinely varied input, extraction from messy documents, summarisation. Surgical use only.</p></div>
+      <div><div class="k">Human gate</div><p>Approval before anything irreversible or externally visible. Blast radius decides, not accuracy.</p></div>
+      <div><div class="k">Leave alone</div><p>Too risky, insufficient ROI, already automated, or about to be replaced. A frequently correct answer.</p></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The allocation grid</strong></td><td>Every step in the operating map gets exactly one category and a written reason. Drill: of a typical ten-step workflow, perhaps three steps need genuine judgment; the rest are conditionals and API calls. Putting a model on all ten gets you 80% accuracy at forty times the cost of 99.9%.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Risk and the calibration questions</strong></td><td>Blast radius: what breaks, who notices, how fast, who gets blamed. <em>Will I get a 2 a.m. call in six months · what's the trade-off for solving this fast · who owns it when I leave · is the volume high enough to matter.</em> Why "is 88% accuracy good?" has no context-free answer.</td></tr>
+        <tr><td>13:15–15:00</td><td><strong>Design-time economics</strong></td><td>Projecting unit cost before building: inference, compute, connector calls and human-gate load at expected volume. Model tiering — frontier to establish feasibility, then push subtasks down to smaller, cheaper models. This discipline is the difference between a pilot that scales and one that dies at budget review.</td></tr>
+        <tr><td>15:15–17:30</td><td><strong>Lab: the Meridian allocation grid</strong></td><td>Each trainee allocates the full order-desk workflow, prices it, and produces a ranked priority matrix — including at least two workflows recommended for <strong>no automation</strong>, with the client-facing rationale. Panel challenge: "why not just put a model on the whole thing?"</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">Graded skill of the day</div>
+      <p>Declining well. Telling a client that a workflow should not be automated — and keeping the relationship — is a demonstration of judgment, and clients read it as exactly that.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 6 deliverable</b><p>Meridian allocation grid with per-step reasoning, a pre-build cost envelope, and a value-vs-feasibility priority matrix with two explicit declines.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 7 -->
+<section class="sec" id="d7">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D7</div>
+      <div><span class="tag">Tuesday</span><h2>Solution architecture and scope control</h2></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>Reference patterns</strong></td><td>The five shapes that cover most enterprise AI work: retrieval over documents, workflow automation with judgment steps, copilot beside an existing tool, agentic execution with gates, and analytics over the canonical model. Choosing by the allocation grid, not by fashion. Every pattern implemented stack-agnostically.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Build on top, never migrate</strong></td><td>Integration architecture against immovable systems of record: reading from the ERP without owning it, writeback with idempotency, translation layers at every seam. What the recently-migrated ERP at Meridian means for every design decision this week.</td></tr>
+        <tr><td>13:15–14:45</td><td><strong>Scope control and acceptance criteria</strong></td><td>The pilot charter as a contract: scope, non-goals, users, milestones, integrations, acceptance criteria, governance. Writing acceptance criteria that are testable — they become the eval suite on Day 10. Security and identity constraints stated up front, not discovered at deployment.</td></tr>
+        <tr><td>15:00–17:30</td><td><strong>Lab: the Meridian MVP spec</strong></td><td>From the priority matrix, each trainee specs the top workflow: order-intake triage. Architecture sketch, integration points, schema definitions, human-gate placement, and the acceptance criteria the Friday eval must pass. Peer review in pairs; the reviewer signs the spec and shares accountability for it.</td></tr>
+      </tbody>
+    </table>
+    <div class="warn"><div class="k">The sub-day rule, applied</div>
+      <p>Somewhere in the Meridian material is a four-hour fix hiding inside the big request. Trainees who spot it are expected to build and ship it <em>today</em>, before the MVP, and log what it bought them with the client characters. Escalating it into the MVP scope is the wrong answer. The doctrine's originator states it plainly: find one papercut you can fix in under a day, ship it before the week is over, and tell them you did — it builds trust and goodwill like nothing else.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 7 deliverable</b><p>Signed MVP spec: architecture, integrations, schemas, gates, and testable acceptance criteria — plus the shipped sub-day fix, if found.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 8 -->
+<section class="sec" id="d8">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D8</div>
+      <div><span class="tag">Wednesday</span><h2>The harness — anatomy of a production agent</h2></div>
+    </div>
+    <p>Full build day on the practice harness. The definition of working: the system completes the task <strong>when prompted badly</strong> — repeatedly, in the background, without depending on anyone crafting the perfect input. If it only works in your hands, you haven't built anything.</p>
+    <table>
+      <thead><tr><th style="width:24%">Component</th><th>Standard</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Agent loop</strong></td><td>Bounded task, explicit completion criteria, iteration limits</td></tr>
+        <tr><td><strong>Tools</strong></td><td>Narrow, well-described, validated inputs and outputs — few tools used well</td></tr>
+        <tr><td><strong>Guardrails</strong></td><td>Hard limits on scope, spend and irreversible actions, enforced in code, never only in the prompt</td></tr>
+        <tr><td><strong>Structured output</strong></td><td>Defined JSON schema, validated at every boundary — never free-form text between components</td></tr>
+        <tr><td><strong>Context and memory</strong></td><td>Deliberate: what persists, what's retrieved, what's discarded — grounded in the Meridian ontology</td></tr>
+        <tr><td><strong>Human gate</strong></td><td>Approval queue wired for every action the allocation grid marked as gated</td></tr>
+        <tr><td><strong>Audit trail</strong></td><td>Every action, input, decision and confidence logged and inspectable — non-negotiable</td></tr>
+      </tbody>
+    </table>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:00</td><td><strong>Harness walkthrough</strong></td><td>The practice harness and why one shared runtime beats every FDE rolling their own loop: shared guardrails, shared improvements, model independence. Where the client's stack plugs in and where it doesn't matter.</td></tr>
+        <tr><td>10:00–17:30</td><td><strong>Build lab</strong></td><td>Heads-down implementation of the order-intake triage MVP against simulated Meridian data: 500 order emails across the real format distribution, including the exception classes from the Week 1 inventory. Facilitators float; nobody is rescued, everybody can ask.</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">Trust rule</div>
+      <p>If you cannot show the client exactly what the system did and why, they will never trust it — and untrusted systems don't get used, regardless of accuracy.</p>
+      <p>The audit trail is a software engineering problem. Solving it well puts you ahead of most of the market on its own.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 8 deliverable</b><p>MVP v1 completing the happy path end to end, with schema validation, gates wired, and a full audit trail.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 9 -->
+<section class="sec" id="d9">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D9</div>
+      <div><span class="tag">Thursday</span><h2>Unhappy paths — building what's actually worth money</h2></div>
+    </div>
+    <p>There is one way something goes right and a thousand ways it goes wrong. A system that handles only the happy path is worth approximately nothing, because the happy path is the part the client already controls. Today the Week 1 exception inventory earns its keep.</p>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:15</td><td><strong>Failure enumeration</strong></td><td>Systematic technique: walk the exception inventory, walk each integration seam, walk each tool call. Timed drill — fifteen failure modes for a given step in ten minutes. Retry with backoff, graceful degradation, and explicit escalation when confidence is low.</td></tr>
+        <tr><td>10:15–16:00</td><td><strong>Hardening lab</strong></td><td>Facilitators switch the data feed to hostile mode: malformed payloads, duplicate orders, the blank-date-epoch trap, a rate-limited endpoint, an exception class nobody inventoried. The MVP must degrade legibly — wrong answers routed to the human gate are a design success; silent wrong answers are the failure.</td></tr>
+        <tr><td>16:15–17:30</td><td><strong>Inject: the scope wobble</strong></td><td>The Meridian COO character appears mid-afternoon asking for "one small addition" that would double scope. Handling it is graded: the correct move protects the pilot charter while giving her a real path for the request.</td></tr>
+      </tbody>
+    </table>
+    <div class="warn"><div class="k">The eighteen-month rule</div>
+      <p>Everything shipped today runs far longer than intended — every hack goes into production and stays there. Each artefact gets an explicit call at ship time: fold into the core offering, or discard by a named date. "Temporary" is a story, not a state. The rule's origin is literal: a Palantir FDE's "temporary" data-deletion script ran in production for eighteen months and is still remembered by his name. The equal and opposite scar is overengineering — the two-week configurable deduplication engine built for what needed a one-off SQL query, used exactly once. Calibration means collecting both scars, and today exists so you collect them cheaply here rather than expensively on an account.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 9 deliverable</b><p>Hardened MVP surviving the hostile feed, a written failure-mode register, and a fold-in / discard call on every component built this week.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 10 -->
+<section class="sec" id="d10">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D10</div>
+      <div><span class="tag">Friday</span><h2>Evals — turning non-determinism into evidence</h2></div>
+    </div>
+    <p>An eval suite is a client deliverable in its own right, and often the artefact that closes the deal. It is how a probabilistic system becomes something an enterprise will put its name on.</p>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The four tests</strong></td><td>Did it have the right data · did it take the required steps · does it match an expert · is it safe to act on. Routing to the human gate on the fourth is a design outcome, not a failure. Golden datasets from history; for subjective outputs, mining the existing corpus for implicit standards, then permanent human-in-the-loop feedback because evals never fully close subjective gaps.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Agent readiness</strong></td><td>The verifiability doctrine: autonomy is bounded not by model capability but by how well the environment can validate the work. Readiness as density of deterministic validation loops. The reframe delivered to clients: invest less in solving the problem, more in preparing the environment to verify it.</td></tr>
+        <tr><td>13:15–15:45</td><td><strong>Eval lab</strong></td><td>Build the golden set from the exception inventory, run the suite, produce the report in the practice format: <span class="mono">200 runs · 176 passed · 24 failed — 13 missing upstream data, 8 wrong record retrieved, 3 uninventoried exception class</span>. Failures are the input to iteration, and showing them is what makes the passes credible. One fix-and-rerun cycle before close.</td></tr>
+        <tr><td>16:00–17:30</td><td><strong>Regression discipline</strong></td><td>Wiring the release gate: the suite re-runs on any change to prompt, model, tool, code or ontology, and blocks release below threshold. Human-review calibration: comparing agent output against expert judgment to know whether the evaluator itself can be trusted.</td></tr>
+      </tbody>
+    </table>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 10 deliverable</b><p>Golden dataset, running eval suite, the eval report with failure taxonomy, and a wired release gate.</p></div></div>
+  </div>
+</section>
+
+<!-- GATE -->
+<section class="gate" id="gate2">
+  <div class="wrap">
+    <div class="eyebrow">End of week 2</div>
+    <h2 style="margin-top:12px">The Week 2 gate</h2>
+    <p>Friday close: 20-minute technical review per trainee with a senior FDE playing the Meridian platform lead. The system runs live against a held-out data slice the trainee has never seen.</p>
+    <div class="steps">
+      <div><b>The system works badly-prompted</b><span>Completes the triage task on the held-out slice at the acceptance-criteria threshold, with zero silent failures — everything below confidence routes to the gate.</span></div>
+      <div><b>The evidence exists</b><span>Eval report with failure taxonomy, full audit trail demonstrable on any run the reviewer picks, regression gate blocks a deliberately broken change.</span></div>
+      <div><b>The judgment is defensible</b><span>Allocation grid survives challenge, the two declines are argued convincingly, the cost envelope is arithmetic rather than hope.</span></div>
+    </div>
+    <ul style="margin-top:26px">
+      <li>Shipped at least one thing in under a day and closed the loop with a client character</li>
+      <li>Protected the pilot charter under scope pressure without damaging the sponsor relationship</li>
+      <li>Made an explicit fold-in / discard call on every artefact — nothing labelled "temporary"</li>
+    </ul>
+    <p style="margin-top:20px;font-size:14.5px;color:rgba(255,255,255,.72)"><strong style="color:var(--lime);font-weight:500">Week 3: deployment, adoption, value realisation — and the capstone,</strong> where this MVP goes through shadow mode, UAT, a client review and a measured outcome.</p>
+  </div>
+</section>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">FDE bootcamp · Week 3 of 3</div>
+    <h1>Deployment, value and the capstone</h1>
+    <p class="lede">A working system that nobody uses is a failed engagement, and a used system nobody can value is an unrenewed one. This week walks the Meridian MVP up the autonomy ladder, teaches the operational and commercial craft around it, and ends in a two-day capstone: ambiguous materials, a live client review, UAT, deployment, and a measured outcome.</p>
+    <div class="meta">
+      <div><b>5 days · ~40 hrs</b>Incl. 2-day capstone</div>
+      <div><b>Domains 3, 5</b>Ship · Stakeholder &amp; Commercial</div>
+      <div><b>Gate artefact</b>Deployed system + measured outcome</div>
+    </div>
+  </div>
+</section>
+<div class="arc"></div>
+
+<!-- DAY 11 -->
+<section class="sec" id="d11">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D11</div>
+      <div><span class="tag">Monday</span><h2>Into production — the autonomy ladder</h2></div>
+    </div>
+    <p>Never flip a switch. The system earns autonomy one rung at a time, with an explicit exit criterion at each — and the shadow-mode harness is what turns each rung from a phase name into a measurement.</p>
+    <ol class="ladder">
+      <li><b>Controlled environment</b><span>Real data in a sandbox. Exit when eval results are stable across representative volume.</span></li>
+      <li><b>Shadow mode</b><span>Runs beside the human on live traffic, acting on nothing. Both outputs logged; agreement and divergence computed. Exit when agreement is acceptable and every divergence is understood.</span></li>
+      <li><b>Human approval on every action</b><span>Agent proposes, human approves. Exit when approval is a formality and rejections are rare and explicable.</span></li>
+      <li><b>Autonomous with exception routing</b><span>Acts inside confidence thresholds, escalates outside them. Exit when escalation volume is stable and monitored.</span></li>
+      <li><b>Autonomous with monitoring</b><span>Full production. Metrics, KPIs and SLAs instrumented; a named person owns it.</span></li>
+    </ol>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The deployment substrate</strong></td><td>Environments and parity, CI/CD, secrets, policy-as-code, feature flags, release packaging, rollback — taught as a buy-and-integrate exercise, not a build. Where identity and access conversations should have started (week one) and what it costs when they didn't.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Shadow mode in practice</strong></td><td>Wiring the comparison harness: agent beside the simulated Meridian order desk, agreement rate computed per exception class. Reading divergence honestly — some disagreements mean the agent is wrong, some mean the golden set is, and telling them apart is the skill.</td></tr>
+        <tr><td>13:15–17:30</td><td><strong>Lab: rungs one to three</strong></td><td>Each trainee deploys their Week 2 MVP into the sandbox, runs 48 simulated hours of shadow traffic (compressed), analyses divergence, fixes one systematic miss, and graduates the system to gated approval with written exit evidence for each rung.</td></tr>
+      </tbody>
+    </table>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 11 deliverable</b><p>System at rung three with a shadow-mode report: agreement by exception class, divergence analysis, and exit evidence per rung.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 12 -->
+<section class="sec" id="d12">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D12</div>
+      <div><span class="tag">Tuesday</span><h2>Adoption, operations and the handoff</h2></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>Adoption is part of the deployment</strong></td><td>Hand-holding the first cohort personally. Watching the first week of real usage the way you watched the original workflow — the same four tells that found the opportunity now show where the new system fails people. Resistance is still data: when someone says it doesn't work and can't say why, go and watch them use it.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>Enablement — teaching the client to fish</strong></td><td>The enablement vintage: training client staff to extend the system themselves. Writing runbooks and playbooks a client operator can actually follow. What to keep (the harness, the ontology) and what to hand over (the workflows, the rules), and why enablement grows accounts rather than shrinking them.</td></tr>
+        <tr><td>13:15–15:00</td><td><strong>Operating it</strong></td><td>Monitoring against the design-time cost envelope, reliability dashboards, incident response and the on-call reality. The 2 a.m. call as a design review you scheduled six months earlier. Postmortems that feed the pattern library instead of a folder.</td></tr>
+        <tr><td>15:15–17:30</td><td><strong>Simulation: the thing we said was temporary</strong></td><td>SCN-06 against Meridian: a fourteen-month-old "temporary" script surfaces, running in four business units, author gone, audit looming. Fold in, or discard with a migration — with a plan either way. Continuing to run it as-is while calling it temporary is scored as a fail regardless of how well it's argued. The hidden finding: six other accounts have the same hack, and nobody noticed because nothing surfaces recurrence.</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">The product-return obligation</div>
+      <p>An engagement that produced a happy client and nothing reusable was a services project, not forward deployed engineering.</p>
+      <p>The fixed question at every close: what did we generalise, and where did it land? Contribution to the pattern library is a condition of finishing, not a virtue — and the practice measures it: at least one generalised asset (a connector, template, eval pack or module) shipped back to the library or platform within 90 days of engagement start. Productisation rate is the master metric of an FDE function. High billable utilisation with nothing flowing back is not success; it is the warning sign of a services shop in disguise.</p>
+    </div>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 12 deliverable</b><p>Client-facing runbook, handoff plan naming the future owner, and a written fold-in / discard decision with its rationale.</p></div></div>
+  </div>
+</section>
+
+<!-- DAY 13 -->
+<section class="sec" id="d13">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D13</div>
+      <div><span class="tag">Wednesday</span><h2>Value realisation and the executive readout</h2></div>
+    </div>
+    <p>There are exactly three buckets a business cares about, and every deployed system is measured against all three.</p>
+    <div class="grid g3">
+      <div class="tile"><div class="k">Bucket 01</div><p><strong>Cost savings.</strong> Hours recovered × loaded rate, minus run cost. Easiest to quantify, easiest to challenge — be conservative.</p></div>
+      <div class="tile"><div class="k">Bucket 02</div><p><strong>Revenue uplift.</strong> Faster cycle time, higher throughput, capacity redeployed to revenue work.</p></div>
+      <div class="tile"><div class="k">Bucket 03</div><p><strong>Risk mitigation.</strong> Error reduction × cost per error, compliance exposure, key-person dependency removed.</p></div>
+    </div>
+    <table class="sched">
+      <thead><tr><th style="width:14%">Block</th><th style="width:34%">Session</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td>09:00–10:30</td><td><strong>The ROI chain</strong></td><td>Baseline before you change anything — Week 1's KPI baseline was for this. Building the chain with visible arithmetic: this change reduces X, which moves Y, which is worth Z. Modelling partial automation, keeping human-gate cost in, including run cost. A number that survives the CFO beats an impressive one.</td></tr>
+        <tr><td>10:45–12:15</td><td><strong>The two rehearsals</strong></td><td>Rehearse as the engineer: architecture, decisions, trade-offs. Then as the VP: problem, outcome, evidence, risk. Different talks, same facts. Readout craft: recommendation in the first ninety seconds, a risk named before it's asked for, and the sentence the sponsor will repeat to <em>their</em> boss — written for them.</td></tr>
+        <tr><td>13:15–16:30</td><td><strong>Simulation: the eleven-minute readout</strong></td><td>SCN-05 with the Meridian findings. Three executives: the warm-but-distracted COO who interrupts at minute four, the CFO who attacks the first number quoted, and the CTO who asks who owns this in eighteen months. Two rounds each; the second round is scored.</td></tr>
+        <tr><td>16:45–17:30</td><td><strong>Debrief</strong></td><td>Why "what do I tell the board?" is the most important question in the meeting: the sponsor's upward narrative is the actual product being bought. What naming a risk unprompted buys you. What the interruption cost the people who lost the thread.</td></tr>
+      </tbody>
+    </table>
+    <div class="deliv"><div class="ic">✓</div><div><b>Day 13 deliverable</b><p>ROI model across the three buckets with visible arithmetic, and a scored 11-minute readout survived under challenge.</p></div></div>
+  </div>
+</section>
+
+<!-- CAPSTONE -->
+<section class="sec" id="d14">
+  <div class="wrap">
+    <div class="day"><div class="dnum">D14–15</div>
+      <div><span class="tag">Thursday–Friday</span><h2>The capstone — a full engagement in miniature</h2></div>
+    </div>
+    <p>Two days, a fresh client, no scaffolding. Everything the bootcamp taught, run end to end under the conditions a real engagement imposes: ambiguity, fragmented data, security constraints, a live client review, and a measured result. Trainees work in pods of two — a compressed version of the durable delivery unit in mature FDE functions: an FDE, a product manager and a platform or data engineer, owning one strategic account together — with individual accountability preserved in the scoring. One practice-level rule is taught here and repeated at certification: FDEs report to product or engineering with a dotted line to sales, never the reverse, because a function that answers to a quota bends every engagement toward the next close and the product-return loop dies.</p>
+    <div class="card">
+      <h4>The materials — deliberately imperfect</h4>
+      <ul>
+        <li><strong>A new fictional client</strong> in a different vertical (rotates per cohort: a regional insurer, a healthcare network, a public-sector service desk), so nothing from Meridian transfers except the method</li>
+        <li><strong>Ambiguous discovery inputs:</strong> a vague sponsor email, meeting notes that contradict each other, a stale process document, and access to three role-played characters with seeded unlock conditions</li>
+        <li><strong>Fragmented data:</strong> exports from three systems that disagree about the core entity, one with a genuine quality landmine</li>
+        <li><strong>A security constraint</strong> that invalidates the obvious architecture (e.g. a data-residency rule, or a regulated decision that demands a point-in-time record)</li>
+        <li><strong>One inject per day,</strong> on the clock: a stakeholder conflict on Thursday, a scope-or-integrity pressure on Friday</li>
+      </ul>
+      <h4>The sequence</h4>
+      <table>
+        <thead><tr><th style="width:22%">Block</th><th>Expected work</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Thu AM</strong></td><td>Discovery against the characters and materials. Operating map, exception inventory, stakeholder map, readiness read.</td></tr>
+          <tr><td><strong>Thu PM</strong></td><td>Allocation grid, draft ontology for the contested entity, MVP spec with acceptance criteria, cost envelope. Sub-day fix shipped if spotted.</td></tr>
+          <tr><td><strong>Fri AM</strong></td><td>Build against the harness. Golden set from the exceptions. Eval run, one fix cycle, shadow comparison on the held-out slice.</td></tr>
+          <tr><td><strong>Fri PM</strong></td><td>Client review with UAT: the characters run three real cases through the system live. Then the 11-minute executive readout with the measured outcome, taken from the eval and shadow evidence — not from hope.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn"><div class="k">What the capstone is actually testing</div>
+      <p>Not whether the system is impressive — whether the <em>judgment chain</em> holds: did discovery find the seeded truth, did the allocation follow the evidence, did the build match the allocation, did the evals measure the acceptance criteria, and did the readout claim only what the evidence supports. A modest system with an intact chain passes; an impressive demo with a broken chain does not.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CERT -->
+<section class="gate" id="cert">
+  <div class="wrap">
+    <div class="eyebrow">Certification</div>
+    <h2 style="margin-top:12px">Certification by shipped project, not by exam</h2>
+    <p>The certification standard is borrowed from the best programmes in the field: you certify on what you shipped and how you defended it. The panel is a senior FDE, the practice lead, and one facilitator who played a capstone character.</p>
+    <div class="steps">
+      <div><b>The judgment chain</b><span>Every capstone artefact traces to evidence: map → grid → spec → build → eval → claim. Any broken link is a specific, named development area.</span></div>
+      <div><b>The behaviours</b><span>Observed at least once across three weeks: chose observation over interview, declined an automation, shipped a sub-day fix, held a position under authority pressure, made an explicit fold-in/discard call.</span></div>
+      <div><b>The product return</b><span>At least one contribution to the pattern library across the bootcamp — a recipe, a template, a scenario finding, an eval pack — accepted by the library owner.</span></div>
+    </div>
+    <ul style="margin-top:26px">
+      <li><strong>Pass</strong> → enters shadow deployment on a live account, paired with an L3/L4 (weeks 9–14 of the practice programme)</li>
+      <li><strong>Conditional</strong> → one named gap, one repeat simulation with a fresh finding set within two weeks</li>
+      <li><strong>Redirect</strong> → strong on one side of the bar only; routed to the matching adjacent role with a written rationale — the average-of-both hire this outcome prevents is the most expensive mis-assignment the practice can make</li>
+    </ul>
+  </div>
+</section>
+
+<!-- AFTER -->
+<section class="sec" id="after">
+  <div class="wrap">
+    <div class="day"><div class="dnum">→</div>
+      <div><span class="tag">Continuing development</span><h2>After the bootcamp</h2></div>
+    </div>
+    <p>Three weeks compresses the classroom and the simulation. It does not replace a real client — no simulation teaches what an actual account's politics, latency and ambiguity teach. Graduates follow the ramp progression the discipline's own veterans recommend:</p>
+    <ol>
+      <li><strong>Observe live customer calls</strong> for the first two weeks on account — listening, logging, not speaking</li>
+      <li><strong>Shadow an implementation and a support escalation</strong> owned by a senior FDE</li>
+      <li><strong>Own one escalation end to end</strong>, with the senior as backstop</li>
+      <li><strong>Observe real users working</strong> on site — the bootcamp's Day 2, now with stakes</li>
+      <li><strong>Establish a recurring customer-learning loop</strong> — a living "what I've learned from customers" document, updated weekly with specific quotes, workflows and pain points, shared with the practice and feeding the pattern library on a cadence, not on inspiration</li>
+    </ol>
+    <h3>Reference shelf</h3>
+    <p>External material used in or aligned with this bootcamp, verified as of this edition. Foundry-specific material is read for its principles — ontology-centred delivery, the ingest → transform → model → application → writeback arc, certification by project — never for its stack.</p>
+    <table>
+      <thead><tr><th style="width:34%">Resource</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td><strong>The Definitive Guide to Forward Deployed Engineering</strong> (nextplay · Vinoo Ganesh)</td><td>Pre-reading, Day 1, and the source of the ramp progression above. Written by the builder of Palantir's Project Frontline programme (250+ engineers rotated). Also contains the six traits with worked field examples, a month-by-month self-directed field-exposure plan, a first-90-days plan, and an FDE interview question bank with bad/good answer pairs — the best single free resource on this shelf.</td></tr>
+        <tr><td><strong>SuperML — Forward Deploy Engineer Mastery</strong> (superml.org, free)</td><td>Closest external analogue to this bootcamp's shape — 20 lessons in six phases plus a 6-week simulated capstone, built on a running fictional client (Northbound Freight, a logistics firm chasing 78%→92% on-time delivery) that independently validates the Meridian method. Names the same three crafts taught in Week 1. Recommended self-paced reinforcement.</td></tr>
+        <tr><td><strong>Umbrex — The Forward Deployed Engineer Playbook</strong></td><td>For practice leadership, not trainees: mission and mandate, org design and reporting lines, hiring rubrics, apprenticeship and certification gates, delivery playbooks by engagement type, commercial guardrails, and the named scaling risks — burnout, hero culture, margin erosion, loss of product discipline.</td></tr>
+        <tr><td><strong>Perspective AI — FDE function playbook (2026)</strong></td><td>Vendor content, read critically: the five-phase lifecycle with explicit gates (discovery → prototype → deploy → productise → hand off by day 120), the pod model, the reporting-line rule and productisation-rate metric are sound and adopted here; its Palantir ROI statistics are unverified and its conclusion sells a product.</td></tr>
+        <tr><td><strong>FDE Academy (Futurense)</strong></td><td>8-month paid PGP with an IIT certification add-on. Its parallel dual-track design — technical and consulting taught together every week rather than sequentially — is worth borrowing; treat its salary claims and marketing framing accordingly.</td></tr>
+        <tr><td><strong>GSDC Certified Forward Deployed Engineer</strong></td><td>Vendor-neutral external benchmark. Optional credential; verify the depth of its live-project component before relying on it alone. Its 13-module syllabus skews toward teaching Python, ML and cloud from scratch — useful as a gap-checklist for individual trainees, not as this audience's curriculum.</td></tr>
+        <tr><td><strong>Maven — FDE on Foundry</strong> (Ontology University)</td><td>Principles-only reading for the ontology-centred model and certification-by-project standard. We do not use Foundry; the shape transfers, the tool does not.</td></tr>
+        <tr><td><strong>Palantir FDE / FDSE role descriptions</strong></td><td>Competency-signal reference for role design and the vintage conversation.</td></tr>
+      </tbody>
+    </table>
+    <div class="rule"><div class="k">Last word</div>
+      <p>Every company can buy the same intelligence. The edge is where, how and why it gets applied — and that edge is a person who can walk into ambiguity, find what's true, decide what deserves to be built, build it so it survives, and prove what it was worth.</p>
+      <p>That person is what these three weeks exist to start building. The account finishes the job.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap"><div>HGS · FDE bootcamp · Complete three-week programme</div><div>Internal enablement · v1</div></div>
+</footer>
+</main>
+
+<script>
+(function(){var l=[].slice.call(document.querySelectorAll('#nav a')),
+s=l.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+if('IntersectionObserver'in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){
+if(e.isIntersecting){var i=s.indexOf(e.target);l.forEach(function(x){x.classList.remove('on');});
+if(i>-1){l[i].classList.add('on');l[i].scrollIntoView({block:'nearest'});}}});},{rootMargin:'-12% 0px -75% 0px'});
+s.forEach(function(x){if(x)io.observe(x);});}})();
+</script>
+</body>
+</html>

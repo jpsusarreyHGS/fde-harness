@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FDE platform and tooling map — HGS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#26476B;--navy-deep:#15283C;--grey:#E7E6E6;--charcoal:#2D2D2D;
+  --lime:#ABCF02;--teal:#3D9B99;--teal-light:#85BEBC;--sage:#9AAC94;--slate:#5C6D72;--white:#FFFFFF;
+  --shadow:0 4px 20px rgba(0,0,0,.10);--shadow-lg:0 6px 28px rgba(0,0,0,.14);
+  --radius:6px;--rail:280px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--grey);color:var(--charcoal);font-family:Kanit,Raleway,system-ui,sans-serif;
+  font-weight:300;font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-weight:600;line-height:1.18;margin:0}
+p{margin:0 0 15px}
+a{color:var(--teal)}
+
+/* rail */
+.rail{position:fixed;top:0;left:0;width:var(--rail);height:100vh;background:var(--navy-deep);
+  color:var(--white);padding:34px 26px;overflow-y:auto;z-index:60}
+.rail .mark{font-size:19px;font-weight:600;letter-spacing:.14em}
+.rail .mark span{color:var(--lime)}
+.rail .sub{font-size:11.5px;color:var(--teal-light);letter-spacing:.09em;text-transform:uppercase;margin-top:6px}
+.rail nav{margin-top:30px;border-top:1px solid rgba(255,255,255,.14);padding-top:18px}
+.rail a{display:flex;gap:11px;align-items:baseline;text-decoration:none;color:rgba(255,255,255,.74);
+  font-size:13px;padding:7px 0 7px 12px;margin-left:-12px;border-left:2px solid transparent;
+  transition:color .18s,border-color .18s}
+.rail a:hover,.rail a:focus-visible,.rail a.on{color:var(--white);border-left-color:var(--lime)}
+.rail a i{font-style:normal;font-size:11px;color:var(--lime);min-width:16px;font-weight:500}
+.rail a em{font-style:normal;font-size:10.5px;color:rgba(255,255,255,.38);margin-left:auto}
+.rail .foot{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.14);
+  font-size:11px;color:rgba(255,255,255,.42);line-height:1.6}
+
+.page{margin-left:var(--rail)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 48px}
+
+/* hero */
+.hero{background:var(--navy);color:var(--white);padding:88px 0 72px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-190px;top:-200px;width:640px;height:640px;border-radius:50%;
+  border:1px solid rgba(171,207,2,.20);box-shadow:0 0 0 62px rgba(255,255,255,.028),0 0 0 148px rgba(255,255,255,.020)}
+.hero .wrap{position:relative;z-index:2}
+.eyebrow{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);font-weight:500}
+.hero h1{font-size:45px;color:var(--lime);margin:18px 0 0;max-width:17ch}
+.hero .lede{font-size:19px;font-weight:200;color:rgba(255,255,255,.90);max-width:62ch;margin-top:20px}
+.hero .meta{margin-top:36px;display:flex;flex-wrap:wrap;gap:34px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
+.hero .meta div{font-size:12.5px;color:rgba(255,255,255,.62)}
+.hero .meta b{display:block;font-weight:500;color:var(--white);font-size:14.5px}
+.arc{height:5px;background:linear-gradient(90deg,var(--lime) 0 22%,var(--teal) 22% 46%,var(--teal-light) 46% 66%,var(--sage) 66% 84%,var(--slate) 84% 100%)}
+
+/* sections */
+.sec{padding:60px 0 6px}
+.sec-head{display:flex;gap:20px;align-items:flex-start;margin-bottom:10px}
+.sec-num{flex:0 0 auto;width:52px;height:52px;border-radius:var(--radius);background:var(--navy);
+  color:var(--lime);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;box-shadow:var(--shadow)}
+.sec-head h2{font-size:31px;padding-top:5px}
+.sec-head .tag{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:500;display:block;margin-bottom:4px}
+.sec > .wrap > p{max-width:72ch}
+h3{font-size:20px;margin:36px 0 12px;color:var(--navy)}
+h4{font-size:14.5px;margin:22px 0 8px}
+
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 30px;margin:20px 0}
+.card > :first-child{margin-top:0}
+.card > :last-child{margin-bottom:0}
+.grid{display:grid;gap:18px;margin:20px 0}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+.tile{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px}
+.tile .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px}
+.tile p:last-child{margin-bottom:0}
+.tile .big{font-size:34px;font-weight:600;color:var(--navy);line-height:1.05}
+.tile .lbl{font-size:12.5px;color:var(--slate)}
+
+.rule{background:var(--navy-deep);color:var(--white);border-radius:var(--radius);padding:26px 30px;margin:26px 0;
+  border-left:4px solid var(--lime);box-shadow:var(--shadow-lg)}
+.rule .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);font-weight:500;margin-bottom:9px}
+.rule p{margin:0;font-size:17px;font-weight:200;color:rgba(255,255,255,.95)}
+.rule p+p{margin-top:12px;font-size:14.5px;color:rgba(255,255,255,.74)}
+.warn{background:var(--white);border-left:4px solid var(--teal);border-radius:var(--radius);padding:20px 24px;margin:22px 0;box-shadow:var(--shadow)}
+.warn .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px}
+.warn p:last-child{margin-bottom:0}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;background:var(--white);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+th{background:var(--navy);color:var(--white);text-align:left;padding:11px 14px;font-weight:500;font-size:12px;letter-spacing:.05em}
+td{padding:11px 14px;border-top:1px solid var(--grey);vertical-align:top}
+tbody tr:nth-child(even) td{background:#FAFAFA}
+td strong{font-weight:500;color:var(--navy)}
+ul,ol{margin:0 0 15px;padding-left:20px}li{margin-bottom:7px}
+ul.qs{list-style:none;padding-left:0}
+ul.qs li{padding-left:22px;position:relative;margin-bottom:10px}
+ul.qs li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;background:var(--lime);border-radius:2px}
+ul.qs li b{font-weight:500;color:var(--navy)}
+.why{display:block;font-size:12.5px;color:var(--slate);margin-top:2px}
+
+/* pills */
+.pill{display:inline-block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;
+  padding:3px 9px;border-radius:11px;white-space:nowrap}
+.p-build{background:var(--navy);color:var(--lime)}
+.p-wrap{background:var(--teal);color:var(--white)}
+.p-buy{background:var(--grey);color:var(--slate)}
+.t1{background:var(--navy-deep);color:var(--lime)}
+.t2{background:var(--teal-light);color:var(--navy-deep)}
+.t3{background:var(--grey);color:var(--slate)}
+
+/* filter bar */
+.filter{position:sticky;top:0;z-index:40;background:var(--navy-deep);padding:14px 0;box-shadow:var(--shadow-lg)}
+.filter .wrap{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.fg{display:flex;gap:8px;align-items:center}
+.fg span{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--teal-light);font-weight:400;margin-right:2px}
+.fg button{font-family:inherit;font-size:12.5px;font-weight:300;padding:5px 13px;border-radius:14px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.24);background:transparent;color:rgba(255,255,255,.78);transition:.16s}
+.fg button:hover{border-color:var(--lime);color:var(--white)}
+.fg button.on{background:var(--lime);border-color:var(--lime);color:var(--navy-deep);font-weight:500}
+.fg button:focus-visible{outline:2px solid var(--white);outline-offset:2px}
+.count{margin-left:auto;font-size:12px;color:rgba(255,255,255,.55)}
+
+.gsec{padding:52px 0 4px}
+.ghead{display:flex;gap:18px;align-items:flex-start}
+.gnum{flex:0 0 auto;width:46px;height:46px;border-radius:var(--radius);background:var(--navy);color:var(--lime);
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;box-shadow:var(--shadow)}
+.ghead h2{font-size:27px;padding-top:6px}
+.ghead .posture{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;display:block;margin-bottom:4px}
+.gsec .intro{max-width:74ch;margin:14px 0 4px}
+.empty{padding:22px 0;color:var(--slate);font-size:14px;font-style:italic}
+tr.hide{display:none}
+
+.loop{background:var(--navy);color:var(--white);padding:56px 0;margin-top:56px}
+.loop h2{color:var(--lime);font-size:28px}
+.loop p{color:rgba(255,255,255,.88);max-width:66ch}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+.steps div{background:rgba(255,255,255,.07);border-radius:var(--radius);padding:20px;border-top:3px solid var(--lime)}
+.steps b{display:block;font-weight:500;font-size:16px;margin-bottom:5px}
+.steps span{font-size:13.5px;color:rgba(255,255,255,.76);font-weight:200}
+footer{background:var(--navy-deep);color:rgba(255,255,255,.5);padding:28px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media(max-width:1080px){
+  :root{--rail:0px}
+  .rail{position:static;width:100%;height:auto;padding:22px 26px}
+  .rail nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 18px}
+  .page{margin-left:0}.wrap{padding:0 26px}
+  .hero h1{font-size:33px}.g2,.g3,.steps{grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  .g2,.g3,.steps{grid-template-columns:1fr}.hero h1{font-size:27px}
+  .sec-head h2,.ghead h2{font-size:23px}
+  table{font-size:12.5px}td,th{padding:9px 10px}
+  .col-out{display:none}
+}
+@media print{
+  .rail,.filter{display:none}.page{margin-left:0}body{background:#fff}
+  .card,.tile,table{box-shadow:none;border:1px solid #ddd}.gsec{page-break-inside:avoid}
+  tr.hide{display:table-row}
+}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <div class="mark">HGS<span>.</span></div>
+  <div class="sub">FDE practice</div>
+  <nav id="nav">
+    <a href="#how"><i>—</i>How to read this</a>
+    <a href="#g0"><i>0</i>Discovery <em>19</em></a>
+    <a href="#g1"><i>1</i>Agent runtime <em>10</em></a>
+    <a href="#g2"><i>2</i>Observability <em>10</em></a>
+    <a href="#g3"><i>3</i>Evals <em>10</em></a>
+    <a href="#g4"><i>4</i>Connectors <em>9</em></a>
+    <a href="#g5"><i>5</i>Ontology <em>10</em></a>
+    <a href="#g6"><i>6</i>Deployment <em>11</em></a>
+    <a href="#g7"><i>7</i>Asset library <em>12</em></a>
+    <a href="#seq"><i>—</i>Sequencing</a>
+  </nav>
+  <div class="foot">Internal enablement document.<br>Platform map v1 · engagement-agnostic.</div>
+</aside>
+
+<main class="page">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Forward deployed engineering</div>
+    <h1>The platform and tooling map</h1>
+    <p class="lede">Eight capability groups, 91 components. The test each one has to pass is simple: does engagement N+1 get cheaper than engagement N? Anything that doesn't compound across accounts is a tool an individual uses, not a platform the practice owns.</p>
+    <div class="meta">
+      <div><b>91 components</b>Across 8 groups</div>
+      <div><b>Build · wrap · buy</b>Investment posture</div>
+      <div><b>Tier 1 · 2 · 3</b>When you actually need it</div>
+    </div>
+  </div>
+</section>
+<div class="arc"></div>
+
+<!-- HOW TO READ -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">—</div>
+      <div><span class="tag">Orientation</span><h2>How to read this map</h2></div>
+    </div>
+    <p>Every component carries two classifications. Together they answer the two questions that actually matter when someone hands you a list this long: <em>should we build this ourselves</em>, and <em>do we need it yet</em>.</p>
+
+    <h3>Investment posture</h3>
+    <div class="grid g3">
+      <div class="tile"><span class="pill p-build">Build</span><p style="margin-top:12px">No adequate off-the-shelf answer, or the thing itself is our differentiation. This is where engineering effort earns its return.</p></div>
+      <div class="tile"><span class="pill p-wrap">Wrap</span><p style="margin-top:12px">A mature tool exists but needs a thin layer to fit our workflow, our ontology, or our audit requirements.</p></div>
+      <div class="tile"><span class="pill p-buy">Buy</span><p style="margin-top:12px">Commodity. Building it is waste. Pick a vendor, integrate, and spend the time saved on the build column.</p></div>
+    </div>
+    <p>The posture distribution is uneven by design and worth noticing. Group 6 is almost entirely buy — secrets management, CI/CD, infrastructure-as-code and incident tooling are solved problems, and a quarter spent building a feature-flag service is a quarter not spent on ontology. Group 5 is almost entirely build, because nothing off the shelf does entity resolution against a client's own domain model in a form you can hand to their people.</p>
+
+    <h3>Tier</h3>
+    <table>
+      <thead><tr><th style="width:14%">Tier</th><th style="width:26%">Threshold</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill t1">Tier 1</span></td><td><strong>First engagement</strong></td><td>Without it you cannot deliver credibly or defend what you delivered. Build or buy before the first account lands.</td></tr>
+        <tr><td><span class="pill t2">Tier 2</span></td><td><strong>First ten</strong></td><td>What makes engagement N+1 cheaper than N. This is where the practice stops being a staffing model.</td></tr>
+        <tr><td><span class="pill t3">Tier 3</span></td><td><strong>Practice scale</strong></td><td>Needed for many concurrent engagements, large regulated accounts, or genuine productisation.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="rule">
+      <div class="k">The boundary rule</div>
+      <p>Group 7 holds the reusable asset. Group 0 holds the live instance of it on a given engagement.</p>
+      <p>A discovery playbook is a Group 7 asset; the filled-in workflow map for one client is a Group 0 artefact. A requirement template lives in 7; the requirements register lives in 0. Without this rule the two groups duplicate each other endlessly, because one is organised by lifecycle stage and the other by asset type. Every Group 0 instrument should be seeded by a Group 7 asset, and every engagement should return something to Group 7 at close.</p>
+    </div>
+  </div>
+</section>
+
+<div class="filter" id="filterbar">
+  <div class="wrap">
+    <div class="fg" role="group" aria-label="Filter by tier">
+      <span>Tier</span>
+      <button data-f="tier" data-v="all" class="on">All</button>
+      <button data-f="tier" data-v="1">1</button>
+      <button data-f="tier" data-v="2">2</button>
+      <button data-f="tier" data-v="3">3</button>
+    </div>
+    <div class="fg" role="group" aria-label="Filter by posture">
+      <span>Posture</span>
+      <button data-f="post" data-v="all" class="on">All</button>
+      <button data-f="post" data-v="build">Build</button>
+      <button data-f="post" data-v="wrap">Wrap</button>
+      <button data-f="post" data-v="buy">Buy</button>
+    </div>
+    <div class="count" id="count">91 of 91 components</div>
+  </div>
+</div>
+
+<div id="groups"></div>
+
+<!-- SEQUENCING -->
+<section class="loop" id="seq">
+  <div class="wrap">
+    <div class="eyebrow">Sequencing</div>
+    <h2 style="margin-top:14px">Build order, if you're starting from zero</h2>
+    <p>The list is a destination, not a plan. Attempting it in parallel produces a platform organisation that occasionally does engagements — which is the failure mode this map exists to avoid.</p>
+    <div class="steps">
+      <div><b>First</b><span>Groups 0, 1 and 2 at Tier 1. Observation instruments, a harness with permissions and approvals, and a trace and decision record. These three make a single engagement deliverable and defensible.</span></div>
+      <div><b>Second</b><span>Groups 3, 4 and 7 at Tier 1–2. Evals, connectors and the asset library. This is where compounding starts and where the margin on engagement five comes from.</span></div>
+      <div><b>Third</b><span>Groups 5 and 6, plus Tier 3 throughout. Ontology depth and deployment substrate, driven by the account size and regulatory exposure you're actually selling into.</span></div>
+    </div>
+    <p style="margin-top:30px;font-size:15px;color:rgba(255,255,255,.72)">One standing rule for whoever owns the roadmap: <strong style="color:var(--lime);font-weight:500">nothing enters the build column without a named engagement that needed it.</strong> Every component here should be traceable to a moment where an FDE was slowed down or a client asked a question we couldn't answer. Platform work sourced from anywhere else is speculative, and speculative platform work is how this list becomes a five-year programme.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>HGS · Forward deployed engineering practice</div>
+    <div>Platform and tooling map v1 · Internal enablement</div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+var GROUPS = [
+{
+  id:"g0", num:"0", name:"Discovery and observation workspace",
+  posture:"Mostly build · Tier 1 heavy",
+  intro:"The per-engagement instruments that establish what is actually true before anything gets built. This group is deliberately weighted toward observation rather than conversation. Meeting capture records what people <em>say</em> about their work, and the stated version of a workflow is reliably not the real one — the exceptions, the undocumented routing rules and the steps nobody counts only surface when someone sits beside the operator. Transcripts are supporting evidence here, not the primary source, and the exception inventory is a first-class store rather than a field inside a process map, because it is what the eval golden sets are later built from.",
+  extra:"obs",
+  items:[
+   ["Client context brief","Consolidates account context, prior commitments, stakeholders, existing systems and strategic objectives ahead of working sessions","Client implementation brief","wrap",1],
+   ["Stakeholder and decision map","Identifies executive sponsor, process owner, operator, exception holder, technical and data owners, security owner, end users and the approval path","Stakeholder map and decision-rights matrix","build",1],
+   ["Observation capture kit","Structures on-site shift shadowing into timestamped events — what was done, in which system, how long it took, what interrupted it","Timestamped observation log","build",1],
+   ["Behavioural tell logger","Records the four opportunity signals as countable events: repeated task, copy-paste between systems, tool or tab switching, and dead time mid-workflow","Ranked friction inventory","build",1],
+   ["Exception inventory","First-class store of every deviation from the happy path — frequency, current handling, and who holds the rule that isn't written down","Exception register, feeding eval golden sets","build",1],
+   ["Evidence store and meeting capture","Supporting record of calls, documents, whiteboards and commitments, source-linked and searchable. Corroborates observation; never substitutes for it","Searchable secondary evidence","buy",1],
+   ["Requirements register","Converts observation and evidence into structured problems, requirements, constraints, users, systems, data sources and success criteria","Initial requirements register","wrap",1],
+   ["Open-question queue","Surfaces ambiguity, conflicts, undefined terms and unstated assumptions for the FDE to resolve. Advisory — it proposes questions, it does not decide what to ask next","Prioritised open-question queue","wrap",2],
+   ["Current-state workflow map","Maps steps, actors, systems, decisions, handoffs, manual work, bottlenecks and failure paths as actually observed","Current-state workflow map","build",1],
+   ["System and data landscape mapper","Inventories applications, APIs, databases, files, identity systems, data owners, refresh patterns and dependencies","System and data landscape map","build",1],
+   ["Data and integration readiness assessment","Assesses data availability, quality, access, integration paths, security requirements and delivery blockers","Readiness scorecard and risk list","build",1],
+   ["Use-case qualification matrix","Scores candidates on value, feasibility, data readiness, AI suitability, risk, time-to-value and reusability","Ranked use-case portfolio","build",1],
+   ["Design-time cost estimator","Projects unit economics before the build — inference, compute, storage, connector calls and human-gate load at expected volume, so the cost conversation happens before the budget does","Pre-build cost envelope","build",2],
+   ["Value hypothesis and KPI baseline","Defines baselines, targets, metric owners, data sources and measurement cadence while the current state is still observable","Value hypothesis and KPI scorecard","build",1],
+   ["Ontology intake","Extracts candidate entities, relationships, events, actions, rules and permissions, then promotes the approved subset into the ontology studio under a defined handoff","Draft ontology backlog with named owner","build",2],
+   ["Assumption, decision and risk ledger","Separates confirmed decisions from assumptions, trade-offs, open issues, scope changes and risks","Auditable decision and risk log","build",1],
+   ["Evidence residency and handling policy","Establishes which tenant holds captured client evidence, plus retention, redaction, access and deletion terms — settled before capture begins, not after procurement asks","Agreed evidence-handling terms","build",1],
+   ["Pilot charter generator","Converts discovery into approved scope, non-goals, users, milestones, integrations, acceptance criteria and governance","Client-ready pilot charter","wrap",1],
+   ["Discovery readiness gate","Blocks build until sponsor alignment, defined value, bounded scope, feasible data, known risks and acceptance criteria are all in place","Go/no-go implementation decision","build",1]
+  ]
+},
+{
+  id:"g1", num:"1", name:"Agent harness and runtime",
+  posture:"Build core · wrap the edges",
+  intro:"One execution layer every engagement builds on, rather than each FDE assembling their own loop per account. Shared guardrails, shared improvements, and the ability to move people between engagements without a rewrite. Model independence matters commercially as well as technically — a client who asks what happens if they want to change provider needs a real answer, and no model vendor should implicitly hold our roadmap.",
+  items:[
+   ["Agent registry","Catalogues approved agents, owners, versions, permissions, models and supported use cases","Governed agent inventory","build",2],
+   ["Agent composer","Assembles workflows from planner, architect, data, coding, testing and documentation agents","Reusable multi-agent workflow","build",2],
+   ["Workflow orchestrator","Manages task routing, dependencies, retries, handoffs, queues and escalations","Reliable end-to-end runs","wrap",1],
+   ["Task planner","Converts approved requirements into bounded tasks with acceptance criteria and dependencies","Work packages for humans and agents","build",2],
+   ["Context manager","Supplies approved requirements, client constraints, ontology, policies and prior decisions to each agent","Grounded agent context","build",1],
+   ["Memory manager","Separates client and project memory, organisational learning, run-scoped memory and sensitive information","Controlled project knowledge","build",2],
+   ["Tool-permission gateway","Defines which agent may read, write, approve, deploy or call each connected system","Least-privilege execution","build",1],
+   ["Human-approval console","Review queues for sensitive decisions, external communications, production actions and exceptions — the human gate as infrastructure rather than policy","Explicit FDE and client approvals","build",1],
+   ["Model router","Selects models on capability, latency, cost, data sensitivity and client constraint","Model-independent execution","build",2],
+   ["Agent sandbox","Isolated coding and data workspaces with mock data, branch access and constrained credentials","Safe build execution","wrap",1]
+  ]
+},
+{
+  id:"g2", num:"2", name:"Observability and audit trail",
+  posture:"Build the client-facing layer",
+  intro:"If you cannot show a client exactly what the system did and why, adoption stalls regardless of how well it performs. Engineering-grade tracing is available off the shelf; the evidentiary view a client can put their name on is not, and that is where the build effort belongs. The traceability map — evidence through to release — is the item most teams skip and the one that answers <em>why does this exist</em> eighteen months later.",
+  items:[
+   ["Run and trace viewer","Shows the path from input through retrieved context, reasoning step, tool call, output and outcome","Debuggable execution trace","wrap",1],
+   ["Tool-call ledger","Logs tool name, caller, arguments, identity, permission check, result and side effect","Action-level audit evidence","build",1],
+   ["Decision ledger","Records requirements decisions, alternatives, assumptions, approvers and dates","Durable client decision log","build",1],
+   ["Point-in-time decision record","Immutable snapshot of inputs, reasoning and confidence as they stood at the moment of decision, reconstructable later even after the underlying data has moved on","Defensible decision reconstruction","build",2],
+   ["Data-provenance tracker","Connects answers, dashboards, models and agent decisions back to source data and transformations","Source-to-outcome lineage","build",2],
+   ["Requirement traceability map","Links evidence → requirement → ontology object → story → code → test → release","Proof of approved-scope delivery","build",2],
+   ["Cost and usage monitor","Tracks tokens, compute, storage and connector calls by client and use case, measured against the design-time envelope","Unit-economics view","wrap",1],
+   ["Reliability dashboard","Availability, latency, errors, retries, failed tool calls and workflow completion","Operational health view","buy",1],
+   ["Security-event log","Access violations, policy denials, sensitive-data exposure and anomalous behaviour","Security investigation evidence","buy",1],
+   ["Client reporting generator","Status, quality, adoption, risk and value reporting in client-ready language","Weekly client and executive update","build",2]
+  ]
+},
+{
+  id:"g3", num:"3", name:"Eval platform and golden-dataset management",
+  posture:"Build the management layer",
+  intro:"An eval suite is a client deliverable in its own right and often the one that closes the deal — it is how a probabilistic system becomes something an enterprise will put its name on. Without a shared platform every FDE reinvents evaluation under deadline pressure and quality varies by whoever is on the account. Note the dependency: the golden workflow set is only as good as the exception inventory that feeds it, which is why observation in Group 0 is load-bearing for this entire group.",
+  items:[
+   ["Golden workflow set","Operational scenarios, exceptions, failure states and expected outcomes, sourced directly from the exception inventory","Workflow and agent test suite","build",1],
+   ["Golden discovery set","Approved discovery examples, edge cases and expected requirement-extraction outputs","Discovery-agent test suite","build",2],
+   ["Retrieval evaluator","Tests whether agents retrieve authoritative, relevant, current and properly attributed context","Groundedness and retrieval metrics","wrap",1],
+   ["Tool-use evaluator","Tests tool selection, argument construction, authorisation, error recovery and action sequencing","Agent reliability metrics","build",1],
+   ["Requirement-quality evaluator","Scores completeness, source attribution, ambiguity and contradiction detection, and actionability","Discovery-quality scorecard","build",3],
+   ["Ontology-validation suite","Checks entity coverage, relationship integrity, rule completeness, permissions and source mapping","Ontology readiness report","build",2],
+   ["Code-quality evaluator","Unit, integration, contract, security, performance and regression checks","Release quality gate","buy",1],
+   ["Human-review calibration","Compares agent output against FDE, domain-expert and client judgement","Evaluator accuracy and trust metrics","build",2],
+   ["Regression manager","Re-runs historical suites when prompts, models, agents, tools, code or ontology definitions change","Change-impact report","build",2],
+   ["Eval release gate","Blocks release when quality, safety, reliability, cost or compliance thresholds are missed","Deployment approval decision","build",1]
+  ]
+},
+{
+  id:"g4", num:"4", name:"Connector and integration library",
+  posture:"Buy commodity · own the concentration",
+  intro:"Integration is the largest consumer of FDE time and the most amenable to amortisation. It is also what makes the build-on-top principle operationally real: you can only credibly refuse to move a client off an ERP they spent years migrating to if integrating with it is cheap for you. Buy the commodity connectors; own the ones your account base concentrates in.",
+  items:[
+   ["Connector registry","Catalogues integrations, auth methods, data classification, owners, environments and health status","Client integration landscape","build",2],
+   ["Connection wizard","Guides credential setup, network access, scopes, test connections and environment configuration","Faster, safer onboarding","build",2],
+   ["API and schema explorer","Inspects endpoints, data models, sample payloads, rate limits, auth patterns and versions — documented coverage and real coverage differ","Integration feasibility package","wrap",1],
+   ["Data ingestion templates","Reusable patterns for databases, SaaS APIs, streams, documents, event feeds and file transfer","Configured ingestion pipeline","wrap",1],
+   ["Document-processing connector","Extracts text, tables, metadata and citations from client repositories and document stores","Searchable implementation evidence","buy",1],
+   ["Identity and entitlement connector","Integrates SSO, groups, service accounts, roles and access policies","Governed human and agent access","buy",1],
+   ["Event and workflow connector","Connects queues, webhooks, schedulers, ticketing, notifications and business-process systems","Triggered operational workflows","wrap",2],
+   ["Connector test harness","Tests authentication, schemas, latency, error behaviour, idempotency and permissions before production use","Integration certification report","build",2],
+   ["Data-contract adapter","Enforces schemas, freshness SLAs, quality checks, ownership and version compatibility","Stable producer–consumer interface","build",3]
+  ]
+},
+{
+  id:"g5", num:"5", name:"Ontology and entity-resolution layer",
+  posture:"Almost entirely build",
+  intro:"The highest-leverage group on the map and the least likely to exist off the shelf in usable form. Every organisation names the same real-world thing differently by function — and frequently at different grains, which is why integrations break weekly and nobody can find the cause. Solving that once per client is unavoidable; solving it with a reusable layer is what turns it into an asset. The commercial argument is stronger than the technical one: clients adopt your vocabulary along with your product, and becoming the linguistic foundation is more durable than any individual workflow you automate.",
+  items:[
+   ["Ontology studio","Defines entities, attributes, relationships, events, actions, policies and business rules","Versioned client domain model","build",2],
+   ["Domain glossary","Establishes approved client terminology, definitions, synonyms, owners and worked examples","Shared business vocabulary","build",1],
+   ["Entity-resolution engine","Matches records across systems and assigns canonical IDs with confidence and survivorship rules","Unified customer, asset, case, order or employee entities","build",2],
+   ["Source-to-object mapper","Maps source fields and transformations into canonical ontology objects","Data-to-ontology mapping specification","build",2],
+   ["Relationship inference engine","Proposes candidate links from identifiers, transactions, reference data, documents and rules, for human confirmation rather than automatic acceptance","Candidate relationship graph","build",3],
+   ["Business-rules engine","Encodes eligibility, routing, SLA, compliance, scoring and exception logic","Governed operational logic","wrap",2],
+   ["Actions and permissions model","Defines which roles, applications and agents may create, modify, approve or close each business object","Safe operational write-backs","build",2],
+   ["Semantic metrics layer","Centralises KPI definitions, measures, dimensions, calculation logic and target thresholds","Consistent dashboards and agent reasoning","build",2],
+   ["Ontology version control","Manages change proposals, review, migrations, compatibility, release history and rollback","Safely evolving domain model","build",3],
+   ["Ontology explorer","Lets FDEs and client users inspect objects, relationships, lineage, data quality, ownership and downstream use","Transparent operational model","build",3]
+  ]
+},
+{
+  id:"g6", num:"6", name:"Deployment substrate",
+  posture:"Overwhelmingly buy",
+  intro:"Almost every component here has a mature commercial or open-source answer, and building any of them is effort diverted from Groups 0 and 5. The exception is the shadow-mode harness, which is what makes the autonomy ladder a measurement rather than a phase name — nothing off the shelf runs an agent alongside a human on live traffic, logs both, and computes agreement. That one is ours. At scale this group also determines the ceiling on account size: without self-assembling deployment, identity integration and air-gap capability, the largest regulated accounts are simply out of reach.",
+  items:[
+   ["Environment manager","Creates and tracks local, development, test, UAT, staging and production environments","Environment readiness and parity","buy",1],
+   ["Infrastructure-as-code factory","Generates and validates cloud, network, compute, database, identity and policy configuration","Reproducible infrastructure","buy",1],
+   ["CI/CD pipeline templates","Standardises build, test, scan, package, deploy, verify, approve and rollback stages","Repeatable release pipeline","buy",1],
+   ["Secrets and key vault","Stores credentials, keys, certificates, connection secrets and rotation policy","Protected runtime credentials","buy",1],
+   ["Shadow-mode comparison harness","Runs the agent alongside the human on live traffic without acting, logs both, and computes agreement and divergence rates as the gate for each rung of the autonomy ladder","Measured autonomy progression","build",1],
+   ["Policy-as-code engine","Enforces data access, geography, security posture, environment promotion and approval rules","Automated governance checks","buy",2],
+   ["Feature-flag service","Releases functionality progressively by client, role, workflow, business unit or cohort","Controlled rollout capability","buy",2],
+   ["Release manager","Bundles dependencies, migrations, test evidence, release notes, approvals and rollback instructions","Auditable release package","buy",2],
+   ["Deployment verifier","Runs smoke tests, health checks, migration validation, integration checks and post-release evaluation","Go/no-go evidence","wrap",2],
+   ["Rollback and recovery manager","Reverts application, configuration, schema, feature-flag and agent-version changes","Safer production recovery","buy",2],
+   ["Incident and runbook hub","On-call routing, triage workflows, response guides, communications and postmortem templates","Consistent production support","buy",2]
+  ]
+},
+{
+  id:"g7", num:"7", name:"Pattern and asset library",
+  posture:"Build · contribution is mandatory",
+  intro:"The mechanism that converts field work into something reusable, and the group most directly answerable for product return. Storing postmortems is not sufficient on its own — something has to <em>surface recurrence</em>, because when six accounts have independently built the same workaround nobody notices unless a system raises its hand. Without detection the library is a filing cabinet you have to remember to search. Contribution should be a condition of engagement close, with a fixed question at every retro: what did we generalise, and where did it land?",
+  items:[
+   ["Discovery playbooks","Reusable executive, workflow, data, security, architecture and adoption interview and observation guides","Faster, more consistent discovery","build",1],
+   ["Requirement and charter templates","Templates for PRDs, use cases, assumptions, risks, acceptance criteria, decisions and success metrics","Implementation-ready requirements package","build",1],
+   ["Reference architectures","Approved blueprints for retrieval, agentic workflow, data platform, copilot, workflow automation and integration patterns","Faster solution design","build",2],
+   ["Connector recipes","Proven integration setups, mappings, authentication guidance, limitations and test patterns","Faster repeatable integrations","build",2],
+   ["Agent templates","Reusable specifications for discovery, architecture, data, coding, QA, security, documentation and support agents","Standard agent starting points","build",2],
+   ["Prompt and policy library","Versioned system prompts, tool instructions, guardrails, escalation rules and client communication styles","Consistent agent behaviour","build",2],
+   ["Test and eval packs","Domain scenarios, adversarial prompts, data-quality tests, UAT scripts and regression cases","Faster confidence-building","build",2],
+   ["Implementation postmortems","Lessons, anti-patterns, delivery risks, fixes and effort benchmarks from finished engagements","Institutional learning","build",2],
+   ["Value-realisation templates","KPI baselines, ROI calculators, adoption dashboards, executive readouts and renewal plans","Proof of client impact","build",2],
+   ["Cross-account pattern detector","Surfaces when the same workaround, connector, rule or module has been built independently across multiple accounts","Ranked productisation candidates","build",3],
+   ["Vertical ontology packs","Industry-specific entities, relationships, metrics, actions, controls and common workflows","Head start on domain modelling","build",3],
+   ["Reusable application modules","Components for approvals, case management, search, dashboards, notifications, orchestration and audit views","Accelerated delivery","build",3]
+  ]
+}
+];
+
+var OBS_HTML = ''
++'<h3>Third-party technology worth evaluating</h3>'
++'<p>The observation instruments are classified as build because the structure — timestamped events, the four tells as countable signals, exceptions as first-class objects — is ours. The capture underneath them does not have to be. Several mature categories are worth evaluating before writing anything.</p>'
++'<table><thead><tr><th style="width:26%">Category</th><th style="width:34%">Worth evaluating</th><th>What it gets you</th></tr></thead><tbody>'
++'<tr><td><strong>Task and process mining</strong></td><td>Celonis, UiPath (Process and Task Mining), Microsoft Power Automate Process Mining, Apromore</td><td>Reconstructs actual process variants from system logs and desktop activity. Strongest evidence available for how often the exception path really runs.</td></tr>'
++'<tr><td><strong>Workflow-to-documentation capture</strong></td><td>Scribe, Tango</td><td>Turns a single recorded screen session into step-by-step documentation. Fastest route to a first-pass current-state map, and cheap enough to run on day one.</td></tr>'
++'<tr><td><strong>Session replay</strong></td><td>FullStory, Glassbox, Hotjar</td><td>Where the workflow is already digital and customer-facing. Shows hesitation, backtracking and abandonment that nobody reports in an interview.</td></tr>'
++'<tr><td><strong>Research repository</strong></td><td>Dovetail, Condens, Marvin</td><td>Tags and structures observation notes so findings stay searchable and can be linked back to individual requirements. Underrated for keeping evidence attached to conclusions.</td></tr>'
++'<tr><td><strong>Meeting capture</strong></td><td>Gong, Fireflies, Otter, Grain</td><td>Supporting evidence and commitment tracking. Useful, but it captures the described workflow — treat its output accordingly.</td></tr>'
++'</tbody></table>'
++'<div class="warn"><div class="k">Consent and works councils</div>'
++'<p>Desktop task mining and session replay are employee monitoring, whatever they are called in the sales deck. In EU works-council jurisdictions and unionised environments they require consultation rather than notice, and getting this wrong ends an engagement rather than delaying it. Settle it alongside the evidence residency policy before any capture starts — and where there is doubt, prefer consented, time-boxed shadowing over always-on instrumentation. It produces better material anyway.</p></div>'
++'<div class="warn" style="border-left-color:var(--sage)"><div class="k">A caution on tooling this well</div>'
++'<p>Capture tools are good enough now that they can quietly make sitting beside the operator feel optional. It is not. Process mining tells you a variant fires 8% of the time; it does not tell you the analyst has a rule in her head for which of those cases go to a specific vendor, and it will never tell you she has stopped mentioning it because nobody listened the last time. Use the tools to find where to look. Then go and look.</p></div>';
+
+(function(){
+  var host=document.getElementById('groups');
+  var html='';
+  GROUPS.forEach(function(g){
+    html+='<section class="gsec" id="'+g.id+'"><div class="wrap">'
+      +'<div class="ghead"><div class="gnum">'+g.num+'</div><div>'
+      +'<span class="posture">'+g.posture+'</span><h2>'+g.name+'</h2></div></div>'
+      +'<p class="intro">'+g.intro+'</p>'
+      +'<table><thead><tr><th style="width:22%">Component</th><th style="width:40%">How it assists the FDE</th>'
+      +'<th class="col-out" style="width:20%">Typical output</th><th style="width:9%">Posture</th><th style="width:9%">Tier</th></tr></thead><tbody>';
+    g.items.forEach(function(it){
+      html+='<tr data-post="'+it[3]+'" data-tier="'+it[4]+'">'
+        +'<td><strong>'+it[0]+'</strong></td><td>'+it[1]+'</td>'
+        +'<td class="col-out">'+it[2]+'</td>'
+        +'<td><span class="pill p-'+it[3]+'">'+it[3]+'</span></td>'
+        +'<td><span class="pill t'+it[4]+'">T'+it[4]+'</span></td></tr>';
+    });
+    html+='</tbody></table><div class="empty" hidden>No components in this group match the current filter.</div>';
+    if(g.extra==='obs') html+=OBS_HTML;
+    html+='</div></section>';
+  });
+  host.innerHTML=html;
+
+  var state={tier:'all',post:'all'};
+  var rows=[].slice.call(host.querySelectorAll('tbody tr'));
+  var total=rows.length;
+
+  function apply(){
+    var shown=0;
+    rows.forEach(function(r){
+      var ok=(state.tier==='all'||r.dataset.tier===state.tier)
+           &&(state.post==='all'||r.dataset.post===state.post);
+      r.classList.toggle('hide',!ok);
+      if(ok)shown++;
+    });
+    [].forEach.call(host.querySelectorAll('.gsec'),function(s){
+      var vis=s.querySelectorAll('tbody tr:not(.hide)').length;
+      s.querySelector('table').hidden=(vis===0);
+      s.querySelector('.empty').hidden=(vis!==0);
+    });
+    document.getElementById('count').textContent=shown+' of '+total+' components';
+  }
+
+  [].forEach.call(document.querySelectorAll('.fg button'),function(b){
+    b.addEventListener('click',function(){
+      var f=b.dataset.f;
+      [].forEach.call(document.querySelectorAll('.fg button[data-f="'+f+'"]'),function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      state[f]=b.dataset.v;
+      apply();
+    });
+  });
+  apply();
+
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          var i=secs.indexOf(e.target);
+          links.forEach(function(l){l.classList.remove('on');});
+          if(i>-1)links[i].classList.add('on');
+        }
+      });
+    },{rootMargin:'-12% 0px -75% 0px'});
+    secs.forEach(function(s){if(s)io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>

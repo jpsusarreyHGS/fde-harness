@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FDE engagement runbook — HGS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#26476B;
+  --navy-deep:#15283C;
+  --grey:#E7E6E6;
+  --charcoal:#2D2D2D;
+  --lime:#ABCF02;
+  --teal:#3D9B99;
+  --teal-light:#85BEBC;
+  --sage:#9AAC94;
+  --slate:#5C6D72;
+  --white:#FFFFFF;
+  --shadow:0 4px 20px rgba(0,0,0,.10);
+  --shadow-lg:0 6px 28px rgba(0,0,0,.14);
+  --radius:6px;
+  --rail:280px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;background:var(--grey);color:var(--charcoal);
+  font-family:Kanit,Raleway,system-ui,sans-serif;font-weight:300;
+  font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-weight:600;line-height:1.18;margin:0}
+a{color:var(--teal)}
+
+/* ---------- rail ---------- */
+.rail{
+  position:fixed;top:0;left:0;width:var(--rail);height:100vh;
+  background:var(--navy-deep);color:var(--white);
+  padding:34px 26px;overflow-y:auto;z-index:50;
+}
+.rail .mark{font-size:19px;font-weight:600;letter-spacing:.14em;color:var(--white)}
+.rail .mark span{color:var(--lime)}
+.rail .sub{font-size:11.5px;color:var(--teal-light);letter-spacing:.09em;text-transform:uppercase;margin-top:6px}
+.rail nav{margin-top:32px;border-top:1px solid rgba(255,255,255,.14);padding-top:20px}
+.rail a{
+  display:flex;gap:12px;align-items:baseline;text-decoration:none;
+  color:rgba(255,255,255,.74);font-size:13.5px;padding:8px 0;
+  border-left:2px solid transparent;padding-left:12px;margin-left:-12px;
+  transition:color .18s,border-color .18s;
+}
+.rail a:hover,.rail a:focus-visible{color:var(--white);border-left-color:var(--lime)}
+.rail a.on{color:var(--white);border-left-color:var(--lime)}
+.rail a i{font-style:normal;font-size:11px;color:var(--lime);min-width:20px;font-weight:500}
+.rail .foot{margin-top:30px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.42);line-height:1.6}
+
+/* ---------- layout ---------- */
+.page{margin-left:var(--rail)}
+.wrap{max-width:900px;margin:0 auto;padding:0 48px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--navy);color:var(--white);padding:92px 0 78px;position:relative;overflow:hidden}
+.hero::after{
+  content:"";position:absolute;right:-190px;top:-190px;width:640px;height:640px;border-radius:50%;
+  border:1px solid rgba(171,207,2,.20);
+  box-shadow:0 0 0 62px rgba(255,255,255,.028),0 0 0 148px rgba(255,255,255,.020);
+}
+.hero .wrap{position:relative;z-index:2}
+.eyebrow{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);font-weight:500}
+.hero h1{font-size:47px;color:var(--lime);margin:18px 0 0;max-width:16ch}
+.hero .lede{font-size:19px;font-weight:200;color:rgba(255,255,255,.90);max-width:60ch;margin-top:22px}
+.hero .meta{margin-top:38px;display:flex;flex-wrap:wrap;gap:34px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
+.hero .meta div{font-size:12.5px;color:rgba(255,255,255,.62);letter-spacing:.04em}
+.hero .meta b{display:block;font-weight:500;color:var(--white);font-size:14.5px;letter-spacing:0}
+
+/* ---------- arc strip ---------- */
+.arc{height:5px;background:linear-gradient(90deg,var(--lime) 0 22%,var(--teal) 22% 46%,var(--teal-light) 46% 66%,var(--sage) 66% 84%,var(--slate) 84% 100%)}
+
+/* ---------- phase ---------- */
+.phase{padding:66px 0 8px}
+.phase-head{display:flex;gap:22px;align-items:flex-start;margin-bottom:8px}
+.phase-num{
+  flex:0 0 auto;width:54px;height:54px;border-radius:var(--radius);
+  background:var(--navy);color:var(--lime);display:flex;align-items:center;justify-content:center;
+  font-size:21px;font-weight:600;box-shadow:var(--shadow)
+}
+.phase-head h2{font-size:33px;color:var(--charcoal);padding-top:5px}
+.phase-head .tag{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:500;display:block;margin-bottom:5px}
+.phase > .wrap > p{max-width:70ch}
+
+h3{font-size:20px;margin:40px 0 12px;color:var(--navy)}
+h4{font-size:14.5px;margin:24px 0 8px;color:var(--charcoal);letter-spacing:.01em}
+p{margin:0 0 15px}
+
+/* ---------- cards ---------- */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 30px;margin:20px 0}
+.card h4:first-child,.card h3:first-child{margin-top:0}
+.grid{display:grid;gap:18px;margin:20px 0}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.tile{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px}
+.tile .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px}
+.tile p:last-child{margin-bottom:0}
+.tile .big{font-size:40px;font-weight:600;color:var(--navy);line-height:1.05}
+.tile .lbl{font-size:12.5px;color:var(--slate)}
+
+/* ---------- rule / callout ---------- */
+.rule{
+  background:var(--navy-deep);color:var(--white);border-radius:var(--radius);
+  padding:26px 30px;margin:26px 0;border-left:4px solid var(--lime);box-shadow:var(--shadow-lg)
+}
+.rule .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);font-weight:500;margin-bottom:9px}
+.rule p{margin:0;font-size:17px;font-weight:200;color:rgba(255,255,255,.95)}
+.rule p + p{margin-top:12px;font-size:14.5px;color:rgba(255,255,255,.74)}
+
+.warn{background:var(--white);border-left:4px solid var(--teal);border-radius:var(--radius);padding:20px 24px;margin:22px 0;box-shadow:var(--shadow)}
+.warn .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px}
+.warn p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+th{background:var(--navy);color:var(--white);text-align:left;padding:12px 15px;font-weight:500;font-size:12.5px;letter-spacing:.05em}
+td{padding:12px 15px;border-top:1px solid var(--grey);vertical-align:top}
+tbody tr:nth-child(even) td{background:#FAFAFA}
+td strong{font-weight:500}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12.5px}
+
+/* ---------- lists ---------- */
+ul,ol{margin:0 0 15px;padding-left:20px}
+li{margin-bottom:7px}
+ul.qs{list-style:none;padding-left:0}
+ul.qs li{padding-left:24px;position:relative;margin-bottom:11px}
+ul.qs li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;background:var(--lime);border-radius:2px}
+ul.qs li b{font-weight:500;color:var(--navy)}
+.why{display:block;font-size:12.5px;color:var(--slate);margin-top:2px}
+
+/* ---------- allocation band ---------- */
+.alloc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:24px 0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.alloc div{padding:20px 18px;color:var(--white)}
+.alloc div:nth-child(1){background:var(--navy-deep)}
+.alloc div:nth-child(2){background:var(--navy)}
+.alloc div:nth-child(3){background:var(--teal)}
+.alloc div:nth-child(4){background:var(--slate)}
+.alloc .k{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--lime);font-weight:500;margin-bottom:7px}
+.alloc p{font-size:13px;margin:0;color:rgba(255,255,255,.92);font-weight:200}
+
+/* ---------- ladder ---------- */
+.ladder{counter-reset:s;margin:22px 0}
+.ladder li{list-style:none;position:relative;padding:16px 0 16px 62px;border-bottom:1px solid rgba(0,0,0,.08)}
+.ladder li::before{
+  counter-increment:s;content:counter(s);position:absolute;left:0;top:14px;
+  width:34px;height:34px;border-radius:var(--radius);background:var(--white);
+  color:var(--navy);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)
+}
+.ladder li b{display:block;font-weight:500;color:var(--navy);font-size:15.5px}
+.ladder li span{font-size:14px;color:var(--charcoal)}
+
+/* ---------- calculator ---------- */
+.calc{background:var(--navy-deep);border-radius:var(--radius);padding:34px 34px 30px;margin:26px 0;box-shadow:var(--shadow-lg);color:var(--white)}
+.calc h3{color:var(--lime);margin:0 0 6px;font-size:21px}
+.calc .note{font-size:13px;color:rgba(255,255,255,.62);margin-bottom:24px;font-weight:200}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px}
+.f label{display:block;font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--teal-light);margin-bottom:6px;font-weight:400}
+.f input{
+  width:100%;padding:9px 11px;border-radius:4px;border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.07);color:var(--white);font-family:inherit;font-size:15px;font-weight:300
+}
+.f input:focus{outline:2px solid var(--lime);outline-offset:1px;border-color:transparent}
+.calc-out{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.16);display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.calc-out .o .n{font-size:31px;font-weight:600;color:var(--lime);line-height:1.1}
+.calc-out .o .l{font-size:11.5px;color:rgba(255,255,255,.66);letter-spacing:.05em;margin-top:3px}
+.calc-out .o.alt .n{color:var(--white)}
+
+/* ---------- loop ---------- */
+.loop{background:var(--navy);color:var(--white);padding:56px 0;margin-top:60px}
+.loop h2{color:var(--lime);font-size:29px}
+.loop p{color:rgba(255,255,255,.88);max-width:64ch}
+.loop-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+.loop-steps div{background:rgba(255,255,255,.07);border-radius:var(--radius);padding:20px;border-top:3px solid var(--lime)}
+.loop-steps b{display:block;font-weight:500;font-size:16px;margin-bottom:5px}
+.loop-steps span{font-size:13.5px;color:rgba(255,255,255,.76);font-weight:200}
+
+footer{background:var(--navy-deep);color:rgba(255,255,255,.5);padding:30px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media(max-width:1080px){
+  :root{--rail:0px}
+  .rail{position:static;width:100%;height:auto;padding:22px 26px}
+  .rail nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 18px}
+  .page{margin-left:0}
+  .wrap{padding:0 26px}
+  .hero h1{font-size:34px}
+  .g2,.g3,.alloc,.calc-grid,.calc-out,.loop-steps{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .g2,.g3,.alloc,.calc-grid,.calc-out,.loop-steps{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+  .phase-head h2{font-size:25px}
+}
+@media print{
+  .rail{display:none}.page{margin-left:0}
+  body{background:#fff}.card,.tile,table{box-shadow:none;border:1px solid #ddd}
+  .phase{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <div class="mark">HGS<span>.</span></div>
+  <div class="sub">FDE practice</div>
+  <nav id="nav">
+    <a href="#p0"><i>00</i>Before you land</a>
+    <a href="#p1"><i>01</i>Map the organisation</a>
+    <a href="#p2"><i>02</i>Gather the real workflow</a>
+    <a href="#p3"><i>03</i>Analyse the systems</a>
+    <a href="#p4"><i>04</i>Place the intelligence</a>
+    <a href="#p5"><i>05</i>Build the MVP</a>
+    <a href="#p6"><i>06</i>Prove it with evals</a>
+    <a href="#p7"><i>07</i>Ship into production</a>
+    <a href="#p8"><i>08</i>Calculate the ROI</a>
+    <a href="#p9"><i>09</i>Run the loop again</a>
+  </nav>
+  <div class="foot">Internal enablement document.<br>Field runbook, v1.</div>
+</aside>
+
+<main class="page">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Forward deployed engineering</div>
+    <h1>The engagement runbook</h1>
+    <p class="lede">Every company can now buy the same intelligence. The advantage has moved to where, how and why it gets applied inside one specific business. This is the sequence an HGS forward deployed engineer runs from the first day on site to a measured outcome.</p>
+    <div class="meta">
+      <div><b>Audit → evals → deployment</b>The engagement shape</div>
+      <div><b>Weeks 1–2 · 3–4 · 5+</b>Typical phasing</div>
+      <div><b>Revenue · cost · risk</b>The only three ROI buckets</div>
+    </div>
+  </div>
+</section>
+<div class="arc"></div>
+
+<!-- 00 -->
+<section class="phase" id="p0">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">00</div>
+      <div><span class="tag">Before you land</span><h2>Set the engagement up so it can succeed</h2></div>
+    </div>
+    <p>Most of what determines the outcome is decided before discovery starts. Three things need to be true on day one.</p>
+
+    <h3>Start with an audit, and charge for it</h3>
+    <p>Every engagement opens with a paid assessment of a department's workflows — the full steps, the back-and-forth, the exception handling — followed by a ranked view of what is worth automating and what is not. Clients routinely report this artefact is worth several times what they paid for it, because almost nobody else can produce it. It also does something structurally important: it converts an open-ended AI conversation into a bounded piece of work with a deliverable.</p>
+
+    <div class="warn">
+      <div class="k">Naming</div>
+      <p>Buyers have an allergic reaction to the word <em>audit</em> — it lands as a tax audit. Sell the identical work as an <strong>assessment sprint</strong> or <strong>discovery sprint</strong>. Same scope, materially better conversion.</p>
+    </div>
+
+    <h3>De-risk the sponsor before you de-risk the technology</h3>
+    <p>The person bringing you in has a straightforward calculation to make. Doing nothing is safe for them. You are the risk. They do not want to get fired; they want to get promoted — and your job includes giving them something to point at in their performance review.</p>
+    <ul class="qs">
+      <li><b>Never open with migration.</b><span class="why">If they spent two years and several million moving to an ERP, proposing they move off it ends the conversation. Build on top of it instead.</span></li>
+      <li><b>Give them the narrative, not just the system.</b><span class="why">Before you leave any meeting with a sponsor, they should have one sentence they can repeat upward.</span></li>
+      <li><b>Consider a free or heavily discounted first assessment</b> on early accounts.<span class="why">It removes the sponsor's downside entirely, and the first few clients teach you more than you teach them.</span></li>
+    </ul>
+
+    <h3>Pick one stack and get genuinely good at it</h3>
+    <p>As a practice we stay model-agnostic — switching providers as accuracy improves and cost falls is a real asset. As an individual FDE walking into your first engagement, that is not where your value is. Get deep on one model and one agent-building framework first. Breadth is a later problem; your value is fluency across the business and the technology, and that transfers to any model.</p>
+  </div>
+</section>
+
+<!-- 01 -->
+<section class="phase" id="p1">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">01</div>
+      <div><span class="tag">Information gathering</span><h2>Map the organisation and find the real contacts</h2></div>
+    </div>
+    <p>Before you can map a workflow you need to know whose workflow it is. The org chart tells you reporting lines; it does not tell you where the knowledge sits.</p>
+
+    <h3>The five roles you need on every engagement</h3>
+    <table>
+      <thead><tr><th style="width:20%">Role</th><th style="width:34%">What they give you</th><th>How to find them</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Executive sponsor</strong></td><td>Budget, mandate, the definition of success that will actually be judged</td><td>They initiated the engagement. Confirm they control the budget — often they don't.</td></tr>
+        <tr><td><strong>Process owner</strong></td><td>The official version of the workflow and the authority to change it</td><td>Ask the sponsor: "who owns this end to end?" If nobody does, that is your first finding.</td></tr>
+        <tr><td><strong>The operator</strong></td><td>The real workflow, including everything undocumented</td><td>Ask the process owner who actually does the work every day. Then go sit with them.</td></tr>
+        <tr><td><strong>The exception holder</strong></td><td>The routing rules that exist in exactly one person's head</td><td>Ask: "when it's ambiguous, who decides?" That name is the most valuable one you'll get.</td></tr>
+        <tr><td><strong>The systems gatekeeper</strong></td><td>Access, data, integration reality, what is immovable</td><td>Usually IT or platform. Engage early — access latency is the top schedule risk.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="rule">
+      <div class="k">Field rule</div>
+      <p>Your badge on site and your contractor email address are your data-mining permits.</p>
+      <p>You cannot survey your way to this. A one-hour meeting gets you what someone <em>thinks</em> their job is. Eight hours beside them gets you the job.</p>
+    </div>
+
+    <h3>Questions for the sponsor</h3>
+    <ul class="qs">
+      <li><b>What are you trying to accomplish?</b><span class="why">The goal, not the artefact. Listen for whether they can state an outcome without describing a feature.</span></li>
+      <li><b>What happens after you have the solution?</b><span class="why">If they can't answer, the request is a proxy for something else and you need to find out what.</span></li>
+      <li><b>How is this being solved today?</b><span class="why">There is always a current solution, even if it's a spreadsheet and a person's memory.</span></li>
+      <li><b>What happens if we do nothing?</b><span class="why">Separates real urgency from ambient AI pressure. Also frequently surfaces the actual fear.</span></li>
+      <li><b>Who else can do this work?</b><span class="why">Key-person risk masquerades as an efficiency request more often than you'd expect.</span></li>
+      <li><b>What have you already committed to, and to whom?</b><span class="why">You need to know what promise you're standing inside before you recommend a timeline.</span></li>
+      <li><b>What would make this a failure even if the technology worked?</b><span class="why">Surfaces political constraints nobody would volunteer.</span></li>
+    </ul>
+
+    <h3>Questions for the operator</h3>
+    <ul class="qs">
+      <li><b>What's the most annoying part of your morning?</b><span class="why">The single highest-yield opening question in the discipline. Ask it early, then stop talking.</span></li>
+      <li><b>Can I watch you do it?</b><span class="why">Ask this in the first ten minutes. Everything below is better answered by observation than by interview.</span></li>
+      <li><b>What happens after this step?</b><span class="why">Reveals dead-end outputs — reports nobody opens, alerts nobody actions.</span></li>
+      <li><b>When was the last time this went wrong? Walk me through it.</b><span class="why">The failure path is where the real complexity lives, and people can only recall it concretely.</span></li>
+      <li><b>How do you know where to look?</b><span class="why">Extracts the undocumented mental model. Often the first time anyone has asked.</span></li>
+      <li><b>What do you do when it's ambiguous?</b><span class="why">Finds the exception holder, who may be the person you're talking to.</span></li>
+      <li><b>What do you ignore, and why?</b><span class="why">Experienced operators filter aggressively and never mention it. That filter is business logic.</span></li>
+      <li><b>If you could stop doing one thing tomorrow, what would it be?</b><span class="why">Often identifies the four-hour fix that buys you access to everything else.</span></li>
+    </ul>
+
+    <h3>What to watch for, not ask about</h3>
+    <p>Four behavioural tells signal an opportunity. Train yourself to catch them without prompting:</p>
+    <div class="grid g2">
+      <div class="tile"><div class="k">Tell 01</div><p><strong>Any task done more than once</strong> — several times a day, a week, an hour. Repetition is a pattern, and a pattern is a hint.</p></div>
+      <div class="tile"><div class="k">Tell 02</div><p><strong>Copy-paste between tools.</strong> Every manual transfer between two systems is an unbuilt integration.</p></div>
+      <div class="tile"><div class="k">Tell 03</div><p><strong>Tool or tab switching</strong> mid-task. The context lives in one place and the work happens in another.</p></div>
+      <div class="tile"><div class="k">Tell 04</div><p><strong>Phone comes out mid-workflow.</strong> Something is slow enough that waiting is dead time. Also: visible exasperation, and the phrase "well, I <em>have</em> to."</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="phase" id="p2">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">02</div>
+      <div><span class="tag">Business reality</span><h2>Gather the workflow as it actually runs</h2></div>
+    </div>
+    <p>This is where the bulk of engagement time goes, and it is the part that gets skipped. The documented process is very rarely the real process — and building against the documented version produces a system that doesn't map to reality.</p>
+
+    <h3>Why "an email arrives" is never one step</h3>
+    <p>Take the simplest imaginable trigger. It sounds clean. Decompose it properly and you find:</p>
+    <div class="card">
+      <h4>Step 1 — "an email arrives"</h4>
+      <ul>
+        <li>It arrives from 40+ senders, no two formatted alike</li>
+        <li>The payload is sometimes a PDF, sometimes a screenshot, sometimes an Excel file, sometimes buried in a forwarded thread</li>
+        <li>Roughly half are exceptions: <em>same as last time</em> · <em>ignore the second attachment</em> · <em>Sarah already signed off on this one</em></li>
+        <li>There is no consistent subject line, so it cannot be routed without opening it</li>
+        <li>The rules for handling all of the above live in one person's head, undocumented</li>
+      </ul>
+      <h4>Step 2 — "it's copied into a spreadsheet"</h4>
+      <ul>
+        <li>There are three versions of the spreadsheet; one is live, two are stale</li>
+        <li>Data validation is inconsistent; values are re-keyed by hand</li>
+        <li>Columns drift over time as people add fields locally</li>
+      </ul>
+      <h4>Step 3 — "it's checked into the internal system"</h4>
+      <p style="margin-bottom:0">Same pattern. Every step in every workflow decomposes like this.</p>
+    </div>
+
+    <div class="rule">
+      <div class="k">The discipline</div>
+      <p>Customers describe solutions, not problems. Your job is to recover the problem.</p>
+      <p>If you ask "what's the first step," you'll be told "an email arrives," and you'll build for a system that doesn't exist. Ask people to write down every exception in their job and they can't — not because they're withholding, but because nobody can. You have to be there when it happens.</p>
+    </div>
+
+    <h3>The operating map — your discovery deliverable</h3>
+    <p>Discovery ends with a document, not a conversation. For each workflow in scope, capture:</p>
+    <table>
+      <thead><tr><th style="width:26%">Element</th><th>What to record</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Trigger</strong></td><td>What starts it, in all its real variants — every format, sender, channel</td></tr>
+        <tr><td><strong>Steps</strong></td><td>Every step including the ones nobody counts. Who does it, in which system, how long it takes</td></tr>
+        <tr><td><strong>Volume &amp; frequency</strong></td><td>Per day, week, month. Peaks. This is the input to prioritisation and to ROI</td></tr>
+        <tr><td><strong>Judgement points</strong></td><td>Where a human decides something that isn't a rule — usually far fewer steps than expected</td></tr>
+        <tr><td><strong>Exceptions</strong></td><td>Every deviation, its frequency, and how it's handled today. The long tail, not the happy path</td></tr>
+        <tr><td><strong>Undocumented knowledge</strong></td><td>What lives only in someone's head, and whose head</td></tr>
+        <tr><td><strong>Dead ends</strong></td><td>Outputs nobody consumes. Reports nobody opens. Steps that persist for historical reasons</td></tr>
+        <tr><td><strong>Failure modes</strong></td><td>What breaks, how often, who notices, who gets blamed, what the recovery is</td></tr>
+        <tr><td><strong>Systems touched</strong></td><td>Every application, in order, with how data moves between them</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="phase" id="p3">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">03</div>
+      <div><span class="tag">Technical discovery</span><h2>Analyse the systems</h2></div>
+    </div>
+    <p>Run this in parallel with workflow discovery. You are establishing what you can build on, what you must build around, and what you must never propose touching.</p>
+
+    <h3>Systems inventory</h3>
+    <table>
+      <thead><tr><th style="width:22%">Layer</th><th style="width:30%">Typical systems</th><th>What you're establishing</th></tr></thead>
+      <tbody>
+        <tr><td><strong>System of record</strong></td><td>ERP — SAP, NetSuite, Workday, Oracle</td><td>Immovable. Recently migrated at great cost. Build on top; never propose replacing.</td></tr>
+        <tr><td><strong>Customer systems</strong></td><td>CRM — Salesforce, HubSpot, Dynamics</td><td>Entity definitions, ownership, data quality. Usually the source of vocabulary collisions.</td></tr>
+        <tr><td><strong>Revenue &amp; engagement</strong></td><td>Gong, Chili Piper, Apollo, Clay, Outreach</td><td>Where signal exists that nobody is using. Frequent source of quick wins.</td></tr>
+        <tr><td><strong>Spend &amp; ops</strong></td><td>Concur, Expensify, Coupa, ServiceNow</td><td>High-volume, high-repetition, well-structured — often the best MVP target.</td></tr>
+        <tr><td><strong>Data platform</strong></td><td>Snowflake, Databricks, Redshift, lakehouse</td><td>What's already integrated, what's stale, refresh cadence, who owns it.</td></tr>
+        <tr><td><strong>Collaboration</strong></td><td>Slack, Teams, email, SharePoint</td><td>Where the real coordination happens and where an intervention will actually be seen.</td></tr>
+        <tr><td><strong>Identity &amp; access</strong></td><td>Okta, Entra, AD</td><td>How an agent will authenticate. Start this conversation in week one.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>For every system, answer six questions</h4>
+    <ol>
+      <li><strong>Is there an API, and what does it actually expose?</strong> Documented coverage and real coverage differ.</li>
+      <li><strong>Is this a system of record or a copy?</strong> Writing to a copy creates silent divergence.</li>
+      <li><strong>Who owns access, and how long does provisioning take?</strong> Measured in weeks at most enterprises.</li>
+      <li><strong>What is the data quality, honestly?</strong> Nulls, duplicates, drift, defaults. Blank date fields defaulting to epoch have taken down more than one system.</li>
+      <li><strong>What has recently been migrated or is scheduled to be?</strong> Recent migration means immovable. Scheduled decommission means don't build on it.</li>
+      <li><strong>What is the translation layer between this and the next system?</strong> The seams are where integrations break.</li>
+    </ol>
+
+    <h3>Vocabulary audit</h3>
+    <p>Every organisation is made of nouns and verbs — entities and operations. The same real-world thing is usually named differently by each function: sales says <em>account</em>, finance says <em>billing entity</em>, delivery says <em>client</em>, engineering says <em>org_id</em>. These are not just different labels; they are frequently different <em>grains</em>, which is why integrations break weekly and nobody can find the cause.</p>
+    <p>Record, for each core entity: which terms refer to it, at what grain, keyed on what, including which populations. Then establish the canonical definition — ideally the one with an external verifiable key. Do not ask any function to change its vocabulary. Build the translation, and let the canonical model surface in the tooling so it gets adopted by use rather than by mandate.</p>
+    <div class="warn">
+      <div class="k">Why this matters commercially</div>
+      <p>Users don't just adopt your product — they adopt your language. If you define the terms, you become the linguistic foundation everything else is built on top of. That is a far more durable position than any individual workflow you automate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="phase" id="p4">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">04</div>
+      <div><span class="tag">FDE judgement</span><h2>Decide where intelligence belongs — and where it doesn't</h2></div>
+    </div>
+    <p>This is the judgement that distinguishes an FDE from an implementer, and it is where the last cycle of AI programmes went wrong. The instinct to hand everything to the model produced hallucinations, blown budgets and the widely cited finding that roughly 95% of generative AI pilots fail to deliver.</p>
+
+    <div class="rule">
+      <div class="k">The correction</div>
+      <p>Most of a good solution is still deterministic software.</p>
+      <p>In a typical ten-step workflow, perhaps three steps require genuine judgement. The rest are conditionals and API calls. Putting a model on all ten is how you get 80% accuracy on something that could have been 99.9%, at forty times the cost.</p>
+    </div>
+
+    <h3>The allocation grid</h3>
+    <p>Take the operating map and assign every step to exactly one of four categories, with a written reason.</p>
+    <div class="alloc">
+      <div><div class="k">Deterministic</div><p>Rules, thresholds, lookups, transformations, routing on structured fields. Fast, cheap, auditable, exactly right every time. Default here.</p></div>
+      <div><div class="k">Model judgement</div><p>Classification of unstructured input, extraction from messy documents, summarisation, ambiguous categorisation. Use where the input genuinely varies.</p></div>
+      <div><div class="k">Human gate</div><p>Approval before an irreversible or externally visible action. Anything with regulatory, financial or reputational blast radius.</p></div>
+      <div><div class="k">Leave alone</div><p>Too risky, insufficient ROI, already automated, or about to be replaced. A legitimate and frequently correct answer.</p></div>
+    </div>
+
+    <h4>The questions that drive the call</h4>
+    <ul class="qs">
+      <li><b>What is the blast radius when this is wrong?</b><span class="why">Determines whether 88% accuracy is excellent or unacceptable. There is no context-free accuracy target.</span></li>
+      <li><b>Will I get a 2 a.m. phone call about this in six months?</b><span class="why">If yes, either don't ship it or ship it properly. There is no third option.</span></li>
+      <li><b>Who owns this when I leave?</b><span class="why">Client, another team, another FDE. Decide before you build, not after.</span></li>
+      <li><b>Is the volume high enough that improvement matters?</b><span class="why">A perfect fix to a twice-monthly task is a rounding error. Prioritise high-volume workflows.</span></li>
+      <li><b>What's the trade-off for solving this fast?</b><span class="why">Small wins with compounding negative consequences are a net loss you'll pay for later.</span></li>
+    </ul>
+
+    <h3>Prioritisation</h3>
+    <p>Rank candidate workflows on two axes and take the top-right quadrant first. Deliver the ranked matrix to the client as part of the assessment — including, explicitly, the workflows you recommend <em>not</em> automating. Declining well is a demonstration of judgement, and clients read it as such.</p>
+    <div class="grid g2">
+      <div class="tile"><div class="k">Axis one</div><p><strong>Value at stake</strong> — volume × time per instance × loaded cost, plus any risk or revenue effect. How much is actually on the table.</p></div>
+      <div class="tile"><div class="k">Axis two</div><p><strong>Feasibility</strong> — data availability, API coverage, verifiability, exception density, political resistance. How likely you are to land it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="phase" id="p5">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">05</div>
+      <div><span class="tag">Build</span><h2>Ship a quick MVP that survives contact</h2></div>
+    </div>
+
+    <div class="rule">
+      <div class="k">The sub-day rule</div>
+      <p>If solving it is under a day of work, just build it and ship it and close the loop.</p>
+      <p>Don't escalate it into a product initiative, don't expand the vision, don't bring in the PMs. Small complete fixes are how you win trust, and trust is how you get access to the real problem. A four-hour Slack alert that replaces a three-month dashboard build is the job, not a shortcut.</p>
+    </div>
+
+    <h3>What "working" means</h3>
+    <p>The bar for an MVP agent is not that it completes the task when prompted perfectly. It's that it completes the task <strong>when prompted badly</strong> — repeatedly, in the background, without depending on anyone crafting a good prompt. If it only works in your hands, you haven't built anything.</p>
+
+    <h3>Anatomy of the build</h3>
+    <table>
+      <thead><tr><th style="width:24%">Component</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Agent loop</strong></td><td>Bounded task definition, explicit completion criteria, iteration limits</td></tr>
+        <tr><td><strong>Tools</strong></td><td>Narrow, well-described, validated inputs and outputs. Fewer tools used well beats many used badly</td></tr>
+        <tr><td><strong>Guardrails</strong></td><td>Hard limits on scope, spend, and any irreversible action. Enforced in code, not in the prompt</td></tr>
+        <tr><td><strong>Structured output</strong></td><td>Defined JSON schema, never free-form text. Validate at every boundary</td></tr>
+        <tr><td><strong>Context &amp; memory</strong></td><td>Deliberate — what persists, what's retrieved, what's discarded. Not "put everything in the window"</td></tr>
+        <tr><td><strong>Failure handling</strong></td><td>Retry with backoff, graceful degradation, explicit escalation to a human when confidence is low</td></tr>
+        <tr><td><strong>Audit trail</strong></td><td>Every action, input, decision and confidence logged and inspectable. <strong>Non-negotiable</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <div class="k">Trust</div>
+      <p>If you cannot show the client exactly what the agent did and why, they will never trust it — and untrusted systems don't get used regardless of how well they perform. The audit trail is a software engineering problem, and solving it well puts you ahead of most of the market.</p>
+    </div>
+
+    <h3>Build for the unhappy paths</h3>
+    <p>There is one way something goes right and a thousand ways it goes wrong. An agent that handles only the happy path is worth approximately nothing, because the happy path is the part the client already has under control. Enumerate the failure modes from your exception inventory — that inventory is the reason discovery took as long as it did — and build against them explicitly.</p>
+
+    <h3>Model economics</h3>
+    <p>Start on a frontier model to establish that the task is achievable at all. Then work down: which subtasks run acceptably on a smaller, faster, cheaper model? Classification and extraction frequently do. Reserve frontier inference for the steps that genuinely need it. This is the difference between a pilot that scales and one that dies at the budget review.</p>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="phase" id="p6">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">06</div>
+      <div><span class="tag">Evaluation</span><h2>Turn non-determinism into evidence</h2></div>
+    </div>
+    <p>An eval suite is a client deliverable in its own right, and often the one that closes the deal. It is how a probabilistic system becomes something an enterprise can put its name on.</p>
+
+    <h3>The four tests</h3>
+    <div class="grid g2">
+      <div class="tile"><div class="k">Test 01</div><p><strong>Did it have the right data?</strong> Was the correct record retrieved, complete and current?</p></div>
+      <div class="tile"><div class="k">Test 02</div><p><strong>Did it take the required steps?</strong> Was the process followed, including the ones that exist for compliance reasons?</p></div>
+      <div class="tile"><div class="k">Test 03</div><p><strong>Does it match an expert?</strong> Compared against how a competent human handled the same case.</p></div>
+      <div class="tile"><div class="k">Test 04</div><p><strong>Is it safe to act on?</strong> If not, it routes to a human gate. That routing is a design outcome, not a failure.</p></div>
+    </div>
+
+    <h3>The eval report</h3>
+    <p>The artefact you put in front of the client looks like this, and it is far more persuasive than any accuracy percentage:</p>
+    <div class="card mono" style="line-height:2">
+      50 runs · 41 passed · 9 failed<br>
+      &nbsp;&nbsp;5 × missing upstream data<br>
+      &nbsp;&nbsp;4 × wrong record retrieved<br>
+      → both failure classes addressable; re-run scheduled after fix
+    </div>
+    <p>Failures are not something to minimise in the report. They are the input to the next iteration, and showing them is what makes the passes credible.</p>
+
+    <h3>Golden datasets, including for subjective work</h3>
+    <p>Where history exists, use it — ten thousand previously categorised emails give you an eval set immediately. Where the output is subjective, such as a drafted document or a client-ready presentation, the approach still holds: mine the existing corpus for the implicit standards nobody wrote down, and encode them.</p>
+    <p>Accept that evals will never fully close the gap on subjective work. Build permanent human-in-the-loop feedback into the system so it keeps improving — through the harness, or through fine-tuning where the volume justifies it. A feedback mechanism is part of the deliverable, not a phase two.</p>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="phase" id="p7">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">07</div>
+      <div><span class="tag">Deployment</span><h2>Ship it into the business</h2></div>
+    </div>
+
+    <h3>Integrate with what already exists</h3>
+    <p>The strongest position you can take is building on top of the client's current stack rather than beside it or instead of it. A client who invested years and millions in an ERP will not move, and asking them to ends the relationship. Make that ERP better, and connect it to everything else they already run — CRM, spend management, revenue tooling, HR. That is where the value is, and it is a proposal nobody has to defend internally.</p>
+
+    <h3>The autonomy ladder</h3>
+    <p>Never flip a switch. Walk the system up in stages, with an explicit exit criterion at each rung — and walk it up in person where you can, because guiding someone through this is far easier when you've sat next to them.</p>
+    <ol class="ladder">
+      <li><b>Controlled environment</b><span>Runs against real data in a sandbox. Exit when eval results are stable across representative volume.</span></li>
+      <li><b>Shadow mode</b><span>Runs in production alongside the human, output compared, nothing actioned. Exit when agreement rate is acceptable and disagreements are understood.</span></li>
+      <li><b>Human approval on every action</b><span>Agent proposes, human approves. Exit when approval becomes a formality and rejection rate is low and explicable.</span></li>
+      <li><b>Autonomous with exception routing</b><span>Acts within confidence thresholds, escalates outside them. Exit when escalation volume is stable and monitored.</span></li>
+      <li><b>Autonomous with monitoring</b><span>Full production. Metrics, KPIs and SLAs instrumented. Someone named owns it.</span></li>
+    </ol>
+
+    <h3>Adoption is part of the deployment</h3>
+    <p>A working system with no users is a failed engagement. Hand-hold the first cohort personally. Watch the first week of real usage the same way you watched the original workflow — the tells that identified the opportunity will also tell you where the new system is failing people.</p>
+    <p>And treat resistance as information rather than obstruction. When someone insists a system doesn't work and can't articulate why, go and watch them use it. There is almost always a real requirement underneath that nobody thought to ask about.</p>
+
+    <div class="rule">
+      <div class="k">Before you leave</div>
+      <p>Every hack goes into production and stays there.</p>
+      <p>If it makes someone's life easier it will run for years, and you will own it. Make an explicit call at ship time: fold this into the core offering, or discard it by a named date. "Temporary" is not a state — it is a story we tell ourselves on the way to supporting something for a decade.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="phase" id="p8">
+  <div class="wrap">
+    <div class="phase-head">
+      <div class="phase-num">08</div>
+      <div><span class="tag">Commercial</span><h2>Calculate the ROI</h2></div>
+    </div>
+    <p>There are exactly three buckets a business cares about. Every deployed system should be measured against all three, and you should be able to show the arithmetic on demand.</p>
+
+    <div class="grid g3">
+      <div class="tile"><div class="k">Bucket 01</div><p class="big" style="font-size:22px;margin-bottom:6px">Cost savings</p><p>Hours recovered × loaded rate, minus run cost. The easiest to quantify and the easiest to challenge — be conservative.</p></div>
+      <div class="tile"><div class="k">Bucket 02</div><p class="big" style="font-size:22px;margin-bottom:6px">Revenue uplift</p><p>Faster cycle time, higher throughput, better conversion, capacity redeployed to revenue work.</p></div>
+      <div class="tile"><div class="k">Bucket 03</div><p class="big" style="font-size:22px;margin-bottom:6px">Risk mitigation</p><p>Error rate reduction × cost per error. Compliance exposure. Key-person dependency removed.</p></div>
+    </div>
+
+    <div class="calc">
+      <h3>Engagement ROI model</h3>
+      <p class="note">Enter the figures from your operating map. Everything recalculates live. Use conservative inputs — a defensible number beats an impressive one.</p>
+      <div class="calc-grid">
+        <div class="f"><label for="vol">Instances per month</label><input id="vol" type="number" value="1200" min="0"></div>
+        <div class="f"><label for="mins">Minutes per instance (today)</label><input id="mins" type="number" value="14" min="0"></div>
+        <div class="f"><label for="auto">% handled without a human</label><input id="auto" type="number" value="70" min="0" max="100"></div>
+        <div class="f"><label for="rate">Loaded hourly cost</label><input id="rate" type="number" value="48" min="0"></div>
+        <div class="f"><label for="err">Error rate today (%)</label><input id="err" type="number" value="4" min="0" max="100"></div>
+        <div class="f"><label for="errnew">Error rate after (%)</label><input id="errnew" type="number" value="1" min="0" max="100"></div>
+        <div class="f"><label for="errcost">Cost per error</label><input id="errcost" type="number" value="260" min="0"></div>
+        <div class="f"><label for="build">Build cost (one-off)</label><input id="build" type="number" value="85000" min="0"></div>
+        <div class="f"><label for="run">Run cost per month</label><input id="run" type="number" value="3200" min="0"></div>
+      </div>
+      <div class="calc-out">
+        <div class="o"><div class="n" id="oHours">—</div><div class="l">Hours recovered / month</div></div>
+        <div class="o"><div class="n" id="oNet">—</div><div class="l">Net benefit / month</div></div>
+        <div class="o alt"><div class="n" id="oPay">—</div><div class="l">Payback period</div></div>
+        <div class="o alt"><div class="n" id="oYear">—</div><div class="l">Year-one net</div></div>
+      </div>
+    </div>
+
+    <h3>How to present it</h3>
+    <ul class="qs">
+      <li><b>Lead with the outcome, not the architecture.</b><span class="why">The recommendation goes in the first ninety seconds. Nobody in the room wants the method first.</span></li>
+      <li><b>Show the arithmetic.</b><span class="why">The first question will be where the number came from. Have the chain ready: this change reduces X, which moves Y, which is worth Z.</span></li>
+      <li><b>Name a risk before you're asked.</b><span class="why">Volunteering the downside is the fastest way to make the upside credible.</span></li>
+      <li><b>Give the sponsor their sentence.</b><span class="why">They will have to repeat this upward. Write it for them.</span></li>
+      <li><b>Rehearse it twice.</b><span class="why">Once as the engineer — architecture, decisions, trade-offs. Once as the VP — problem, outcome, evidence, risk. They are different talks.</span></li>
+    </ul>
+
+    <div class="warn">
+      <div class="k">A note on conservatism</div>
+      <p>Do not claim the full theoretical saving. Model partial automation, keep the human gate cost in, include run cost and your own ongoing support. A number that survives the CFO is worth several times a number that doesn't.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="loop" id="p9">
+  <div class="wrap">
+    <div class="eyebrow">The engagement never really ends</div>
+    <h2 style="margin-top:14px">Run the loop again</h2>
+    <p>Once one system improves, the next becomes obvious. Bottlenecks are interconnected — every workflow is constrained by something upstream and frees something downstream. This is why AI spreads through an organisation once it lands properly: you are not improving one workflow ten times over, you are compounding across the business.</p>
+    <div class="loop-steps">
+      <div><b>Audit</b><span>Map the next workflow. It will be faster now — you know the systems, the vocabulary and the people.</span></div>
+      <div><b>Evals</b><span>Reuse the harness, the golden-dataset method and the reporting format. This is where the margin is.</span></div>
+      <div><b>Deployment</b><span>Ship, walk the autonomy ladder, measure against the three buckets, and feed what generalises back into the offering.</span></div>
+    </div>
+    <p style="margin-top:30px;font-size:15px;color:rgba(255,255,255,.7)">The last step is the one most practices skip. Ask at every engagement close: <strong style="color:var(--lime);font-weight:500">what did we generalise, and where did it land?</strong> An engagement that produced a happy client and nothing reusable was a services project, not forward deployed engineering.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>HGS · Forward deployed engineering practice</div>
+    <div>Field runbook v1 · Internal enablement</div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  var ids=['vol','mins','auto','rate','err','errnew','errcost','build','run'];
+  var f=function(id){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;};
+  var money=function(n){
+    var a=Math.abs(n),s=n<0?'-':'';
+    if(a>=1000000)return s+'$'+(a/1000000).toFixed(1)+'M';
+    if(a>=1000)return s+'$'+Math.round(a/1000)+'k';
+    return s+'$'+Math.round(a);
+  };
+  function calc(){
+    var vol=f('vol'),mins=f('mins'),auto=Math.min(f('auto'),100)/100,rate=f('rate');
+    var err=Math.min(f('err'),100)/100,errNew=Math.min(f('errnew'),100)/100,errCost=f('errcost');
+    var build=f('build'),run=f('run');
+
+    var hours=(vol*mins*auto)/60;
+    var labour=hours*rate;
+    var riskVal=vol*Math.max(err-errNew,0)*errCost;
+    var net=labour+riskVal-run;
+    var yearOne=net*12-build;
+    var payback=net>0?build/net:null;
+
+    document.getElementById('oHours').textContent=Math.round(hours).toLocaleString();
+    document.getElementById('oNet').textContent=money(net);
+    document.getElementById('oYear').textContent=money(yearOne);
+    document.getElementById('oPay').textContent=
+      payback===null?'—':(payback<1?'<1 mo':payback.toFixed(1)+' mo');
+  }
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    el.addEventListener('input',calc);
+    el.addEventListener('change',calc);
+  });
+  calc();
+
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var i=secs.indexOf(e.target);
+          links.forEach(function(l){l.classList.remove('on');});
+          if(i>-1)links[i].classList.add('on');
+        }
+      });
+    },{rootMargin:'-15% 0px -70% 0px'});
+    secs.forEach(function(s){if(s)io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>

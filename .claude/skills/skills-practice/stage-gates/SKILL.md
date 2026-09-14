@@ -5,7 +5,7 @@ description: The three engagement gates and their criteria, taken from the bootc
 
 # Stage gates
 
-Three gates, at the runbook's real decision points. Each is a **stop**, not a status update. `engagement-manager` produces the memo; **the operator decides.** Nothing in this skill makes the decision.
+Three gates, from the bootcamp's Week 1, Week 2 and capstone bars. **The runbook has no gates** — it names no decision point other than the autonomy ladder's per-rung exit criteria, so do not cite it for these. Each is a **stop**, not a status update. `engagement-manager` produces the memo; **the operator decides.** Nothing in this skill makes the decision.
 
 **Machine-derivable status only.** A gate may be computed to `ready`. Only a person sets `passed`, with a `decidedBy`. Code never sets `passed`.
 
@@ -57,18 +57,47 @@ Three of these are actively adversarial and must be rehearsed, not assumed:
 
 ## G3 — Production (stage `08` → `09`)
 
-The capstone bar: the system goes through shadow mode, UAT, a client review and a **measured** outcome.
+The capstone bar is three things, and the harness used to carry only one of
+them. From the bootcamp, verbatim: **the judgment chain**, **the behaviours**,
+**the product return**. What it tests is *"not whether the system is
+impressive — whether the judgment chain holds… A modest system with an intact
+chain passes; an impressive demo with a broken chain does not."*
 
 | Criterion | Standard |
 |---|---|
+| **The judgment chain holds** | Every claim traces to evidence: map → grid → spec → build → eval → claim. Any broken link is a specific, named gap. `cli.ts <dir> --audit` computes it; attach the output |
+| **Library contribution** | At least one generalised asset accepted **by the library owner** |
 | **Shadow mode passed** | Agreement met its stated threshold **and the disagreements are understood** — clustered or scattered, named either way |
 | **UAT complete** | Client-led, against their own cases, with exit criteria agreed in advance |
 | **Client review held** | The readout given, the arithmetic shown, a risk named before being asked |
 | **A measured outcome** | Not projected. The ROI model populated with **actuals** against the baseline captured in stage 04 |
 | **Fold-in or discard** | Called on **every** artefact, with a named date on each discard |
-| **Library contribution** | At least one generalised asset accepted into the pattern library |
+| **Named production owner** | Someone named owns it, and has accepted. The ladder's rung 5 requires it |
 
-The last two are what separate a finished engagement from an abandoned one. A measured outcome is also the only defence against the baseline having quietly disappeared — which is why stage 04 captures it while the current state is still observable.
+The first two are the capstone bar. The rest come from the Week 2 footer —
+*"Week 3: deployment, adoption, value realisation"* — and belong here, but they
+are not what the bootcamp certifies.
+
+A measured outcome is also the only defence against the baseline having quietly
+disappeared, which is why stage 04 captures it while the current state is still
+observable.
+
+### Behaviours
+
+**The five the bootcamp certifies**, observed at least once across the
+engagement. They sat in the stage-09 retrospective — written *after* the
+decision they exist to inform.
+
+| Behaviour |
+|---|
+| Chose observation over interview, unprompted |
+| Declined an automation |
+| Shipped a sub-day fix and closed the loop with a real user |
+| **Held a position under authority pressure** |
+| Made an explicit fold-in / discard call on every artefact — nothing labelled "temporary" |
+
+The fourth has no other home in the harness, and a gate is the only honest
+place to assess it.
 
 ---
 

@@ -2,7 +2,22 @@
 
 This is the HGS Forward Deployed Engineering harness. Follow these rules at all times. If you are starting a session, read the primer below first.
 
-**The practice runbook is canon.** `fde-engagement-runbook.html` and `fde-bootcamp-complete.html` define the method; this harness implements it. Where the harness and the runbook disagree, **the runbook wins** and the divergence is a defect to report.
+**The practice documents are canon.** Both are vendored in `docs/canon/` so
+conformance is checkable from a clone, and they own different things:
+
+| Source | Owns |
+|---|---|
+| `docs/canon/fde-engagement-runbook.html` | The ten stages, their outputs, and every named framework — the operating map, the five roles, the four tells, the allocation grid, two-axis prioritisation, the four tests, the autonomy ladder, the ROI model |
+| `docs/canon/fde-bootcamp-complete.html` | The three gate bars and the five certified behaviours. **The runbook contains no gates** — no G1, no readiness criteria, no held-out slice |
+| `docs/canon/fde-platform-tooling-map.html` | The tool inventory the harness is measured against — 91 components in eight groups, with a stated build order |
+
+Where the harness and a canon document disagree, **the canon document wins**
+and the divergence is a defect to report. Where the two canon documents
+disagree, say so rather than picking one — `docs/conformance.md` records the
+known cases.
+
+**Never attribute a gate to the runbook.** Gates come from the bootcamp, and
+three places used to say otherwise.
 
 ## What this harness does
 
@@ -228,13 +243,13 @@ Write into the engagement folder, read, then delete. Never target `datasources/`
 
 ## Stage gates
 
-Three gates, placed at the runbook's real decision points. Each is a **stop**, not a status update. `engagement-manager` produces the memo; **the operator decides.**
+Three gates, from the bootcamp's Week 1, Week 2 and capstone bars, placed at the runbook's stage boundaries. Each is a **stop**, not a status update. `engagement-manager` produces the memo; **the operator decides.**
 
 | Gate | Between | Cannot pass without |
 |---|---|---|
 | **G1 — Discovery** | `03` → `04` | Operating map + exception inventory at standard · stakeholder map with the five roles and defensible decision rights · readiness scorecard with the data landmines named · draft ontology with the canonical grain chosen **and defended** · evidence-handling terms signed |
 | **G2 — Build** | `06` → `07` | **The system works** — meets the acceptance threshold on a held-out slice with **zero silent failures**; everything below confidence routes to a gate · **the evidence exists** — eval report with a failure taxonomy, audit trail demonstrable on any run, regression gate blocks a deliberately broken change · **the judgment is defensible** — allocation grid survives challenge, the declines are argued convincingly, the cost envelope is arithmetic rather than hope |
-| **G3 — Production** | `08` → `09` | Shadow mode passed with divergence understood · UAT complete · client review held · a **measured** outcome, not a projected one · fold-in-or-discard call made on every artefact |
+| **G3 — Production** | `08` → `09` | **The judgment chain holds** · **library contribution accepted by the library owner** — those two are the capstone bar. Then shadow mode passed with divergence understood · UAT complete · client review held · a **measured** outcome, not a projected one · fold-in-or-discard on every artefact · a named production owner. Plus the five certified behaviours |
 
 ## Engagement structure
 

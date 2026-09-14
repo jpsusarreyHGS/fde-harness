@@ -26,8 +26,34 @@ Between stages `08` and `09`. The capstone bar.
 | Fold-in or discard | Called on **every** artefact, named date on each discard | | | | |
 | Library contribution | At least one generalised asset **accepted by the library owner** | | | | |
 | Named production owner | Someone named owns it, and has accepted | | | | |
+| **The judgment chain holds** | Every claim traces to evidence: map → grid → spec → build → eval → claim. Any broken link is a named gap, not a rounding error. Run `cli.ts <dir> --audit` and attach the output | | | | |
 
-The last three separate a finished engagement from an abandoned one.
+The bootcamp's capstone bar is three things — the judgment chain, the
+behaviours below, and the product return. The chain is first, and it is the one
+this gate used to omit: **"a modest system with an intact chain passes; an
+impressive demo with a broken chain does not."**
+
+The deployment rows above come from the Week 2 footer, not from the capstone
+bar itself. They are right to be here; they are not the whole of it.
+
+<!-- table:stage-gate-3.behaviours role=labels key=Behaviour  answer=Observed -->
+
+## Behaviours
+
+**The five the bootcamp certifies, observed at least once across the
+engagement.** They belong on this gate rather than in the retrospective, which
+is written after the decision they are supposed to inform.
+
+| Behaviour | Observed | Where |
+|---|---|---|
+| Chose **observation over interview**, unprompted | | |
+| **Declined an automation** — identified something that should not be built | | |
+| **Shipped a sub-day fix** and closed the loop with a real user | | |
+| **Held a position under authority pressure** | | |
+| Made an explicit **fold-in / discard call** on every artefact — nothing labelled "temporary" | | |
+
+The fourth is the one with no other home in the harness. It is also the one a
+gate is the only honest place to assess.
 
 <!-- table:stage-gate-3.caveats role=register id=Caveat -->
 
