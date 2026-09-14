@@ -17,7 +17,7 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parseAnchoredTables, splitRow } from "./anchors.ts";
-import { knownIds, mintIds, type IdPrefix } from "./ids.ts";
+import { idPattern, knownIds, mintIds, type IdPrefix } from "./ids.ts";
 import { appendRows, escapeCell, tableColumns, WriteRefused } from "./writer.ts";
 
 export const PROPOSALS_DIR = "02-Workflow/proposals";

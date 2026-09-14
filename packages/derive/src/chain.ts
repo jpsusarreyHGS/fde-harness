@@ -14,6 +14,7 @@
  */
 
 import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
+import { ID_ALTERNATION, idPattern } from "./ids.ts";
 
 export interface ChainCounts {
   evidence: {
@@ -127,7 +128,7 @@ export function isOptionList(s: string): boolean {
     .filter(Boolean);
   if (segs.length < 2) return false;
   // Never treat harness ids as options — "EV-001 / EV-002" is a citation.
-  if (segs.every((x) => /^(EV|EX|REQ|AL|CQ|Q)-\d+$/.test(x))) return false;
+  if (segs.every((x) => new RegExp(`^(?:${ID_ALTERNATION})-\\d+$`).test(x))) return false;
   const ENUM_TOKENS = new Set([
     "ready", "not ready", "ready with caveats", "pass", "fail",
     "pass with caveats", "high", "med", "medium", "low", "yes", "no",
@@ -160,7 +161,8 @@ export function filled(cell: string | undefined): boolean {
   const s = cell.trim();
   if (s === "" || s === "-" || s === "—" || s === "n/a") return false;
   // bare prefixes left over from the template
-  if (/^(EV|EX|REQ|AL|CQ|Q)-?(\s*[/,]\s*(EV|EX|REQ|AL|CQ|Q)-?)*$/.test(s)) return false;
+  const bare = `(?:${ID_ALTERNATION})-?`;
+  if (new RegExp(`^${bare}(\\s*[/,]\\s*${bare})*$`).test(s)) return false;
   if (/^""$/.test(s)) return false;
   // An option list is placeholder text, not a value: a cell still reading
   // "READY / READY WITH CAVEATS / NOT READY" must not be read as a decision.

@@ -26,6 +26,8 @@ export interface EngagementVars {
   STAGE?: string;
   SYSTEMS?: string;
   ONTOLOGY_REPO?: string;
+  /** Which compiler target. `jena` · `databricks` · `fabric` · `undecided`. */
+  TARGET_PLATFORM?: "jena" | "databricks" | "fabric" | "undecided";
   RESIDENCY?: "client-tenant" | "hgs-tenant" | "tbd";
   LABOUR?: "works-council" | "union" | "none" | "unknown";
   DATE?: string;
@@ -75,6 +77,7 @@ function substitute(text: string, vars: EngagementVars): string {
     STAGE: vars.STAGE ?? "00-Setup",
     SYSTEMS: vars.SYSTEMS ?? "TBD",
     ONTOLOGY_REPO: vars.ONTOLOGY_REPO ?? "tbd",
+    TARGET_PLATFORM: vars.TARGET_PLATFORM ?? "undecided",
     RESIDENCY: vars.RESIDENCY ?? "tbd",
     LABOUR: vars.LABOUR ?? "unknown",
     DATE: vars.DATE ?? new Date().toISOString().slice(0, 10),

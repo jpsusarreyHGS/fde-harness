@@ -31,6 +31,8 @@
 import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
 import type { AuditFinding } from "./chain.ts";
 import type { Gate } from "./state.ts";
+import type { ContractFinding } from "./contract.ts";
+import { idPattern } from "./ids.ts";
 
 export interface CoachQuestion {
   /** Stable within a run, for the console and for `/next`. */
@@ -57,7 +59,7 @@ export interface CoachQuestion {
    * loses its meaning.
    */
   work: "ask" | "fix";
-  source: "gate" | "chain" | "open-question" | "stakeholder";
+  source: "gate" | "chain" | "open-question" | "stakeholder" | "contract";
   /** The harness id this is about, where there is one. */
   id: string | null;
 }
@@ -66,6 +68,14 @@ export interface CoachInput {
   findings: readonly AuditFinding[];
   gates: readonly Gate[];
   tables: readonly ParsedTable[];
+  /**
+   * Contract-layer refusals, when the ontology layer has been started.
+   *
+   * These rank above ordinary findings because they are not advice: the
+   * downstream compiler will not build past them, so an engagement carrying
+   * one has a deadline attached to it that nothing else here does.
+   */
+  contract?: readonly ContractFinding[];
 }
 
 /**
@@ -452,6 +462,41 @@ function stakeholderQuestions(tables: readonly ParsedTable[]): CoachQuestion[] {
 }
 
 /**
+ * Contract refusals, as questions.
+ *
+ * `checkContract` already produces the role and the file; the work here is
+ * ranking. A refusal scores above every chain finding and below a gate
+ * criterion — the gate is the client's definition of ready, but a refusal is
+ * a build that will not happen.
+ */
+function contractQuestions(
+  findings: readonly ContractFinding[],
+  names: Map<string, string>,
+): CoachQuestion[] {
+  const out: CoachQuestion[] = [];
+  for (const f of findings) {
+    if (f.severity !== "refuse") continue;
+    const who = cleanRole(f.who ?? "Process owner");
+    out.push({
+      key: `contract:${f.code}:${f.where}`,
+      ask: f.detail,
+      who,
+      whoName: names.get(who.toLowerCase()) ?? null,
+      blocks: "the ontology compile",
+      location: f.location ?? f.where,
+      why: `the ontology compiler refuses on ${f.code.replace(/-/g, " ")}`,
+      score: 90,
+      // A missing owner is a person to ask. A dangling id or a renamed anchor
+      // is ours to repair, and nobody at the client can help.
+      work: f.who ? "ask" : "fix",
+      source: "contract",
+      id: null,
+    });
+  }
+  return out;
+}
+
+/**
  * Build the ranked queue.
  *
  * Ties break by key so two runs over unchanged files produce the same order —
@@ -480,6 +525,7 @@ export function coach(input: CoachInput): CoachQuestion[] {
 
   const all = [
     ...gateQuestions(input.gates, names),
+    ...contractQuestions(input.contract ?? [], names),
     ...stakeholderQuestions(input.tables),
     ...chainQuestions(input.findings, names, prio, blocksById, alreadyAsked),
     ...openQuestions(input.tables, names, prio),

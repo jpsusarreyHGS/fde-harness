@@ -13,6 +13,8 @@ import {
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
 import { scanIntake } from "./intake.ts";
 import { coach, type CoachQuestion } from "./coach.ts";
+import { CONTRACT_SCHEMA } from "./instruments.ts";
+import { checkContract, readContract } from "./contract.ts";
 import { pendingProposals } from "./proposals.ts";
 import {
   INSTRUMENTS, instrumentStatus, STAGES, type StageId,
@@ -20,8 +22,16 @@ import {
 
 export const SCHEMA_VERSION = 2 as const;
 
+/** Re-exported so one import gets both versions a consumer cares about. */
+export { CONTRACT_SCHEMA } from "./instruments.ts";
+
 export interface State {
   schemaVersion: 2;
+  /**
+   * The contract-layer version the ontology compiler parses against.
+   * Derived, never typed — a property of the templates, not of an engagement.
+   */
+  contractSchema: string;
   generatedAt: string;
   engagement: Record<string, string>;
   stages: {
@@ -480,6 +490,13 @@ export async function deriveState(opts: {
     if (note && !/^none\.?$/i.test(note)) friction.push({ session: f.replace(/\.md$/, ""), note });
   }
 
+  // The ontology layer, checked against what the compiler will accept. Only
+  // once it has been started — an untouched contract on a stage-01 engagement
+  // is not a finding, it is a stage nobody has reached.
+  const contractInput = await readContract(engagementDir);
+  const contractStarted = contractInput.tables.some((t) => dataRows(t).length > 0);
+  const contractFindings = contractStarted ? checkContract(contractInput) : [];
+
   // Raw material and proposals. Read from disk, not from registers — that is
   // the whole point: this is the work that has not entered the chain yet.
   const { items: intakeItems, unclassified: intakeUnclassified } =
@@ -492,6 +509,7 @@ export async function deriveState(opts: {
 
   return {
     schemaVersion: SCHEMA_VERSION,
+    contractSchema: CONTRACT_SCHEMA,
     generatedAt: now.toISOString(),
     engagement,
     stages,
@@ -532,6 +550,7 @@ export async function deriveState(opts: {
       findings: chain.audit.findings,
       gates,
       tables: [...tablesByInstrument.values()].flat(),
+      contract: contractFindings,
     }),
   };
 }

@@ -7,9 +7,21 @@
 | Item | Value |
 |---|---|
 | Stack | |
+| Target platform | {{TARGET_PLATFORM}} |
 | Chosen because | |
 | Decided by | |
 | Date | |
+
+**`Target platform` is one of `jena` · `databricks` · `fabric` · `undecided`.**
+It is the one field the ontology compiler reads to pick a target, so it is a
+value and not a sentence. Today `jena` and `databricks` are built; `fabric` is
+configured but not implemented.
+
+**Choose it from the competency questions, not from precedent.** A triple store
+earns its place where relationship traversal and per-fact provenance are the
+point. Where the questions are aggregations over known joins, a warehouse with
+a semantic model on top is less machinery for the same answer. If the questions
+are not written yet, the honest answer is `undecided`.
 
 <!-- table:stack-decision.client-platforms role=register id=Platform -->
 

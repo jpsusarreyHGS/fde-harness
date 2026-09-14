@@ -31,6 +31,7 @@ import { appendRows } from "./writer.ts";
 
 const RESIDENCY = ["client-tenant", "hgs-tenant", "tbd"] as const;
 const LABOUR = ["works-council", "union", "none", "unknown"] as const;
+const TARGET_PLATFORM = ["jena", "databricks", "fabric", "undecided"] as const;
 
 /** Fields the templates cannot sensibly default. */
 const REQUIRED = ["CLIENT_NAME", "SPONSOR", "SCOPE", "NON_GOALS"] as const;
@@ -87,6 +88,7 @@ export function validateVars(raw: unknown, slug: string): EngagementVars {
   for (const [key, allowed] of [
     ["RESIDENCY", RESIDENCY as readonly string[]],
     ["LABOUR", LABOUR as readonly string[]],
+    ["TARGET_PLATFORM", TARGET_PLATFORM as readonly string[]],
   ] as const) {
     const got = v[key];
     if (got !== undefined && !allowed.includes(got as string)) {
@@ -181,6 +183,18 @@ async function raiseTbdQuestions(
       question: "Which repository holds the ontology for this client?",
       who: "Technical owner",
       blocks: "03-Systems/ontology/ promotion",
+    });
+  }
+  // The one field the ontology compiler reads to pick a target. Left blank it
+  // is not a default — it is a decision nobody has made, and the compiler will
+  // pick jena for them.
+  if (tbd(vars.TARGET_PLATFORM)) {
+    gaps.push({
+      field: "TARGET_PLATFORM",
+      question:
+        "Which platform does the assistant compile to — jena, databricks or fabric?",
+      who: "Technical owner",
+      blocks: "the ontology compile; choose from the competency questions, not precedent",
     });
   }
 

@@ -15,6 +15,7 @@
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
+ *   cli.ts contract-check <engagement-dir>      will the ontology compiler take it?
  *
  * Exit codes are meant for a runner and for CI:
  *   0  fine
@@ -27,7 +28,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
-import { mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
+import { ID_ALTERNATION, mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
 import { scanIntake, CLASS_MEANING } from "./intake.ts";
 import {
   acceptProposal,
@@ -40,12 +41,13 @@ import { INSTRUMENTS } from "./instruments.ts";
 import { dataRows, parseAnchoredTables } from "./anchors.ts";
 import { deskWork, nextConversations } from "./coach.ts";
 import { initEngagement, InitRefused, validateVars } from "./init.ts";
+import { checkContract, readContract } from "./contract.ts";
 import { WriteRefused } from "./writer.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold",
+  "scaffold", "contract-check",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -125,6 +127,48 @@ if (sub === "scaffold") {
     }
     throw err;
   }
+}
+
+if (sub === "contract-check") {
+  // The ontology compiler refuses on these, at its own boundary, in Python.
+  // Running them here means the FDE hears it in the harness's words, on the
+  // day the gap was created, with a person to ask.
+  const findings = checkContract(await readContract(engagementDir));
+  const refusals = findings.filter((f) => f.severity === "refuse");
+  const warnings = findings.filter((f) => f.severity === "warn");
+
+  if (refusals.length) {
+    console.log("Refused — the ontology compiler will not build past these:\n");
+    for (const f of refusals) {
+      console.log(`  ${f.where}`);
+      console.log(`    ${f.detail}`);
+      if (f.who) console.log(`    ask: ${f.who}`);
+      if (f.location) console.log(`    in:  ${f.location}`);
+      console.log("");
+    }
+  }
+
+  if (warnings.length) {
+    console.log(`${refusals.length ? "Also thin" : "Thin, but it will build"} — ${warnings.length} warning(s):\n`);
+    for (const f of warnings.slice(0, 12)) {
+      console.log(`  ${f.where} — ${f.detail}`);
+    }
+    if (warnings.length > 12) console.log(`  … and ${warnings.length - 12} more`);
+    console.log("");
+  }
+
+  if (!findings.length) {
+    console.log("The contract holds. Hand it over with:");
+    console.log("");
+    console.log(`  python -m core.importer ${dirArg}/03-Systems/ontology --instance ${basename(engagementDir)}`);
+    process.exit(0);
+  }
+
+  console.log(
+    `${refusals.length} refusal(s), ${warnings.length} warning(s). ` +
+      "Thinness is visible progress; a missing owner is an unanswered question about who decides.",
+  );
+  process.exit(refusals.length ? 1 : 0);
 }
 
 if (sub === "intake") {
@@ -224,11 +268,11 @@ if (sub === "anchors") {
       // engagement has no rows, and reading the first one made every register
       // look FDE-supplied on exactly the day that matters.
       if (t.anchor.idColumn) {
-        // Only the instrument's *primary* register mints. The secondary
-        // tables key on an existing id — `exception-register.promoted` says
-        // what EX-004 became, it does not create EX-005.
-        const prefix = prefixMintedBy(inst.path);
-        const minted = prefix !== null && t.anchor.name === inst.primaryTable;
+        // Ask by anchor. Only one table per file mints, and it is not always
+        // the primary one — `exception-register.promoted` records what EX-004
+        // became without creating EX-005, and `personas.rows` keys on a role.
+        const prefix = prefixMintedBy(inst.path, t.anchor.name);
+        const minted = prefix !== null;
         console.log(
           minted
             ? `  idColumn=${t.anchor.idColumn} — leave it blank; code mints ${prefix}- at accept`
@@ -307,7 +351,7 @@ if (sub === "mint") {
   const prefix = rest[1] as IdPrefix | undefined;
   const n = Number(rest[2] ?? "1");
   if (!prefix) {
-    console.error("usage: cli.ts mint <engagement-dir> <EV|EX|REQ|AL|CQ|Q> [count]");
+    console.error(`usage: cli.ts mint <engagement-dir> <${ID_ALTERNATION}> [count]`);
     process.exit(2);
   }
   const { ids, previousMax } = await mintIds(engagementDir, prefix, Number.isFinite(n) ? n : 1);

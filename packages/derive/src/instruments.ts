@@ -35,6 +35,22 @@ export const STAGES: readonly StageDef[] = [
   { id: "09", slug: "09-Loop",         label: "Run the loop again" },
 ] as const;
 
+/**
+ * The version of the contract layer this harness emits.
+ *
+ * `03-Systems/ontology/` is consumed by `jpsusarreyHGS/ontology-compiler`,
+ * which states plainly that the schema is ours: *"The harness is the authority
+ * for this format; if the two ever diverge, the harness wins."* Its own
+ * `core/contract/schema.py` carries this same string as a fallback and says it
+ * defers to ours once we stamp one. This is that stamp.
+ *
+ * **Bump it when a column is renamed or removed, never when one is reworded.**
+ * The compiler normalises header presentation — `**Grain — one row is one
+ * what?**` and `Grain` are the same column to it — so a version that moves on
+ * cosmetics is a version people learn to ignore.
+ */
+export const CONTRACT_SCHEMA = "fde-harness/03-Systems-ontology@2026-09";
+
 export interface InstrumentDef {
   /** Stable id, used as the key in derived state. */
   id: string;

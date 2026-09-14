@@ -159,3 +159,24 @@ test("every template table is anchored, and register tables ship no rows", async
   assert.deepEqual(unanchored, [], `unanchored tables: ${unanchored.join(" · ")}`);
   assert.deepEqual(seeded, [], `register tables shipping rows: ${seeded.join(" · ")}`);
 });
+
+test("REGRESSION: the id alternation is built once and escapes correctly", async () => {
+  // Adding `WR` meant replacing six hand-typed `EV|EX|REQ|…` alternations with
+  // one generated pattern. Building a regex from a template literal is where
+  // `\d` quietly becomes `d`, and the first attempt did exactly that: every
+  // citation then read as an option list and `filled()` voided it.
+  const { ID_PREFIXES, ID_ALTERNATION, idPattern } = await import("../src/ids.ts");
+
+  assert.ok(ID_PREFIXES.includes("WR"), "WR joins the minted prefixes");
+  assert.equal(ID_ALTERNATION, ID_PREFIXES.join("|"));
+  assert.deepEqual(
+    "cites EV-001, WR-02 and CQ-9".match(idPattern()),
+    ["EV-001", "WR-02", "CQ-9"],
+  );
+  // `\b` must survive: CQ-01 is one id, not a Q- hiding inside a C.
+  assert.deepEqual("CQ-01".match(idPattern()), ["CQ-01"]);
+
+  // And the two call sites that build their own pattern from the alternation.
+  assert.equal(filled("EV-001 / EV-002 / EV-003"), true);
+  assert.equal(filled("EV- / EX-"), false, "bare prefixes are still placeholder text");
+});

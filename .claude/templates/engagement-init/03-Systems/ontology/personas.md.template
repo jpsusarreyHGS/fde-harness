@@ -29,10 +29,14 @@ Rules, inherited from the reference architecture and non-negotiable:
 
 The complete set of things an agent may change. Enumerated here, derived from approved use cases.
 
-<!-- table:personas.write-allow-list role=register id=Write -->
+<!-- table:personas.write-allow-list role=register id=Id -->
 
-| Write | Object | Roles permitted | Approver | Reversible | Use case |
-|---|---|---|---|---|---|
+| Id | Write | Object | Roles permitted | Approver | Reversible | Use case |
+|---|---|---|---|---|---|---|
+
+`WR-NN`, minted at accept time like every other id. It is the join key: the
+ontology compiler names every generated write template `wr-NN-<slug>` in every
+target, so a write that changes its id changes a filename two repos away.
 
 ## Impersonation test list
 

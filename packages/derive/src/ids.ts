@@ -19,16 +19,45 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parseAnchoredTables } from "./anchors.ts";
 
-export type IdPrefix = "EV" | "EX" | "REQ" | "AL" | "CQ" | "Q";
+export type IdPrefix = "EV" | "EX" | "REQ" | "AL" | "CQ" | "Q" | "WR";
 
-/** Where each prefix's ids live. One file owns each sequence. */
-const HOME: Record<IdPrefix, { path: string; width: number }> = {
-  EV:  { path: "02-Workflow/observation-log.md",       width: 3 },
-  EX:  { path: "02-Workflow/exception-register.md",    width: 3 },
-  REQ: { path: "02-Workflow/requirements-register.md", width: 3 },
-  Q:   { path: "02-Workflow/open-questions.md",        width: 3 },
-  AL:  { path: "04-Placement/allocation-grid.md",      width: 3 },
-  CQ:  { path: "03-Systems/ontology/competency-questions.md", width: 2 },
+/**
+ * Every minted prefix, in one place.
+ *
+ * The alternation used to be retyped in six regexes across four files. Adding
+ * `WR` found five of them; the sixth was already wrong — `coach.ts` omitted
+ * `Q`, so a finding about an open question could never inherit what it blocked.
+ * A list that has to be kept in sync by hand is a list that drifts.
+ */
+export const ID_PREFIXES: readonly IdPrefix[] = ["EV", "EX", "REQ", "AL", "CQ", "Q", "WR"];
+
+/** `EV|EX|REQ|…`, for building a regex. */
+export const ID_ALTERNATION = ID_PREFIXES.join("|");
+
+/** Matches one harness id anywhere in a cell. Global — clone before reuse. */
+export function idPattern(flags = "g"): RegExp {
+  return new RegExp(`\\b((?:${ID_ALTERNATION})-\\d+)\\b`, flags);
+}
+
+/**
+ * Where each prefix's ids live. One file owns each sequence.
+ *
+ * `anchor` names the table that actually mints, because it is not always the
+ * instrument's primary one. `personas.md` leads with the roles register and
+ * mints in the write allow-list further down — inferring the minting table
+ * from the file told an agent to leave the *Role* column blank.
+ */
+const HOME: Record<IdPrefix, { path: string; anchor: string; width: number }> = {
+  EV:  { path: "02-Workflow/observation-log.md",       anchor: "observation-log.rows",       width: 3 },
+  EX:  { path: "02-Workflow/exception-register.md",    anchor: "exception-register.rows",    width: 3 },
+  REQ: { path: "02-Workflow/requirements-register.md", anchor: "requirements-register.rows", width: 3 },
+  Q:   { path: "02-Workflow/open-questions.md",        anchor: "open-questions.rows",        width: 3 },
+  AL:  { path: "04-Placement/allocation-grid.md",      anchor: "allocation-grid.rows",       width: 3 },
+  CQ:  { path: "03-Systems/ontology/competency-questions.md", anchor: "competency-questions.rows", width: 2 },
+  // Width 2 to match CQ: the ontology compiler joins on `wr-NN-<slug>` and
+  // `cq-NN-<slug>` template names, and a width mismatch would produce
+  // wr-001 against cq-01 in the same registry.
+  WR:  { path: "03-Systems/ontology/personas.md",      anchor: "personas.write-allow-list",  width: 2 },
 };
 
 /**
@@ -133,9 +162,11 @@ export function homeOf(prefix: IdPrefix): string {
  * reads as one the FDE supplies — which is exactly the wrong instruction at
  * exactly the moment it is followed.
  */
-export function prefixMintedBy(instrumentPath: string): IdPrefix | null {
+export function prefixMintedBy(instrumentPath: string, anchorName?: string): IdPrefix | null {
   for (const prefix of Object.keys(HOME) as IdPrefix[]) {
-    if (HOME[prefix].path === instrumentPath) return prefix;
+    if (HOME[prefix].path !== instrumentPath) continue;
+    if (anchorName !== undefined && HOME[prefix].anchor !== anchorName) continue;
+    return prefix;
   }
   return null;
 }
