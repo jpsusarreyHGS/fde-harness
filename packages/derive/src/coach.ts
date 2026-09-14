@@ -517,7 +517,7 @@ export function coach(input: CoachInput): CoachQuestion[] {
     const answered = has(cell(r, "Answered")) || has(cell(r, "Answer"));
     const blocks = cell(r, "Blocks");
     const text = `${cell(r, "Question")} ${cell(r, "Why it matters")} ${blocks}`;
-    for (const m of text.matchAll(/\b((?:EV|EX|REQ|AL|CQ)-\d+)\b/g)) {
+    for (const m of text.matchAll(idPattern())) {
       if (has(blocks) && !blocksById.has(m[1]!)) blocksById.set(m[1]!, blocks);
       if (!answered) alreadyAsked.add(m[1]!);
     }

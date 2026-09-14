@@ -223,4 +223,22 @@ test("the registry and the templates do not drift", async () => {
 
   const missingTemplate = INSTRUMENTS.filter((i) => !seen.has(i.path)).map((i) => i.path);
   assert.deepEqual(missingTemplate, [], `registry entries with no template: ${missingTemplate.join(", ")}`);
+
+  // The other direction, which the registry's own docstring claims is
+  // asserted and which nothing asserted. It was false: all three stage-gate
+  // templates carry a `role=register` caveats table and none was registered,
+  // so a caveat the operator accepted could never reach derived state.
+  const { readFile } = await import("node:fs/promises");
+  const { parseAnchoredTables } = await import("../src/anchors.ts");
+  const registered = new Set(INSTRUMENTS.map((i) => i.path));
+  const unregistered: string[] = [];
+  for (const rel of seen) {
+    if (registered.has(rel)) continue;
+    const md = await readFile(join(TEMPLATES, `${rel}.template`), "utf8");
+    if (parseAnchoredTables(md).some((x) => x.anchor.role === "register")) unregistered.push(rel);
+  }
+  assert.deepEqual(
+    unregistered.sort(), [],
+    "templates with a register table that the registry cannot see",
+  );
 });

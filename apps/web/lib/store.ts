@@ -46,6 +46,7 @@ export interface EngagementState {
   }[];
   chain: {
     evidence: { total: number; observed: number; system: number; documented: number; stated: number };
+    tells?: { repeat: number; paste: number; switch: number; dead: number; total: number; sessions: number };
     exceptions: { total: number; withRuleHolder: number; quantified: number };
     requirements: { total: number; sourced: number; verified: number; unverified: number; assumption: number; withAC: number };
     allocations: { total: number; withReason: number; deterministic: number; modelJudgement: number; humanGate: number; leaveAlone: number };

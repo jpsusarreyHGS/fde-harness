@@ -185,13 +185,16 @@ export async function acceptProposal(
   // extraction that invented EV-099 is caught here, not by the audit later.
   const known = await knownIds(engagementDir);
   const dangling: AcceptResult["danglingCitations"] = [];
-  const CITE = /\b(EV|EX|REQ|AL|CQ|Q)-\d+\b/g;
+  const CITE = idPattern();
   for (const b of blocks) {
     b.rows.forEach((cells, rowIdx) => {
       for (const cell of cells) {
         for (const m of cell.matchAll(CITE)) {
-          const id = m[0];
-          const prefix = m[1] as IdPrefix;
+          // The shared pattern captures the whole id, not the prefix — the
+          // hand-typed regex this replaced captured the prefix, and reading
+          // group 1 as one made every citation look dangling.
+          const id = m[1]!;
+          const prefix = id.slice(0, id.indexOf("-")) as IdPrefix;
           if (!known.get(prefix)?.has(id)) {
             dangling.push({ anchor: b.target.anchor, row: rowIdx + 1, cited: id });
           }

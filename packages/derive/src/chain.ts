@@ -24,6 +24,21 @@ export interface ChainCounts {
     documented: number;
     stated: number;
   };
+  /**
+   * The four opportunity signals, counted as events.
+   *
+   * The observation-log template has always said "derived at derive time —
+   * do not maintain by hand", and until now nothing derived them. An FDE
+   * following the instruction produced no count at all.
+   *
+   * `sessions` is the observation window. The practice is explicit that a
+   * count without one is not evidence: "eleven switches" is meaningless,
+   * "eleven switches across nine observed cases" is a finding.
+   */
+  tells: {
+    repeat: number; paste: number; switch: number; dead: number;
+    total: number; sessions: number;
+  };
   exceptions: { total: number; withRuleHolder: number; quantified: number };
   requirements: {
     total: number;
@@ -82,7 +97,9 @@ export interface ChainAudit {
   findings: AuditFinding[];
 }
 
-const ID_RE = /\b((?:EV|EX|REQ|AL|CQ|Q)-\d+)\b/g;
+// From the one prefix list. A hand-typed alternation here missed `WR-`
+// entirely, so the audit could not see a dangling write-allow-list citation.
+const ID_RE = idPattern();
 
 /** Extract every harness id from a cell. `Source` cells hold lists. */
 export function extractIds(cell: string): string[] {
@@ -229,6 +246,26 @@ export function deriveChain(input: ChainInput): ChainCounts {
       case "documented": evidence.documented++; break;
       case "stated": evidence.stated++; break;
     }
+  }
+
+  // ---- the four tells -----------------------------------------------------
+  // One row is one event, so this is a count of rows, not a rating. A cell
+  // naming more than one tell counts once for each — an operator pasting
+  // between two systems while waiting is both.
+  const tells = {
+    repeat: 0, paste: 0, switch: 0, dead: 0, total: 0,
+    sessions: rowsOf("observation-log", "observation-log.sessions").length,
+  };
+  for (const r of evRows) {
+    const cell = norm(col(r, "Tell"));
+    if (!cell) continue;
+    let matched = false;
+    for (const kind of ["repeat", "paste", "switch", "dead"] as const) {
+      if (!new RegExp(`\\b${kind}\\b`).test(cell)) continue;
+      tells[kind]++;
+      matched = true;
+    }
+    if (matched) tells.total++;
   }
 
   // ---- exceptions ---------------------------------------------------------
@@ -490,6 +527,7 @@ export function deriveChain(input: ChainInput): ChainCounts {
 
   return {
     evidence,
+    tells,
     exceptions: { total: exRows.length, withRuleHolder, quantified },
     requirements,
     allocations,

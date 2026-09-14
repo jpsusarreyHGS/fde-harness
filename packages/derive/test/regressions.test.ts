@@ -180,3 +180,64 @@ test("REGRESSION: the id alternation is built once and escapes correctly", async
   assert.equal(filled("EV-001 / EV-002 / EV-003"), true);
   assert.equal(filled("EV- / EX-"), false, "bare prefixes are still placeholder text");
 });
+
+test("REGRESSION: no source file hand-types the id alternation", async () => {
+  // The fix that introduced `ID_PREFIXES` replaced six hand-typed alternations
+  // — except three of the replacements silently failed, and the commit claimed
+  // otherwise. Asserting that `idPattern()` *works* was not enough; nothing
+  // asserted the call sites used it, so `chain.ts` kept a list missing `WR-`
+  // and the audit could not see a dangling write citation.
+  const { readdir, readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+
+  const src = join(import.meta.dirname, "..", "src");
+  const offenders: string[] = [];
+  for (const f of await readdir(src)) {
+    if (!f.endsWith(".ts")) continue;
+    // `ids.ts` is where the list legitimately lives.
+    if (f === "ids.ts") continue;
+    const body = await readFile(join(src, f), "utf8");
+    body.split("\n").forEach((line, i) => {
+      if (/EV\|EX\|REQ/.test(line)) offenders.push(`${f}:${i + 1}`);
+    });
+  }
+  assert.deepEqual(offenders, [], "build the pattern from ID_PREFIXES instead");
+});
+
+test("the four tells are counted, because the template says they are", async () => {
+  // `observation-log.md.template` has always said "Derived from the Tell
+  // column above — do not maintain by hand. Counts are computed at derive
+  // time." Nothing computed them, so an FDE following the instruction
+  // produced no count at all, and the map's Tier-1 "behavioural tell logger"
+  // existed in name only.
+  const { deriveChain } = await import("../src/chain.ts");
+  const { parseAnchoredTables } = await import("../src/anchors.ts");
+
+  const md = parseAnchoredTables(`
+<!-- table:observation-log.rows role=register id=Id -->
+
+| Id | Action | Tell | Class |
+|---|---|---|---|
+| EV-001 | pasted the reference into the portal | paste | observed |
+| EV-002 | switched to the spreadsheet | switch | observed |
+| EV-003 | re-keyed the same address | repeat | observed |
+| EV-004 | waited for approval | dead | observed |
+| EV-005 | pasted while waiting | paste · dead | observed |
+| EV-006 | read the case | | observed |
+
+<!-- table:observation-log.sessions role=register id=Date -->
+
+| Date | Workflow observed | Ev range |
+|---|---|---|
+| 2026-09-09 | Claims triage | EV-001–EV-006 |
+`);
+
+  const chain = deriveChain({ tables: new Map([["observation-log", md]]) });
+  assert.deepEqual(chain.tells, {
+    // A row naming two tells counts once for each — pasting while waiting is
+    // genuinely both — but once toward the total, because it is one event.
+    repeat: 1, paste: 2, switch: 1, dead: 2, total: 5,
+    // The observation window. A count without one is not evidence.
+    sessions: 1,
+  });
+});

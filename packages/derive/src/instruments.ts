@@ -6,7 +6,7 @@
  * rows that count toward instrument coverage.
  *
  * Drift between this registry and the templates is a defect, and
- * `test/registry.test.ts` asserts both directions:
+ * `test/fresh.test.ts` asserts both directions:
  *   - every registry path has a template
  *   - every template holding a `role=register` table is in the registry
  */
@@ -138,6 +138,12 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "library-contribution",   label: "Library contribution",   stage: "09", path: "09-Loop/library-contribution.md",       primaryTable: "library-contribution.rows" },
 
   // Engagement management — not stage-scoped
+  // The gate memos. Registered so the caveats an operator accepted are
+  // visible to derived state — they are a register, and until now nothing
+  // could see them. Stage-tagged by the stage each gate closes.
+  { id: "stage-gate-1",           label: "G1 readiness",           stage: "03", path: "engagement-management/stage-gate-1-readiness.md", primaryTable: "stage-gate-1.caveats" },
+  { id: "stage-gate-2",           label: "G2 readiness",           stage: "06", path: "engagement-management/stage-gate-2-readiness.md", primaryTable: "stage-gate-2.caveats" },
+  { id: "stage-gate-3",           label: "G3 readiness",           stage: "08", path: "engagement-management/stage-gate-3-readiness.md", primaryTable: "stage-gate-3.caveats" },
   { id: "roadmap",                label: "Roadmap",                stage: "00", path: "engagement-management/roadmap.md",       primaryTable: "roadmap.slices" },
   { id: "raid-log",               label: "RAID log",               stage: "00", path: "engagement-management/raid-log.md",     primaryTable: "raid-log.risks" },
   { id: "scope-changes",          label: "Scope changes",          stage: "00", path: "engagement-management/scope-changes.md", primaryTable: "scope-changes.rows" },
