@@ -55,8 +55,7 @@ Ranked by how load-bearing the canon makes them.
 
 | Gap | Canon says |
 |---|---|
-| **Shadow-mode comparison harness** | Tooling map, Tier 1: *"nothing off the shelf runs an agent alongside a human on live traffic, logs both, and computes agreement. **That one is ours.**"* Template only, and G3 plus every autonomy rung rest on a hand-typed figure |
-| **The three ROI buckets** | Runbook: *"There are **exactly three buckets** a business cares about… every deployed system should be measured against all three"* — cost savings, revenue uplift, risk mitigation. Revenue uplift has no line in the ROI model |
+| **Shadow-mode comparison harness** | Tooling map, Tier 1: *"nothing off the shelf runs an agent alongside a human on live traffic, logs both, and computes agreement. **That one is ours.**"* **Partly closed** — the ledger now records agreement by exception class and the harness derives clustered-vs-scattered from the counts rather than asking someone to type the word. **The runtime half is still absent**: nothing runs the agent alongside the human. The numbers still arrive by hand; only the judgement on them is computed |
 | **The sponsor de-risking pillar** | Runbook stage 00: never open with migration; give them a sentence they can repeat upward; consider a discounted first assessment; *"they do not want to get fired, they want to get promoted"*. None of it is captured |
 | **Model economics** | Runbook: *"Start on a frontier model… then work down. This is the difference between a pilot that scales and one that dies at the budget review."* No tiering field anywhere |
 | **The MVP bar** | Runbook: *"the bar is that it completes the task **when prompted badly**… If it only works in your hands, you haven't built anything."* G2 substitutes a held-out-slice threshold, which is weaker |
@@ -83,6 +82,17 @@ Roughly **13–16 of 91** components, and **10 of 44 Tier-1**. The map's stated 
 | 7 — Pattern library | **Good.** Skills, templates, agents, and the boundary rule implemented literally |
 
 The honest read: the harness is an excellent Group 0 and Group 7, and the map's first tranche is two-thirds unbuilt.
+
+## Closed since the audit
+
+| Was | Now |
+|---|---|
+| The four tells were never counted, though the template said *"do not maintain by hand"* | Derived, with the observation window beside them |
+| The ROI arithmetic existed nowhere, though `/roi` promised to show it | `cli.ts roi` computes all four from the nine inputs and prints the working. A missing input yields no output rather than a zero; an error rate that rose contributes nothing rather than netting off |
+| **The three buckets had no home**, and revenue uplift no line at all | A labels table on the ROI model, and `/roi` exits non-zero while any bucket is unaddressed |
+| G3 omitted the judgment chain and the five behaviours | Both are G3 criteria |
+| Gate caveats were written into a register nothing could see | The three gate memos are registered instruments |
+| Neither canon document was in the repo | `docs/canon/`, with this file as the report |
 
 ## Keeping this true
 

@@ -15,6 +15,7 @@ import { scanIntake } from "./intake.ts";
 import { coach, type CoachQuestion } from "./coach.ts";
 import { CONTRACT_SCHEMA } from "./instruments.ts";
 import { checkContract, readContract } from "./contract.ts";
+import { computeRoi, type RoiModel } from "./roi.ts";
 import { pendingProposals } from "./proposals.ts";
 import {
   INSTRUMENTS, instrumentStatus, STAGES, type StageId,
@@ -88,6 +89,13 @@ export interface State {
     count: number; latest: string | null;
     byAgent: Record<string, number>;
   };
+  /**
+  * The ROI model, computed rather than typed.
+  *
+  * The runbook: "Show the arithmetic. The first question will be where the
+  * number came from."
+  */
+  roi: RoiModel;
   friction: { session: string; note: string }[];
   /**
    * The ranked question queue.
@@ -546,6 +554,7 @@ export async function deriveState(opts: {
       byAgent,
     },
     friction,
+    roi: computeRoi(tablesByInstrument.get("roi-model") ?? []),
     coach: coach({
       findings: chain.audit.findings,
       gates,

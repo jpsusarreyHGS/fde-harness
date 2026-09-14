@@ -64,6 +64,26 @@ export interface ChainCounts {
     notModelled: number;
   };
   evalCases: { total: number; passing: number; failing: number; p0: number };
+  /**
+   * Shadow-mode disagreement, by exception class.
+   *
+   * The practice's own rule is that the *pattern* decides the rung, not the
+   * rate: "92% clustered on one exception type is a fixable gap; 92%
+   * scattered randomly is a capability ceiling. They look identical in a
+   * summary metric and demand opposite decisions."
+   *
+   * So the harness counts rather than asking someone to type a word. `top`
+   * is the share of disagreements sitting in the single worst class.
+   */
+  shadow: {
+    classes: number;
+    disagreements: number;
+    /** Share in the largest class, 0-100. Zero when nothing is recorded. */
+    concentration: number;
+    pattern: "clustered" | "scattered" | "unmeasured";
+    /** Classes whose rule holder could not state the rule — the real ceiling. */
+    unfixable: number;
+  };
   audit: ChainAudit;
 }
 
@@ -267,6 +287,36 @@ export function deriveChain(input: ChainInput): ChainCounts {
     }
     if (matched) tells.total++;
   }
+
+  // ---- shadow mode --------------------------------------------------------
+  // Clustered or scattered is a count, not an impression — and the impression
+  // is reliably the more optimistic of the two.
+  const shadowRows = rowsOf("autonomy-ledger", "autonomy-ledger.by-exception");
+  const byClass = new Map<string, number>();
+  let unfixable = 0;
+  for (const r of shadowRows) {
+    const ex = col(r, "Ex id").trim();
+    const n = Number(col(r, "Disagreements").replace(/[^0-9.]/g, ""));
+    if (!ex || !Number.isFinite(n) || n <= 0) continue;
+    byClass.set(ex, (byClass.get(ex) ?? 0) + n);
+    // "no" or a blank rule holder both mean nobody can state the rule.
+    if (/^n(o)?$/i.test(col(r, "Fixable by a rule?").trim())) unfixable++;
+  }
+  const disagreements = [...byClass.values()].reduce((a, b) => a + b, 0);
+  const top = byClass.size ? Math.max(...byClass.values()) : 0;
+  const concentration = disagreements ? Math.round((top / disagreements) * 100) : 0;
+  const shadow = {
+    classes: byClass.size,
+    disagreements,
+    concentration,
+    // Two thirds in one class is the practice's own worked example of
+    // "clustered". Below that, iteration is not the remedy.
+    pattern: (disagreements === 0
+      ? "unmeasured"
+      : concentration >= 66 ? "clustered" : "scattered") as
+      "clustered" | "scattered" | "unmeasured",
+    unfixable,
+  };
 
   // ---- exceptions ---------------------------------------------------------
   const exRows = rowsOf("exception-register", "exception-register.rows");
@@ -528,6 +578,7 @@ export function deriveChain(input: ChainInput): ChainCounts {
   return {
     evidence,
     tells,
+    shadow,
     exceptions: { total: exRows.length, withRuleHolder, quantified },
     requirements,
     allocations,

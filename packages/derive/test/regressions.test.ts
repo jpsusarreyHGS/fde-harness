@@ -241,3 +241,44 @@ test("the four tells are counted, because the template says they are", async () 
     sessions: 1,
   });
 });
+
+test("clustered vs scattered is counted, not typed", async () => {
+  // The practice's own rule: "92% clustered on one exception type is a fixable
+  // gap; 92% scattered randomly is a capability ceiling. They look identical
+  // in a summary metric and demand opposite decisions." The ledger asked an
+  // operator to type which one it was — and the optimistic reading is the one
+  // people type.
+  const { deriveChain } = await import("../src/chain.ts");
+  const { parseAnchoredTables } = await import("../src/anchors.ts");
+
+  const ledger = (rows: string) => new Map([["autonomy-ledger", parseAnchoredTables(`
+<!-- table:autonomy-ledger.by-exception role=register id=Ex id -->
+
+| Ex id | Run date | Workflow | Cases seen | Disagreements | Rate | Fixable by a rule? | Rule holder |
+|---|---|---|---|---|---|---|---|
+${rows}
+`)]]);
+
+  const clustered = deriveChain({
+    tables: ledger(`| EX-001 | 2026-09-01 | Triage | 210 | 18 | 8.6% | yes | Ana |
+| EX-004 | 2026-09-01 | Triage | 210 | 2 | 1.0% | yes | Ana |`),
+  });
+  assert.equal(clustered.shadow.pattern, "clustered");
+  assert.equal(clustered.shadow.concentration, 90);
+  assert.equal(clustered.shadow.disagreements, 20);
+
+  const scattered = deriveChain({
+    tables: ledger(`| EX-001 | 2026-09-01 | Triage | 210 | 5 | 2.4% | no | — |
+| EX-002 | 2026-09-01 | Triage | 210 | 5 | 2.4% | no | — |
+| EX-003 | 2026-09-01 | Triage | 210 | 5 | 2.4% | yes | Ana |`),
+  });
+  assert.equal(scattered.shadow.pattern, "scattered");
+  assert.equal(scattered.shadow.classes, 3);
+  // The two nobody can state a rule for are the real ceiling.
+  assert.equal(scattered.shadow.unfixable, 2);
+
+  // Nothing recorded is "unmeasured", never a flattering default.
+  const empty = deriveChain({ tables: new Map() });
+  assert.equal(empty.shadow.pattern, "unmeasured");
+  assert.equal(empty.shadow.concentration, 0);
+});

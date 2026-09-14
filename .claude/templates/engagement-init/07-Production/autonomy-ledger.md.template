@@ -25,6 +25,33 @@
 
 92% clustered on one exception type is a **fixable gap** — a missing rule, probably already in the exception register, possibly a day's work. 92% scattered randomly is a **capability ceiling** — no amount of iteration will move it. They look identical in a summary metric and demand opposite decisions.
 
+Which is why the next table exists: **clustered or scattered is not a judgement call, it is a count.**
+
+<!-- table:autonomy-ledger.by-exception role=register id=Ex id -->
+
+## Agreement by exception class
+
+One row per exception the shadow run touched. The practice asks for agreement
+**by exception class**, not a single headline rate, because the headline rate
+cannot tell you which of the two situations above you are in.
+
+| Ex id | Run date | Workflow | Cases seen | Disagreements | Rate | Fixable by a rule? | Rule holder |
+|---|---|---|---|---|---|---|---|
+
+`Ex id` cites the exception register. A disagreement on an exception that is
+not in the register is the more interesting finding — it means the shadow run
+found a case discovery missed, and it belongs in `exception-register.md` before
+it belongs here.
+
+`Fixable by a rule?` is the column the rung decision turns on. If the rule
+holder can state the rule, the gap is a day's work. If nobody can, it is a
+capability ceiling and the rung does not move.
+
+**Concentration is derived.** The dashboard computes what share of
+disagreements sit in the top exception class and calls it clustered or
+scattered. Do not type the word — a count is harder to argue with than an
+impression, and the impression is usually the more optimistic of the two.
+
 <!-- table:autonomy-ledger.thresholds role=labels key=Transition -->
 
 ## Thresholds for this engagement

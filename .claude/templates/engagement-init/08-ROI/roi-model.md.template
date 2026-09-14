@@ -33,6 +33,30 @@ A G3 criterion is a **measured** outcome, not a projected one. Baselines were ca
 | Payback period | | |
 | Year-one net | | |
 
+**Do not compute these by hand.** `/roi` derives all four from the nine inputs
+above and prints the arithmetic with the numbers substituted, because the first
+question will be where the number came from and a typed figure cannot answer
+it. A missing input produces no output rather than a zero that reads as a
+result.
+
+<!-- table:roi-model.buckets role=labels key=Bucket  answer=Effect -->
+
+## The three buckets
+
+**There are exactly three buckets a business cares about, and every deployed
+system is measured against all three.** A model that reports only cost savings
+is not a conservative model — it is an incomplete one, and the bucket it
+usually omits is the one the sponsor is actually judged on.
+
+| Bucket | Effect | Arithmetic or evidence | Measured / modelled / assumed | Owner |
+|---|---|---|---|---|
+| Cost savings | | | | |
+| Revenue uplift | | | | |
+| Risk mitigation | | | | |
+
+Leave a row empty only if you can say why it does not apply — and write that in
+`Effect`. "Not applicable" with a reason is an answer; a blank cell is not.
+
 <!-- table:roi-model.counter-metrics role=register id=Counter-metric -->
 
 ## Counter-metrics

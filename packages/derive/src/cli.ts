@@ -16,6 +16,7 @@
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
  *   cli.ts contract-check <engagement-dir>      will the ontology compiler take it?
+ *   cli.ts roi     <engagement-dir>             the four outputs, with the working
  *
  * Exit codes are meant for a runner and for CI:
  *   0  fine
@@ -47,7 +48,7 @@ import { WriteRefused } from "./writer.ts";
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check",
+  "scaffold", "contract-check", "roi",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -421,6 +422,50 @@ ${g.whoName ? `${g.whoName} — ${g.who}` : `${g.who} (no name in the stakeholde
       "that is what makes them count.",
   );
   process.exit(0);
+}
+
+if (sub === "roi") {
+  const r = state.roi;
+  const fmt = (n: number | null, suffix = "") =>
+    n === null ? "—" : `${n.toLocaleString("en-GB", { maximumFractionDigits: 1 })}${suffix}`;
+
+  console.log("Outputs\n");
+  console.log(`  Hours recovered / month   ${fmt(r.outputs.hoursRecovered)}`);
+  console.log(`  Net benefit / month       ${fmt(r.outputs.netBenefitPerMonth)}`);
+  console.log(`  Payback period            ${fmt(r.outputs.paybackMonths, " months")}`);
+  console.log(`  Year-one net              ${fmt(r.outputs.yearOneNet)}`);
+
+  if (r.outputs.workings.length) {
+    console.log("\nArithmetic — paste this into the model rather than retyping a figure\n");
+    for (const w of r.outputs.workings) console.log(`  ${w}`);
+  }
+
+  if (r.missing.length) {
+    console.log(`\n${r.missing.length} input(s) with no value, so anything downstream of them is blank:`);
+    for (const m of r.missing) console.log(`  ${m}`);
+    console.log("\nA blank output is honest. A zero would read as a computed result.");
+  }
+
+  console.log(`\nProvenance: ${r.measured} of 9 inputs measured.`);
+  if (r.measured < 9) {
+    console.log("An unlabelled figure will be read as measured. Label every number.");
+  }
+
+  const b = r.buckets;
+  const unfilled = [
+    !b.costSavings && "cost savings",
+    !b.revenueUplift && "revenue uplift",
+    !b.riskMitigation && "risk mitigation",
+  ].filter(Boolean);
+  if (unfilled.length) {
+    console.log(`\n${unfilled.length} of the three buckets have no effect recorded: ${unfilled.join(", ")}.`);
+    console.log("Every deployed system is measured against all three. A bucket that");
+    console.log("does not apply needs a reason in the cell, not a blank.");
+  }
+
+  // Exit 1 when the readout would not survive its first question.
+  const unusable = r.outputs.netBenefitPerMonth === null || unfilled.length > 0;
+  process.exit(unusable ? 1 : 0);
 }
 
 if (args.includes("--audit")) {
