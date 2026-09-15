@@ -1,0 +1,7 @@
+broker_code,broker_name,claims_submitted,duplicate_refs,avg_days_to_valid_policy
+BRK-0041,Halstead & Co,412,31,0.2
+BRK-0107,Marlowe Insurance Services,388,4,0.1
+BRK-0233,Pennine Broking,201,47,1.8
+BRK-0288,Coastal Risk Partners,177,2,0.1
+BRK-0301,Fenwick Commercial,164,19,2.4
+BRK-0355,Ashby & Vale,98,1,0.0

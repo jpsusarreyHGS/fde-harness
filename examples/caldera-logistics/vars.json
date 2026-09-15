@@ -1,0 +1,12 @@
+{
+  "CLIENT_NAME": "Caldera Logistics",
+  "SPONSOR": "Marta Oyelaran, VP Operations",
+  "SCOPE": "Exception handling on inbound freight bookings",
+  "NON_GOALS": "No rate negotiation. No carrier selection. No changes to the customer booking portal.",
+  "SYSTEMS": "TBD",
+  "ONTOLOGY_REPO": "tbd",
+  "RESIDENCY": "tbd",
+  "LABOUR": "union",
+  "TARGET_PLATFORM": "undecided",
+  "DATE": "2026-09-15"
+}

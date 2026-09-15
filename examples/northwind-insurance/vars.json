@@ -1,0 +1,12 @@
+{
+  "CLIENT_NAME": "Northwind Insurance",
+  "SPONSOR": "Priya Raman, Director of Claims Operations",
+  "SCOPE": "First-notice-of-loss triage and routing for motor claims",
+  "NON_GOALS": "No adjudication. No reserve setting. No customer-facing correspondence. No fleet claims in the pilot.",
+  "SYSTEMS": "Guidewire ClaimCenter, Outlook, a broker commission spreadsheet",
+  "ONTOLOGY_REPO": "tbd",
+  "RESIDENCY": "client-tenant",
+  "LABOUR": "none",
+  "TARGET_PLATFORM": "databricks",
+  "DATE": "2026-09-15"
+}

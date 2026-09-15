@@ -131,6 +131,18 @@ claude
 
 Everything below happens inside Claude Code, in this directory.
 
+### Want to try it before a real client?
+
+```bash
+node scripts/load-example.mjs northwind-insurance
+```
+
+Three example engagements live in [`examples/`](examples/) — the answers and
+the raw evidence an FDE produces on a first visit, nothing pre-filled. One is
+the happy path, one is a works-council site where the policy and the COO both
+contradict what the shadowing found, one is deliberately messy. Work them
+exactly as you would a client.
+
 ### Step 1 — Create the engagement
 
 ```

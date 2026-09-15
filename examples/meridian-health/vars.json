@@ -1,0 +1,12 @@
+{
+  "CLIENT_NAME": "Meridian Health",
+  "SPONSOR": "Dr Hakim Osei, COO Shared Services",
+  "SCOPE": "Prior-authorisation intake and clinical routing for outpatient imaging",
+  "NON_GOALS": "No clinical decisions. No denials. No patient contact. Nothing touching the EHR write path.",
+  "SYSTEMS": "Epic, a fax gateway, a shared Outlook mailbox, an Access database nobody owns",
+  "ONTOLOGY_REPO": "tbd",
+  "RESIDENCY": "hgs-tenant",
+  "LABOUR": "works-council",
+  "TARGET_PLATFORM": "jena",
+  "DATE": "2026-09-15"
+}
