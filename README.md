@@ -2,6 +2,8 @@
 
 A Claude Code project harness implementing the HGS Forward Deployed Engineering practice method — the ten stages of the engagement runbook, with the artefacts that pass the bootcamp's gates. Both documents are vendored in [`docs/canon/`](docs/canon/).
 
+**Where things stand:** [`docs/status.md`](docs/status.md) — what is ready, what is manual, what is missing, and what to do next.
+
 **The canon is canon.** The runbook owns the stages and the frameworks; the bootcamp owns the gates and the certified behaviours; the tooling map is what the tooling is measured against. Where the harness and a canon document disagree, the document wins and the divergence is a defect to report. See [`docs/conformance.md`](docs/conformance.md) for what is implemented, what is extension, and what is knowingly divergent.
 
 ---
