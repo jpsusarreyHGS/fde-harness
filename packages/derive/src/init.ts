@@ -32,6 +32,7 @@ import { appendRows } from "./writer.ts";
 const RESIDENCY = ["client-tenant", "hgs-tenant", "tbd"] as const;
 const LABOUR = ["works-council", "union", "none", "unknown"] as const;
 const TARGET_PLATFORM = ["jena", "databricks", "fabric", "undecided"] as const;
+const SCOPE_SOURCE = ["mandate", "document", "recollection", "tbd"] as const;
 
 /** Fields the templates cannot sensibly default. */
 const REQUIRED = ["CLIENT_NAME", "SPONSOR", "SCOPE", "NON_GOALS"] as const;
@@ -89,6 +90,7 @@ export function validateVars(raw: unknown, slug: string): EngagementVars {
     ["RESIDENCY", RESIDENCY as readonly string[]],
     ["LABOUR", LABOUR as readonly string[]],
     ["TARGET_PLATFORM", TARGET_PLATFORM as readonly string[]],
+    ["SCOPE_SOURCE", SCOPE_SOURCE as readonly string[]],
   ] as const) {
     const got = v[key];
     if (got !== undefined && !allowed.includes(got as string)) {
@@ -188,6 +190,18 @@ async function raiseTbdQuestions(
   // The one field the ontology compiler reads to pick a target. Left blank it
   // is not a default — it is a decision nobody has made, and the compiler will
   // pick jena for them.
+  // The scope line is the baseline every later scope decision is judged
+  // against. "recollection" is an honest answer and still a gap — it means
+  // nobody can check the baseline against what the client agreed to buy.
+  if (tbd(vars.SCOPE_SOURCE) || vars.SCOPE_SOURCE === "recollection") {
+    gaps.push({
+      field: "SCOPE_SOURCE",
+      question:
+        "What did the client actually agree to buy, and where is that written down?",
+      who: "Executive sponsor",
+      blocks: "every scope decision — scope-changes.md is adjudicated against this line",
+    });
+  }
   if (tbd(vars.TARGET_PLATFORM)) {
     gaps.push({
       field: "TARGET_PLATFORM",

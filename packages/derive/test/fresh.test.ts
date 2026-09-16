@@ -149,11 +149,15 @@ test("all three gates are not-run, and none claims passed", () => {
 
 test("gate criteria are parsed from the memo templates", () => {
   const g1 = state.gates.find((g) => g.id === "G1")!;
-  assert.equal(g1.criteria.length, 5, "G1 ships five criteria");
+  assert.equal(g1.criteria.length, 6, "G1 ships six criteria");
   assert.equal(g1.behaviours.length, 4, "G1 ships four behaviours");
   assert.ok(
     g1.criteria.some((c) => /canonical grain/i.test(c.name)),
     "G1 must require the canonical grain be chosen and defended",
+  );
+  assert.ok(
+    g1.criteria.some((c) => /hypothes/i.test(c.name)),
+    "G1 must require the entry hypotheses be closed, not quietly dropped",
   );
   assert.ok(
     g1.behaviours.some((b) => /should not be built/i.test(b.name)),

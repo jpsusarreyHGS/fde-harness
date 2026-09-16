@@ -29,6 +29,7 @@ Use `AskUserQuestion` once, not one question at a time.
 | Slug | *(the folder name)* | kebab-case. Not a JSON field — it comes from the path |
 | Executive sponsor | `SPONSOR` | Role and name if known |
 | Scope, one line | `SCOPE` | What the pilot is |
+| **Where that scope came from** | `SCOPE_SOURCE` | `mandate` / `document` / `recollection` / `tbd`. Every scope decision is later judged against this line — `recollection` is honest and still raises a question |
 | Non-goals | `NON_GOALS` | At least one. A scope with no non-goals has not been bounded |
 | Starting stage | `STAGE` | Usually `00-Setup` |
 | Target systems | `SYSTEMS` | Comma-separated, or `TBD` |
@@ -40,6 +41,11 @@ Use `AskUserQuestion` once, not one question at a time.
 names who can settle a dispute, the other decides whether capture can legally
 begin. Unknown is `TBD`, and the scaffolder turns each `TBD` into a `Q-` with an
 owner — you do not have to write those yourself.
+
+**You will usually arrive with a brief.** Record what was agreed in
+`00-Setup/engagement-mandate.md` and what you believe in
+`00-Setup/entry-hypotheses.md` before the first client meeting. The scaffolder
+creates both; it cannot fill them, because only you were in the handover.
 
 *(In the target platform this interview is replaced by a web intake form; the
 keys are the form's fields.)*

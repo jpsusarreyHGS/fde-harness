@@ -21,6 +21,7 @@ The bootcamp's Week 1 bar. Three artefacts at standard, plus behaviours observed
 | **Stakeholder map + readiness scorecard** | **Five roles identified correctly**, decision rights defensible, and **the data landmines found** |
 | **Draft ontology** | **Canonical grain chosen and defended.** Grain mismatches between source systems identified as the cause of whatever breaks weekly |
 | **Evidence-handling terms** | Signed. Six terms agreed, monitoring constraint checked against jurisdiction and labour representation |
+| **Entry hypotheses closed** | Each of the three supported or disproved, with the evidence named. They were written before anything was watched and are expected to be wrong — the bar is that we say which, not that we were right |
 
 **Behaviours to confirm, not just artefacts:**
 

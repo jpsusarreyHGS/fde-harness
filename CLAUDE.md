@@ -260,6 +260,9 @@ engagements/{slug}/
 ├── state.json
 ├── 00-Setup/
 │   ├── pilot-charter.md              # scope, non-goals, acceptance criteria
+│   ├── engagement-mandate.md         # what was sold, and to whom
+│   ├── entry-hypotheses.md           # what we believe before we land, and what would disprove it
+│   ├── agreement/                    # the commercial paper. NOT evidence, never classified
 │   ├── evidence-handling-terms.md    # the six terms; signed BEFORE capture
 │   └── stack-decision.md
 ├── 01-Organisation/
@@ -340,6 +343,7 @@ A clean "not found" is itself the state signal.
 |---|---|
 | Machine state | `state.json` |
 | Charter · evidence terms | `00-Setup/pilot-charter.md` · `00-Setup/evidence-handling-terms.md` |
+| What was agreed · what we assumed | `00-Setup/engagement-mandate.md` · `00-Setup/entry-hypotheses.md` |
 | Stakeholder map | `01-Organisation/stakeholder-map.md` |
 | Observation log · operating map | `02-Workflow/observation-log.md` · `02-Workflow/operating-map.md` |
 | Exceptions · requirements · questions | `02-Workflow/exception-register.md` · `02-Workflow/requirements-register.md` · `02-Workflow/open-questions.md` |

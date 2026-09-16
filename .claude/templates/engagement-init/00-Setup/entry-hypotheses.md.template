@@ -1,0 +1,52 @@
+# Entry hypotheses — {{CLIENT_NAME}}
+
+**What you believe before you have watched anything, and what would change your mind.**
+
+You will usually arrive with a brief. That brief is a hypothesis, not a finding — the practice's own rule is that *customers describe solutions, not problems*, and the request you were handed is a solution someone already chose. Writing the belief down now, with the evidence that would kill it, is what stops it quietly becoming the requirement.
+
+**This file is expected to be wrong.** That is its job. It is revisited at G1, not deleted.
+
+<!-- table:entry-hypotheses.request role=kv -->
+
+## What they asked for
+
+| Item | Value |
+|---|---|
+| The request, verbatim | |
+| Who asked | |
+| Where stated | |
+| Date | |
+
+**Verbatim.** Their words, including the vague ones. A paraphrase you wrote is already halfway to a solution, and the gap between the request and the real problem is what G1 asks you to state.
+
+## What we were given
+
+<!-- table:entry-hypotheses.package role=register id=Item -->
+
+| Item | What it is | Currency | Who provided it | What it does not tell us |
+|---|---|---|---|---|
+
+`Currency` matters more than it looks. A data dictionary three years out of date is not a resource, it is a finding — and the column exists so that nobody quietly treats it as current.
+
+The last column is the useful one. Naming what a document *cannot* answer, on the day you receive it, is how you arrive with questions rather than assumptions.
+
+## The hypotheses
+
+<!-- table:entry-hypotheses.rows role=register id=Id -->
+
+| Id | Hypothesis | Why we believe it | Disconfirming evidence we would want | Status | Revisited |
+|---|---|---|---|---|---|
+
+Three rules, none optional:
+
+- **Write three, not one.** One hypothesis is a conclusion you have already reached and are now looking to confirm.
+- **Every row names the evidence that would kill it** — before discovery starts, while you are still willing to be wrong. A hypothesis with no disconfirming evidence cannot be tested, only defended.
+- **Nothing here is deleted.** A hypothesis that turned out wrong is the most useful row in the file, and at the readout it is the evidence that you looked rather than assumed.
+
+Ids are `HY-NN`, minted by code. A requirement that came from a hypothesis cites it.
+
+## Allowed values
+
+- `Status`: `open` · `supported` · `disproved`
+
+**An `open` hypothesis at G1 is a gap, not a subtlety.** The bar is that each one has been supported or disproved with the evidence named — the same discipline as a competency question, where "should work" is not coverage.

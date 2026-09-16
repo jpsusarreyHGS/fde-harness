@@ -96,7 +96,8 @@ export interface AuditFinding {
     | "gap-without-question"
     | "unowned-assumption"
     | "allocation-without-reason"
-    | "exception-without-rule-holder";
+    | "exception-without-rule-holder"
+    | "hypothesis-never-revisited";
   /** The id the finding is about, e.g. "REQ-014". */
   id: string;
   /** Where to look. */
@@ -113,6 +114,7 @@ export interface ChainAudit {
   unownedAssumptions: number;
   allocationsWithoutReason: number;
   exceptionsWithoutRuleHolder: number;
+  hypothesesNeverRevisited: number;
   /** Every finding, with a location. A count with no location is not actionable. */
   findings: AuditFinding[];
 }
@@ -266,6 +268,26 @@ export function deriveChain(input: ChainInput): ChainCounts {
       case "documented": evidence.documented++; break;
       case "stated": evidence.stated++; break;
     }
+  }
+
+  // ---- entry hypotheses ---------------------------------------------------
+  // Written before anything was watched, and expected to be wrong. The point
+  // is that they are *revisited* rather than quietly deleted — the bootcamp
+  // logs first reactions on Monday precisely so they can be shown wrong on
+  // Friday. One still open at the gate is a belief nobody tested.
+  for (const r of rowsOf("entry-hypotheses", "entry-hypotheses.rows")) {
+    const id = col(r, "Id").trim();
+    if (!id) continue;
+    const status = norm(col(r, "Status"));
+    if (status === "supported" || status === "disproved") continue;
+    findings.push({
+      kind: "hypothesis-never-revisited",
+      id,
+      location: "00-Setup/entry-hypotheses.md",
+      detail:
+        "still open. Discovery either supported it or disproved it — say which, " +
+        "and name the evidence. A hypothesis quietly dropped is one you were wrong about.",
+    });
   }
 
   // ---- the four tells -----------------------------------------------------
@@ -594,6 +616,7 @@ export function deriveChain(input: ChainInput): ChainCounts {
       unownedAssumptions: count("unowned-assumption"),
       allocationsWithoutReason: count("allocation-without-reason"),
       exceptionsWithoutRuleHolder: count("exception-without-rule-holder"),
+      hypothesesNeverRevisited: count("hypothesis-never-revisited"),
       findings,
     },
   };

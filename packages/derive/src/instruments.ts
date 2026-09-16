@@ -81,6 +81,8 @@ export interface InstrumentDef {
 export const INSTRUMENTS: readonly InstrumentDef[] = [
   // 00 — Before you land
   { id: "pilot-charter",          label: "Pilot charter",          stage: "00", path: "00-Setup/pilot-charter.md",           primaryTable: "pilot-charter.acceptance", coverage: true },
+  { id: "engagement-mandate",     label: "Engagement mandate",     stage: "00", path: "00-Setup/engagement-mandate.md",      primaryTable: "mandate.promised", coverage: true },
+  { id: "entry-hypotheses",       label: "Entry hypotheses",       stage: "00", path: "00-Setup/entry-hypotheses.md",        primaryTable: "entry-hypotheses.rows", coverage: true },
   { id: "evidence-handling-terms",label: "Evidence-handling terms",stage: "00", path: "00-Setup/evidence-handling-terms.md",   coverage: true, coverageMode: "fields" },
   { id: "stack-decision",         label: "Stack decision",         stage: "00", path: "00-Setup/stack-decision.md",          primaryTable: "stack-decision.client-platforms", coverage: true },
 

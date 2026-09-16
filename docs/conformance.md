@@ -38,6 +38,7 @@ Not in any canon document. Listed because the README used to print *"straight fr
 | The coach (`/next`) | See *Knowingly divergent* below |
 | The ontology contract layer — ten of 41 instruments | The runbook's stage 03 asks for a systems inventory and a vocabulary audit and stops there. The largest single extension, and the one most likely to be mistaken for method |
 | Engagement management — roadmap, RAID, scope changes, charter | Standard delivery furniture. `RAID`, `roadmap` and `charter` appear nowhere in the canon |
+| **The pre-engagement layer** — `engagement-mandate.md`, `entry-hypotheses.md`, `00-Setup/agreement/` | The runbook asserts stage 00 *"converts an open-ended AI conversation into a bounded piece of work with a deliverable"* and then never names the artefact carrying that boundary, never says who writes it, and never tells the FDE to read it. Its two nearest sponsor questions recover the prior commitment **by asking in an interview**. So the harness now records what was sold, and the shape comes from the bootcamp's Day 1 deliverable — *"three hypotheses about what [the client] actually needs, and the evidence you'd want before believing any of them"* — which had no instrument |
 
 ## Knowingly divergent
 
@@ -56,7 +57,7 @@ Ranked by how load-bearing the canon makes them.
 | Gap | Canon says |
 |---|---|
 | **Shadow-mode comparison harness** | Tooling map, Tier 1: *"nothing off the shelf runs an agent alongside a human on live traffic, logs both, and computes agreement. **That one is ours.**"* **Partly closed** — the ledger now records agreement by exception class and the harness derives clustered-vs-scattered from the counts rather than asking someone to type the word. **The runtime half is still absent**: nothing runs the agent alongside the human. The numbers still arrive by hand; only the judgement on them is computed |
-| **The sponsor de-risking pillar** | Runbook stage 00: never open with migration; give them a sentence they can repeat upward; consider a discounted first assessment; *"they do not want to get fired, they want to get promoted"*. None of it is captured |
+| **The sponsor de-risking pillar** | Runbook stage 00: never open with migration; give them a sentence they can repeat upward; consider a discounted first assessment; *"they do not want to get fired, they want to get promoted"*. **Partly closed** — `mandate.promised` records what was promised and to whom. Still missing: the narrative sentence the sponsor repeats upward, and the migration rule |
 | **Model economics** | Runbook: *"Start on a frontier model… then work down. This is the difference between a pilot that scales and one that dies at the budget review."* No tiering field anywhere |
 | **The MVP bar** | Runbook: *"the bar is that it completes the task **when prompted badly**… If it only works in your hands, you haven't built anything."* G2 substitutes a held-out-slice threshold, which is weaker |
 | **Five of seven build-anatomy components** | Runbook stage 05 requires guardrails *"enforced in code, not in the prompt"*, structured output, deliberate context and memory, and failure handling. Only the audit trail is enforced |
@@ -92,6 +93,7 @@ The honest read: the harness is an excellent Group 0 and Group 7, and the map's 
 | **The three buckets had no home**, and revenue uplift no line at all | A labels table on the ROI model, and `/roi` exits non-zero while any bucket is unaddressed |
 | G3 omitted the judgment chain and the five behaviours | Both are G3 criteria |
 | Gate caveats were written into a register nothing could see | The three gate memos are registered instruments |
+| The scope every change was judged against was a line typed from memory | `SCOPE_SOURCE` is recorded on the charter, and an unsourced one raises a `Q-` against the sponsor |
 | Neither canon document was in the repo | `docs/canon/`, with this file as the report |
 
 ## Keeping this true

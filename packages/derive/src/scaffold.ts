@@ -26,6 +26,14 @@ export interface EngagementVars {
   STAGE?: string;
   SYSTEMS?: string;
   ONTOLOGY_REPO?: string;
+  /**
+   * Where the scope line came from.
+   *
+   * Every scope decision in the engagement is adjudicated against it, so a
+   * scope of unknown provenance makes the whole discipline rest on somebody
+   * remembering a conversation.
+   */
+  SCOPE_SOURCE?: "mandate" | "document" | "recollection" | "tbd";
   /** Which compiler target. `jena` · `databricks` · `fabric` · `undecided`. */
   TARGET_PLATFORM?: "jena" | "databricks" | "fabric" | "undecided";
   RESIDENCY?: "client-tenant" | "hgs-tenant" | "tbd";
@@ -42,7 +50,7 @@ export interface ScaffoldResult {
 }
 
 const SUBDIRS = [
-  "00-Setup", "01-Organisation",
+  "00-Setup", "00-Setup/agreement", "01-Organisation",
   "02-Workflow/evidence/observed", "02-Workflow/evidence/system",
   "02-Workflow/evidence/documented", "02-Workflow/evidence/stated",
   "02-Workflow/proposals",
@@ -78,6 +86,7 @@ function substitute(text: string, vars: EngagementVars): string {
     SYSTEMS: vars.SYSTEMS ?? "TBD",
     ONTOLOGY_REPO: vars.ONTOLOGY_REPO ?? "tbd",
     TARGET_PLATFORM: vars.TARGET_PLATFORM ?? "undecided",
+    SCOPE_SOURCE: vars.SCOPE_SOURCE ?? "tbd",
     RESIDENCY: vars.RESIDENCY ?? "tbd",
     LABOUR: vars.LABOUR ?? "unknown",
     DATE: vars.DATE ?? new Date().toISOString().slice(0, 10),

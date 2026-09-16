@@ -1,0 +1,69 @@
+# Engagement mandate — {{CLIENT_NAME}}
+
+**What was agreed before you landed.** Someone sold this work, to someone, on some basis, and probably promised something. That is the boundary every later scope decision is judged against — so it is written down here rather than recalled.
+
+The runbook is clear that the assessment is what "converts an open-ended AI conversation into a bounded piece of work with a deliverable." This file is that boundary. Without it, `scope-changes.md` adjudicates against a sentence somebody typed from memory on day one.
+
+**Fill this before the first client meeting, not after.** If you cannot, that is itself the finding, and it belongs in `02-Workflow/open-questions.md` with a name against it.
+
+<!-- table:mandate.agreement role=kv -->
+
+## The agreement
+
+| Item | Value |
+|---|---|
+| What was sold, one line | |
+| Commercial basis | |
+| Assessment window | |
+| Agreed by (client) | |
+| Agreed by (HGS) | |
+| Date agreed | |
+| Primary document | |
+
+`Primary document` names the thing, and `mandate.documents` below says where it lives. Do not paste contract text into this file.
+
+## Outcomes promised
+
+Everything said during the sale that the client could reasonably expect us to deliver. **An unmeasurable promise is the one that resurfaces at the readout**, phrased as though it had always been precise.
+
+<!-- table:mandate.promised role=register id=Id -->
+
+| Id | Promise | Made to | Where stated | Measurable? | Measured by |
+|---|---|---|---|---|---|
+
+`Measurable?` is `yes` or `no`, and `no` is a legitimate and common answer. Record it as `no` and raise a `Q-` rather than inventing a metric nobody agreed to.
+
+## The boundary
+
+<!-- table:mandate.boundary role=register id=Item -->
+
+| Item | In / out / silent | Where stated | Notes |
+|---|---|---|---|
+
+**`silent` is the interesting value.** In and out were both negotiated; silent is everything nobody discussed, and that is where scope creep enters — as a small helpful addition during a working session, not as a change request. A two-value column hides exactly the rows you need.
+
+## Documents
+
+Where the paper lives. **Not what it says** — extract the terms that guide the work into the tables above, and leave the document where its owner keeps it.
+
+<!-- table:mandate.documents role=register id=Document -->
+
+| Document | Type | Where it lives | Owner | Date | Copy in `agreement/`? |
+|---|---|---|---|---|---|
+
+An executed contract stays with legal unless legal has said otherwise. `00-Setup/agreement/README.md` says what may be copied in.
+
+## Prior work
+
+What has already been tried, by whom, and what became of it. Ask early — an earlier attempt that failed tells you more about the organisation than the brief does, and walking into a room unaware of it is how credibility is lost in the first ten minutes.
+
+<!-- table:mandate.prior-work role=register id=Item -->
+
+| Item | Who did it | When | What became of it | Where it lives |
+|---|---|---|---|---|
+
+## Allowed values
+
+- `Measurable?`: `yes` · `no`
+- `In / out / silent`: `in` · `out` · `silent`
+- `Type`: `proposal` · `sow` · `contract` · `analysis` · `deck` · `email` · `other`

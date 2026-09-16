@@ -1,0 +1,35 @@
+# Agreement
+
+**The commercial paper, where the engagement needs it to hand.**
+
+This folder sits outside `02-Workflow/evidence/` on purpose. The four evidence classes describe material the **client** produced about their **own operations** — a shift note, a system export, an SOP, an interview. A proposal HGS wrote, or an SOW both parties signed, is none of those. Dropped into `evidence/` it would be reported as unclassified, which is the right refusal and the wrong destination.
+
+Nothing here is classified, counted, or read by `intake`. It is reference.
+
+## What belongs
+
+- The proposal or assessment scope as sent
+- The agreed statement of work, **if legal has said a copy may sit here**
+- A prior analysis or consultant's deck worth having open while you work
+- The org chart and any data dictionary you were handed before landing
+
+## What does not
+
+- **An executed contract, unless legal has explicitly agreed.** Record where it lives in `mandate.documents` instead.
+- Anything containing a credential, a key, or a personal record
+- Client operational data — that is `datasources/`, which is read-only to the harness
+- Anything you have not checked against the evidence-handling terms in `00-Setup/evidence-handling-terms.md`
+
+## The rule this follows
+
+The mandate records **where** each document lives and **who owns it**. That is the same discipline `chronicle/memory/environment.md` uses for credentials: the location is recorded, the value never is. A contract copied onto an FDE laptop is also in every backup of that laptop, and that is a decision somebody should make deliberately rather than by default.
+
+## Using what is here
+
+To extract terms into the mandate, convert first and drop the conversion somewhere you will delete it:
+
+```bash
+uv run --script --frozen scripts/convert_to_md.py "00-Setup/agreement/<file>.pdf" --out ./tmp_conversion.md
+```
+
+Then fill `00-Setup/engagement-mandate.md` by hand, and delete the conversion. A stray conversion is an unredacted copy of commercial material outside its intended store.

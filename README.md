@@ -143,6 +143,19 @@ the happy path, one is a works-council site where the policy and the COO both
 contradict what the shadowing found, one is deliberately messy. Work them
 exactly as you would a client.
 
+### Step 0.5 — You will usually arrive with a brief
+
+Somebody sold this work before you landed. There is a scope, probably a promise, possibly a stated problem and a stale data dictionary. **That brief is a hypothesis, not a finding** — the practice's own rule is that customers describe solutions, not problems, and the request you were handed is a solution somebody already chose.
+
+Two files, filled before the first client meeting rather than after:
+
+- **`00-Setup/engagement-mandate.md`** — what was sold, to whom, what was promised, what is explicitly out, and what nobody discussed either way. This is the baseline every later scope decision is judged against. Today, if you skip it, that baseline is a sentence you typed from memory on day one.
+- **`00-Setup/entry-hypotheses.md`** — the request verbatim, what you were given, and **three hypotheses with the evidence that would disprove each**. Written before you watch anything, and expected to be wrong. G1 asks whether each was supported or disproved, not whether you were right.
+
+Commercial paper goes in `00-Setup/agreement/`, which sits outside the evidence classes on purpose — an SOW we wrote is not the client describing their own operations. Its README says what may be copied in; an executed contract stays with legal.
+
+**The gap between what was sold and what discovery finds is the most valuable output of an assessment.** It is either a scope change or a better problem, and you cannot see it without writing both down.
+
 ### Step 1 — Create the engagement
 
 ```

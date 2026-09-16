@@ -19,7 +19,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parseAnchoredTables } from "./anchors.ts";
 
-export type IdPrefix = "EV" | "EX" | "REQ" | "AL" | "CQ" | "Q" | "WR";
+export type IdPrefix = "EV" | "EX" | "REQ" | "AL" | "CQ" | "Q" | "WR" | "HY";
 
 /**
  * Every minted prefix, in one place.
@@ -29,7 +29,7 @@ export type IdPrefix = "EV" | "EX" | "REQ" | "AL" | "CQ" | "Q" | "WR";
  * `Q`, so a finding about an open question could never inherit what it blocked.
  * A list that has to be kept in sync by hand is a list that drifts.
  */
-export const ID_PREFIXES: readonly IdPrefix[] = ["EV", "EX", "REQ", "AL", "CQ", "Q", "WR"];
+export const ID_PREFIXES: readonly IdPrefix[] = ["EV", "EX", "REQ", "AL", "CQ", "Q", "WR", "HY"];
 
 /** `EV|EX|REQ|…`, for building a regex. */
 export const ID_ALTERNATION = ID_PREFIXES.join("|");
@@ -58,6 +58,10 @@ const HOME: Record<IdPrefix, { path: string; anchor: string; width: number }> = 
   // `cq-NN-<slug>` template names, and a width mismatch would produce
   // wr-001 against cq-01 in the same registry.
   WR:  { path: "03-Systems/ontology/personas.md",      anchor: "personas.write-allow-list",  width: 2 },
+  // Entry hypotheses. Width 2 because there should be three of them — a
+  // sequence that reaches HY-100 is not a set of hypotheses, it is a list
+  // of everything anyone wondered.
+  HY:  { path: "00-Setup/entry-hypotheses.md",         anchor: "entry-hypotheses.rows",      width: 2 },
 };
 
 /**

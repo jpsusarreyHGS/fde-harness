@@ -94,6 +94,10 @@ const PERISHABILITY: Record<string, number> = {
   "unverified-in-placement": 20,
   "allocation-without-reason": 15,
   "dangling-citation": 10,
+  // Low, deliberately. A hypothesis does not get harder to close over time —
+  // it gets harder to *remember why you believed it*, which is what the
+  // written disconfirming evidence is for.
+  "hypothesis-never-revisited": 20,
 };
 
 /** Phrasing that makes a finding sayable out loud. */
@@ -114,10 +118,14 @@ const PHRASING: Record<string, (id: string, detail: string) => string> = {
     `${id} was allocated with no reason recorded. Why this quadrant and not the next one over?`,
   "gap-without-question": (id) =>
     `${id} is a gap that never became an open question. Who would we have to ask?`,
+  "hypothesis-never-revisited": (id) =>
+    `${id} was written before we watched anything and is still open. Did discovery support it or disprove it?`,
 };
 
 /** Kinds nobody at the client can answer — the FDE repairs these. */
-const DESK_WORK = new Set(["dangling-citation", "allocation-without-reason"]);
+// A hypothesis is ours. Nobody at the client can tell us whether we were
+// right about what we believed before we arrived.
+const DESK_WORK = new Set(["dangling-citation", "allocation-without-reason", "hypothesis-never-revisited"]);
 
 /** Role most likely to hold the answer, by finding kind. */
 const OWNER_ROLE: Record<string, string> = {
@@ -129,6 +137,7 @@ const OWNER_ROLE: Record<string, string> = {
   "unverified-in-placement": "Operator",
   "allocation-without-reason": "FDE",
   "gap-without-question": "Process owner",
+  "hypothesis-never-revisited": "FDE",
 };
 
 /**
