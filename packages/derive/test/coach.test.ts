@@ -347,3 +347,25 @@ test("a freshly scaffolded caldera raises setup questions the coach explains", a
     await rm(tmp, { recursive: true, force: true });
   }
 });
+
+test("a gate memo nobody has run contributes no criterion questions — only the sponsor behaviour", () => {
+  const notRun: Gate = {
+    id: "G1", label: "Discovery gate", between: "03→04", status: "not-run",
+    date: null, decidedBy: null,
+    criteria: [
+      { name: "A", status: "unmet", evidence: "", toClose: "", owner: "" },
+      { name: "B", status: "unmet", evidence: "", toClose: "", owner: "" },
+      { name: "Readiness scorecard — the data landmines found", status: "unmet", evidence: "", toClose: "", owner: "" },
+    ],
+    behaviours: [{ name: "Can state the sponsor's real problem in one sentence that is not what they asked for", observed: false, where: "" }],
+    antiPatterns: [],
+  };
+  const qs = coach({ findings: [], gates: [notRun], tables: TABLES });
+  const gate = qs.filter((q) => q.source === "gate");
+  assert.equal(gate.length, 1, "only the behaviour");
+  assert.match(gate[0]!.key, /^G1:behaviour/);
+  assert.ok(!qs.some((q) => /criteria have no owner/.test(q.ask)), "nobody is asked who owns an unwritten memo");
+  // Once the memo has been assessed, the criteria are questions as before.
+  const assessed = coach({ findings: [], gates: [{ ...notRun, status: "not-ready" }], tables: TABLES });
+  assert.ok(assessed.some((q) => /criteria have no owner/.test(q.ask)));
+});

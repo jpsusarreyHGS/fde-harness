@@ -429,7 +429,13 @@ function gateQuestions(
   const open = gates.filter((g) => g.status !== "passed");
   const current = open.length ? [open[0]!] : [];
   for (const g of current) {
-    const unmet = g.criteria.filter((c) => c.status !== "met");
+    // A memo nobody has run is the template: every criterion blank, every
+    // owner blank. Turning that into "six criteria have no owner — who owns
+    // each?" on day one asks the sponsor about a document we have not
+    // written. The criteria become questions once /gate has assessed them;
+    // the behaviour check below is useful from the first day and stays.
+    const assessed = g.status !== "not-run";
+    const unmet = assessed ? g.criteria.filter((c) => c.status !== "met") : [];
     const unowned = unmet.filter((c) => !has(c.owner));
 
     // Five unowned criteria are not five conversations — they are one
