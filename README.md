@@ -72,14 +72,14 @@ All of it lives in `engagements/<slug>/03-Systems/ontology/`, except the flows, 
 | | **G3 — Production gate** | `/gate 3` |
 | `09` | Run the loop again | `/harness-improver close` |
 
-Plus `/next` (the three conversations to have tomorrow, with names attached), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
+Plus `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
 
 ## What it gives you
 
 | | |
 |---|---|
 | **8 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, chronicle, harness-improver |
-| **15 slash commands** | the stage pipeline plus dashboard, render and the improvement loop |
+| **16 slash commands** | the stage pipeline plus sketch, dashboard, render and the improvement loop |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
 | **A published contract** | `03-Systems/ontology/` compiles to a governed assistant — see [`docs/contract.md`](docs/contract.md) |
@@ -309,6 +309,20 @@ For everything else, the loop you already know: bring back the notes, drop them 
 watch → drop in evidence/<class>/ → /capture → accept → /next → ask → answer → repeat
 ```
 
+### Step 6½ — Need something to show the client before the gate? `/sketch`
+
+```
+/sketch
+```
+
+With one day of discovery, G1 will be NOT READY — correctly. But you may still need a page to put in front of the sponsor to check you heard right. `/sketch` renders one: `deliverables/<slug>/sketch/<date>.html`, self-contained and branded, built **only from rows you have accepted**. Five sections — what we heard (the sponsor's sentence and the steps, each badged *observed* / *stated* / *unverified*), where the work is lost, what we do not yet know (grouped by who can answer), constraints already found, and what this is not.
+
+Three things to know:
+
+- **It never invents.** A step you have not accepted is not on it. If the page is sparse, accept more rows; do not edit the HTML.
+- **It is the only thing allowed in `deliverables/` before G1**, and it says so — `PROVISIONAL — pre-G1 alignment sketch` in the header and footer. That banner does not come off; the route past it is `/gate 1` and then `/render`.
+- **It shows what you heard, not what you will build.** Solution wireframes are your work after `/allocate`. The badges are the point: a page of *stated* lines is a request to go and watch.
+
 ### Step 7 — See where you stand
 
 ```
@@ -370,6 +384,8 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
 | An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
+| I need something to show the client and G1 is NOT READY | `/sketch`. It renders what you have accepted so far under a PROVISIONAL banner. It is a page to be corrected, not a design |
+| The sketch is missing a step I captured | It is in a proposal you have not accepted. `cli.ts pending`, then `accept` — the sketch reads registers only, never proposals |
 | `/allocate` (or any agent command) stops with "`engagements/<slug>` is not visible from this session" | The session is in an isolated git worktree, which holds no engagement folders because they are never committed — or the engagement was created in a different checkout. Run from the main checkout or turn off worktree isolation; `git worktree list` shows which you are in |
 | `/next` keeps asking something I already answered | Answers given in chat are not evidence until written down. Run `cli.ts answer …` with the answer and who said it, then `/capture` and accept. If the answer is already in an instrument — the sponsor brief, the stakeholder map — it should appear under "Verify first", not as a question; if it does not, report it |
 

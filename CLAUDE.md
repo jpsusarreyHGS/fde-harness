@@ -190,6 +190,7 @@ node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>
 node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to verify, then what to ask
 node packages/derive/src/cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>"
                                                                        # a chat answer, written into evidence/stated/ for /capture
+node packages/derive/src/cli.ts sketch  <engagement-dir>              # the pre-G1 alignment sketch, accepted rows only
 node packages/derive/src/cli.ts contract-check <engagement-dir>       # will the compiler take it?
 ```
 
@@ -343,6 +344,8 @@ engagements/{slug}/
 ```
 
 Client-facing outputs land in `deliverables/{slug}/`, mirroring the stage folders. **Nothing is a deliverable until it has been rendered there.**
+
+One exception exists before G1: `/sketch` writes `deliverables/{slug}/sketch/<date>.html` — the alignment sketch, built from accepted rows only, every line badged with its evidence class, under a `PROVISIONAL — pre-G1 alignment sketch` banner that is not removable by argument. It shows what was heard, never what will be built; it never reads a pending proposal and never invents a step. `state.json` lists it under `sketches[]`, apart from `deliverables[]`.
 
 ### Canonical paths — read the path, do not probe
 

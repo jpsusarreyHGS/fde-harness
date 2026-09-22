@@ -50,6 +50,7 @@ Every table in every instrument carries an HTML-comment anchor immediately above
 | `evals` | object | The four tests plus the regression gate |
 | `roi` | object | Inputs labelled by provenance, and outputs |
 | `deliverables` | array | Rendered client-facing artefacts |
+| `sketches` | array | Pre-G1 alignment sketches — `{ date, path }` under `deliverables/<slug>/sketch/`. Listed apart from `deliverables[]` so a provisional page is never counted as a deliverable |
 | `datasources` | array | Input files and classification |
 | `skills` | object | Counts and detected supersedes |
 | `harnessImprover` | object | Loop health |

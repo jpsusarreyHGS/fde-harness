@@ -9,6 +9,8 @@ export type { ParsedTable, TableAnchor, TableRole } from "./anchors.ts";
 export { deriveChain, extractIds, filled } from "./chain.ts";
 export { coach, deskWork, nextConversations, verifyFirst, type CoachQuestion } from "./coach.ts";
 export { recordAnswer } from "./answer.ts";
+export { renderSketch, PROVISIONAL, SKETCH_DIR } from "./sketch.ts";
+export type { SketchOptions, SketchResult } from "./sketch.ts";
 export type { AnswerClass, RecordAnswerOptions, RecordAnswerResult } from "./answer.ts";
 export { computeRoi, ROI_INPUTS, type RoiModel } from "./roi.ts";
 export type { ChainCounts, ChainAudit, AuditFinding } from "./chain.ts";

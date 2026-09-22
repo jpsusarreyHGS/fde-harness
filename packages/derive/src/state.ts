@@ -53,6 +53,14 @@ export interface State {
   autonomy: Record<string, unknown>[];
   prioritisation: Record<string, string>[];
   deliverables: { name: string; stage: string; rendered: boolean }[];
+  /**
+   * Pre-G1 alignment sketches under `deliverables/<slug>/sketch/`.
+   *
+   * The one artefact allowed in `deliverables/` before G1. Listed separately
+   * from `deliverables[]` so nothing can mistake a provisional sketch for a
+   * rendered client deliverable.
+   */
+  sketches: { date: string; path: string }[];
   datasources: { name: string; sizeBytes: number; classification: string }[];
   skills: {
     practice: number; engagement: number; function: number;
@@ -444,6 +452,7 @@ export async function deriveState(opts: {
   }
 
   const deliverables: State["deliverables"] = [];
+  const sketches: State["sketches"] = [];
   if (opts.deliverablesDir) {
     for (const s of STAGES) {
       for (const f of await lsIf(join(opts.deliverablesDir, slug, s.slug))) {
@@ -451,6 +460,10 @@ export async function deriveState(opts: {
           deliverables.push({ name: f.replace(/\.html$/, ""), stage: s.slug, rendered: true });
         }
       }
+    }
+    for (const f of (await lsIf(join(opts.deliverablesDir, slug, "sketch"))).sort()) {
+      const m = /^(\d{4}-\d{2}-\d{2})\.html$/.exec(f);
+      if (m) sketches.push({ date: m[1]!, path: `${slug}/sketch/${f}` });
     }
   }
 
@@ -529,6 +542,7 @@ export async function deriveState(opts: {
     autonomy,
     prioritisation,
     deliverables,
+    sketches,
     datasources,
     skills: { practice, engagement: engagementSkills.length, function: fn, supersedes: [] },
     intake: {

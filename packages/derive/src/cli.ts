@@ -16,6 +16,7 @@
  *                                              what a source names — a floor under /capture
  *   cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>" [--class stated|documented]
  *                                              write a chat answer into evidence/ so /capture can propose it
+ *   cli.ts sketch  <engagement-dir>             the pre-G1 alignment sketch, from accepted rows only
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
@@ -52,11 +53,12 @@ import { checkContract, readContract } from "./contract.ts";
 import { WriteRefused } from "./writer.ts";
 import { coverage, formatCoverage, formatSweep, sweepText } from "./sweep.ts";
 import { recordAnswer, type AnswerClass } from "./answer.ts";
+import { renderSketch } from "./sketch.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check", "roi", "sweep", "answer",
+  "scaffold", "contract-check", "roi", "sweep", "answer", "sketch",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -119,6 +121,25 @@ async function sponsorName(): Promise<string | undefined> {
 }
 
 // --------------------------------------------------------------- subcommands
+
+if (sub === "sketch") {
+  const res = await renderSketch({
+    engagementDir,
+    slug: basename(engagementDir),
+    harnessRoot,
+    deliverablesDir: resolve(harnessRoot, "deliverables"),
+  });
+  const c = res.counts;
+  console.log(`deliverables/${res.path}`);
+  console.log("");
+  console.log(`  ${c.steps} step(s) · ${c.exceptions} exception(s) · ${c.deadEnds} dead end(s) · ${c.questions} open question(s) · ${c.constraints} constraint(s)`);
+  console.log("  From accepted rows only. Pending proposals were not read; nothing was invented.");
+  console.log("");
+  console.log("  PROVISIONAL — pre-G1 alignment sketch. Show it to be corrected, not approved.");
+  const thin = [c.steps === 0 && "no steps", c.exceptions === 0 && "no exceptions", c.questions === 0 && "no open questions"].filter(Boolean);
+  if (thin.length) console.log(`  Sparse: ${thin.join(", ")}. That is the honest picture — accept more rows, do not pad the page.`);
+  process.exit(0);
+}
 
 if (sub === "answer") {
   const fromAt = args.indexOf("--from");
