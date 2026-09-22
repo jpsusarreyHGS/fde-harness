@@ -707,7 +707,7 @@ function openQuestions(
  * Ranked above the questions that need them: every "ask the exception holder"
  * is unactionable until this one is answered.
  */
-function stakeholderQuestions(tables: readonly ParsedTable[]): CoachQuestion[] {
+function stakeholderQuestions(tables: readonly ParsedTable[], names: Map<string, string>): CoachQuestion[] {
   const out: CoachQuestion[] = [];
   for (const r of rowsOf(tables, "stakeholder-map.five-roles")) {
     const raw = cell(r, "Role");
@@ -717,7 +717,7 @@ function stakeholderQuestions(tables: readonly ParsedTable[]): CoachQuestion[] {
       key: `stakeholder:${role}`,
       ask: `Who is the ${role.toLowerCase()}? A name, not a team.`,
       who: "Executive sponsor",
-      whoName: null,
+      whoName: names.get("executive sponsor") ?? null,
       blocks: `every question that needs the ${role.toLowerCase()}`,
       location: "01-Organisation/stakeholder-map.md",
       why: `one of the five roles, unnamed — ${role.toLowerCase()} questions cannot be asked until it is`,
@@ -799,7 +799,7 @@ export function coach(input: CoachInput): CoachQuestion[] {
   const all = [
     ...gateQuestions(input.gates, names, input.tables),
     ...contractQuestions(input.contract ?? [], names),
-    ...stakeholderQuestions(input.tables),
+    ...stakeholderQuestions(input.tables, names),
     ...chainQuestions(input.findings, names, prio, blocksById, alreadyAsked),
     ...openQuestions(input.tables, names, prio),
   ];

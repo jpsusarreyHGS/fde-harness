@@ -369,3 +369,9 @@ test("a gate memo nobody has run contributes no criterion questions — only the
   const assessed = coach({ findings: [], gates: [{ ...notRun, status: "not-ready" }], tables: TABLES });
   assert.ok(assessed.some((q) => /criteria have no owner/.test(q.ask)));
 });
+
+test("an unnamed-role question is addressed to the sponsor by name when the map has one", () => {
+  const q = coach({ findings: [], gates: NO_GATES, tables: TABLES }).find((x) => x.source === "stakeholder")!;
+  assert.equal(q.who, "Executive sponsor");
+  assert.equal(q.whoName, "Priya Raman");
+});
