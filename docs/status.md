@@ -24,7 +24,7 @@ Last verified 15 September 2026 by cloning the repo fresh and walking a full fir
 | **ROI** | `cli.ts roi` computes all four outputs from the nine inputs and prints the working. Three buckets tracked |
 | **Conformance** | Canon vendored in `docs/canon/`; `docs/conformance.md` records implemented / extension / divergent / missing |
 
-15 slash commands · 50 templates · 41 instruments · 111 tests.
+16 slash commands · 55 templates · 47 instruments · 173 tests.
 
 ## What is usable but manual
 
@@ -65,4 +65,5 @@ Stages 04–09 ship good templates carrying real doctrine, and an FDE can work t
 - `03-Systems/ontology/` is a **published interface** read by `jpsusarreyHGS/ontology-compiler`, which names the harness as the schema's owner. A column rename there is an API change in another repository. Read `docs/contract.md` first and bump `CONTRACT_SCHEMA`.
 - **There is no workspace root**, so `@hgs-fde/derive` resolves nowhere. Anything an agent invokes must be a `node packages/derive/src/cli.ts <subcommand>`, not a library import.
 - Node 24 is the floor — everything under `packages/` runs TypeScript with no build step.
-- Engagements are gitignored. Client material never enters the repo.
+- Engagements are gitignored. Client material never enters the repo — and the repo is **public**, so that rule is load-bearing. An isolated git worktree therefore holds no engagements; `scripts/preflight.mjs` runs before every agent dispatch and says so.
+- **The SIM-01 field-use brief (September 2026)** landed eleven changes: `sweep` and coverage under `/capture`, fills for labels tables, `verify` and `answer` in `/next`, `means`/`goes` on every coach question, the pre-flight, `/sketch`, the v2 dashboard with an early-state layout, the client-safe pass on `/render`, placement warnings in `intake`, and the per-stage artefact table in the README. `docs/status.md` counts above were refreshed then.

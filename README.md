@@ -74,6 +74,38 @@ All of it lives in `engagements/<slug>/03-Systems/ontology/`, except the flows, 
 
 Plus `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
 
+### What each stage needs before you can leave it
+
+Two kinds of artefact. **Accepted rows** come out of `/capture` as proposed rows and become real when you `accept` — ids are minted then, and everything downstream cites them. **Written prose** is a file an agent drafts and you edit; nothing mints it. The gate memos say whether the bar is met; this table says what has to exist for the memo to have something to assess.
+
+| Stage | Must exist to leave it | Path under `engagements/<slug>/` | Produced by | Kind |
+|---|---|---|---|---|
+| `00` | Mandate, entry hypotheses, evidence-handling terms **signed**, stack decision | `00-Setup/engagement-mandate.md` · `entry-hypotheses.md` · `evidence-handling-terms.md` · `stack-decision.md` | `/init-engagement` scaffolds; you fill before the first meeting | prose |
+| `01` | The five roles named, decision rights defensible; the sponsor's sentence verbatim | `01-Organisation/stakeholder-map.md` · `sponsor-brief.md` | `/capture` (fills the roles and the sponsor's answers from interviews) · `/discover` | accepted rows (fills) |
+| `02` | Observation log, operating map (nine elements), exception register with rule holders, requirements each with a `Source`, open questions | `02-Workflow/observation-log.md` · `operating-map.md` · `exception-register.md` · `requirements-register.md` · `open-questions.md` | `/capture` → `accept` · `/discover` for the map's prose · `answer` for what you were told | accepted rows |
+| `03` | Systems inventory, readiness scorecard with blockers **and owners**, vocabulary audit; the ontology contract started | `03-Systems/systems-inventory.md` · `readiness-scorecard.md` · `vocabulary-audit.md` · `ontology/{glossary,personas,competency-questions,source-systems}.md` | `/capture` → `accept` · `/ontology` promotes into `ontology/` | accepted rows; ontology is prose + rows |
+| **G1** | Memo: READY / READY WITH CAVEATS / NOT READY. A person decides | `engagement-management/stage-gate-1-readiness.md` | `/gate 1` | prose; you set the decision |
+| `04` | Every map step in one of four quadrants **with a reason**; two-axis ranking **including the declines**; cost envelope; baselines | `04-Placement/allocation-grid.md` · `prioritisation.md` · `cost-envelope.md` · `value-hypothesis.md` | `/allocate` | rows (`AL-`) + prose |
+| `05` | Architecture and diagram, access model, build plan, a working slice | `05-Build/architecture.md` · `architecture-diagram.md` · `access-model.md` · `builds/` | `/architect` · `/build` | prose + code |
+| `06` | Golden sets from `EX-`/`CQ-` ids, a run, the eval report with a failure taxonomy, regression gate proven | `06-Evals/golden-sets/` · `runs/` · `eval-report.md` | `/evaluate` | rows + prose |
+| **G2** | Memo, as G1 | `engagement-management/stage-gate-2-readiness.md` | `/gate 2` | prose |
+| `07` | Autonomy ledger with **measured** agreement per rung, adoption, runbook, fold-in-or-discard on every artefact | `07-Production/autonomy-ledger.md` · `adoption.md` · `runbook.md` · `fold-in-or-discard.md` | `/evaluate` (measures) · you write the rest | rows + prose |
+| `08` | ROI model, nine inputs each labelled measured / modelled / assumed; the executive readout | `08-ROI/roi-model.md` · `executive-readout.md` | `/roi` (code computes the four outputs) | rows + prose |
+| **G3** | Memo, as G1 | `engagement-management/stage-gate-3-readiness.md` | `/gate 3` | prose |
+| `09` | Retrospective; a library contribution **accepted by the library owner** | `09-Loop/retrospective.md` · `library-contribution.md` | `/harness-improver close` | prose + rows |
+
+Any time: `/sketch` (before G1), `/dashboard`, `/render` (after G1), `/next`, `/chronicle`.
+
+### Compressed engagements and simulations
+
+If you have one day of discovery — a training simulation, a two-hour call, a compressed assessment — expect the following, and do not fight it:
+
+- **The gates do not move.** G1 will read NOT READY, and that is the correct reading of one day's evidence. Do not answer the coach's questions from your own head to turn it green; that is the thing the gate exists to catch.
+- **Use `/sketch` for alignment.** It is the artefact for "here is what we think we heard — is it right?", built from what you accepted, badged by evidence class, banner on. It is what you show at the end of day one.
+- **Use `/next` to plan the second round.** It says who to talk to and why, with `means:` on every question, and `answer` writes down what you learn so it is not asked again.
+- **Run agent commands from the main checkout.** Engagement folders are never committed, so an isolated worktree cannot see yours; the pre-flight will stop you before the agent fails.
+- **Expect the coverage grid to be empty.** The dashboard leads with what is waiting, what is pending and the G1 checklist until you accept your first rows. That is early state, not a broken page.
+
 ## What it gives you
 
 | | |
@@ -408,6 +440,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
 | `intake` says my notes "look like an interview" | They are in `observed/` and read as something someone told you. If a person told you, move the file to `stated/`. If you genuinely watched it, leave it — the warning never moves anything, and the folder decides |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
+| I want to ask "what should I do next?" without interrupting a running `/capture` | Type `/btw <your question>` in Claude Code. It answers on the side and the running command continues; nothing in the harness changes |
 | The dashboard is "empty" on a new engagement | It is not — it is in early state. Look at the strip at the top: material waiting, rows pending, the G1 checklist. The coverage grid appears after your first accept. If the page is genuinely blank, open the browser console and report the error |
 | An accept is refused | It cites an id that does not exist. The message names it |
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
