@@ -29,18 +29,33 @@ and gets back rows to check, rather than a form to fill.
 
    A file dropped outside a class folder is **reported, never guessed**.
 
-2. **The agent extracts**, one source at a time, and proposes rows for the
-   observation log, the operating map's nine elements, the exception register,
-   and the open-question queue. It never writes a register directly — it looks
-   up the real columns, writes a spec, and lets code build the proposal:
+2. **The agent extracts**, one source at a time, into **every instrument the
+   material supports** — not only the stage-02 registers. A single interview
+   commonly names the sponsor, three of the five roles, four systems and a
+   dozen client terms, and a capture that lands only observation rows leaves
+   the FDE answering "who is the process owner?" at the gate from notes the
+   harness already read.
+
+   | Stage | Instruments the transcribe lane may propose into |
+   |---|---|
+   | `01` | `stakeholder-map` (the five roles by **fill**; others and decision rights as rows) · `sponsor-brief` (the seven answers and the success sentence, by fill) |
+   | `02` | `observation-log` · `operating-map` (all nine elements) · `exception-register` · `requirements-register` · `open-questions` |
+   | `03` | `systems-inventory` · `readiness-scorecard` · `vocabulary-audit` · `ontology/backlog` (candidates only) |
+
+   It never writes a register directly — it looks up the real columns and
+   keys, writes a spec, and lets code build the proposal:
 
    ```bash
-   node packages/derive/src/cli.ts anchors <engagement-dir> [filter]
+   node packages/derive/src/cli.ts sweep   <engagement-dir> <source>        # the floor: who, what systems, which figures
+   node packages/derive/src/cli.ts anchors <engagement-dir> [filter]        # the real columns, and the keys a fill can land on
    node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>
    ```
 
    A column the instrument does not have is **refused with the real column
-   list**, rather than dropped silently three steps later.
+   list**, rather than dropped silently three steps later. `propose` then
+   prints a **coverage block** — rows proposed per instrument beside what the
+   sweep found in the source — so `stakeholder-map 0 rows ← source named 4
+   people` is visible now, not at `/gate 1`.
 
 3. **Skim and accept**
 

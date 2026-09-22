@@ -49,6 +49,30 @@ Then, per source:
    shift note commonly yields observation rows, trigger variants, judgement
    points, a dead end, a failure mode, one or two exceptions, and several
    questions. Extracting only observation rows wastes most of it.
+
+   The targets, by stage: `01` stakeholder-map, sponsor-brief · `02`
+   observation-log, operating-map, exception-register, requirements-register,
+   open-questions · `03` systems-inventory, readiness-scorecard,
+   vocabulary-audit, ontology/backlog (candidates only).
+
+   **Then sweep, before you write the spec.** Run
+   `node packages/derive/src/cli.ts sweep <engagement-dir> <source>` and walk
+   the source once more against this checklist — the first pass reliably stops
+   at the stage-02 registers:
+
+   - Every named person with a role → one of the five roles by **fill** on
+     `stakeholder-map.five-roles`, or a `stakeholder-map.others` row; a
+     sign-off they hold → `stakeholder-map.decision-rights`. If the role is
+     one of the five and the person is unnamed, that is a `Q-`, not a blank.
+   - Every sentence in which the sponsor says what success looks like →
+     `sponsor-brief.questions` by fill, **verbatim**.
+   - Every system, portal, mailbox, spreadsheet or file named as somewhere
+     work happens → `systems-inventory.applications`.
+   - Every access constraint, review timeline, absent API, T&C prohibition →
+     `readiness-scorecard.rows`, with the blocker named.
+   - Every client-specific term, code, or two-words-for-one-thing →
+     `vocabulary-audit.terms`.
+   - Then and only then, write the spec and emit the report.
 3. **Quote, do not paraphrase.** An operator's own words go in verbatim, in
    quotation marks. Your paraphrase smooths off the conditions that make a
    rule correct.
@@ -90,6 +114,22 @@ It **refuses** a column the instrument does not have, and names the real ones �
 a stray column name would otherwise be dropped silently and the FDE would never
 learn the cell was lost. It also refuses a row where you filled the id column.
 
+The five roles and the sponsor's seven questions are **labels tables**: their
+rows are the schema, so they take a **fill**, not a row. `anchors` prints the
+keys. A fill sets cells on a row that exists and never overwrites one already
+filled:
+
+```json
+{ "instrument": "01-Organisation/stakeholder-map.md",
+  "anchor": "stakeholder-map.five-roles", "mode": "fill",
+  "columns": ["Role", "Name"],
+  "rows": [ { "Role": "Exception holder", "Name": "<name, as stated>" } ] }
+```
+
+`propose` prints a **coverage block** beside the proposal name. An instrument
+the source plausibly supported that got nothing is flagged `← … Check.` —
+re-read for it, or say in the report why nothing was there.
+
 Then stop, and tell the operator what to skim.
 
 ### Hard rules for this lane
@@ -109,11 +149,14 @@ Then stop, and tell the operator what to skim.
 ```
 CAPTURE PROPOSED — <source> (<evidence class>)
 
-Proposed
-- <anchor>: N row(s)
+Coverage — paste the block `propose` printed, unedited
+  stakeholder-map      4 rows proposed   (source named 4 people)
+  systems-inventory    6 rows proposed   (source named 5 systems)
+  sponsor-brief        0 fields          ← source contains a sponsor; nothing extracted. Check.
+  ...
 
 What the material did not support
-- <instrument>: <why nothing was extracted>
+- <instrument>: <why nothing was extracted — required for every line flagged Check.>
 
 Questions raised
 - <question> — who can answer — what it blocks

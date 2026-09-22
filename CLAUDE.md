@@ -175,8 +175,9 @@ Then `/capture` extracts rows and writes a **proposal**. Nothing reaches a regis
 
 ```bash
 node packages/derive/src/cli.ts intake  <engagement-dir>              # what is waiting
-node packages/derive/src/cli.ts anchors <engagement-dir> [filter]     # the real columns
-node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>  # agents write this
+node packages/derive/src/cli.ts sweep   <engagement-dir> <source>     # the floor under a capture: people, systems, figures
+node packages/derive/src/cli.ts anchors <engagement-dir> [filter]     # the real columns, and the keys a fill lands on
+node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>  # agents write this; prints coverage against the sweep
 node packages/derive/src/cli.ts pending <engagement-dir>              # awaiting a decision
 node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
 node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>"

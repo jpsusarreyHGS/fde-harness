@@ -17,6 +17,13 @@ node src/cli.ts <engagement-dir> --out state.json      # write it
 node src/cli.ts <engagement-dir> --audit               # chain findings, gating exit code
 ```
 
+The intake loop — `intake`, `sweep`, `anchors`, `propose`, `pending`, `accept`,
+`reject`, `next`, `contract-check` — is documented in the root `CLAUDE.md`.
+`sweep` is the floor under a capture: what a source names (people with roles,
+systems, acronyms, figures), printed so a proposal can be checked against it.
+`propose` prints that comparison as a coverage block, and flags an instrument
+the source supported that got no rows.
+
 Exit codes are for a runner and for CI:
 
 | Code | Meaning |
