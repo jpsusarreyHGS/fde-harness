@@ -17,4 +17,10 @@ With no arguments, renders the canonical client-facing set:
 
 Accepted targets: any of the names above, or **any in-engagement relative path** — e.g. `/render 02-Workflow/exception-register` — resolved under `engagements/<slug>/` and rendered to the matching stage folder in `deliverables/<slug>/`.
 
-**Nothing is a client deliverable until it has been rendered into `deliverables/`.** An internal working file is not a client artefact, however finished it looks. The render step is also the moment to check that internal-only material — raw observation rows, named individuals, unredacted exceptions — is not about to leave the building.
+Each file is rendered by the script, which runs the **client-safe pass** by default and prints a redaction report:
+
+```bash
+node scripts/render-deliverable.mjs <slug> <in-engagement path> [--internal] [--with-citations] [--keep-quotes]
+```
+
+**Nothing is a client deliverable until it has been rendered into `deliverables/`.** An internal working file is not a client artefact, however finished it looks. The pass takes out `Source` lines and columns, harness ids, unapproved names (rendered as their role) and verbatim observed quotes, and says what it removed — or that it removed nothing. **Read the report back to the operator.** What it cannot judge — raw observation rows, internal scoring commentary, anything under the evidence-handling redaction term — is still yours to raise before sending.

@@ -1,0 +1,12 @@
+# Client-safe names — {{CLIENT_NAME}}
+
+Names that may appear in a client-facing deliverable. **Everyone else is rendered as their role** — the client-safe pass in `/render` and `/sketch` replaces "Marta Oyelaran" with "the executive sponsor" unless Marta is listed here, with who approved it.
+
+Why a list, and not judgement at render time: the exception register names the holder of an undocumented rule, and surfacing that person to their management can read as surfacing a workaround they are responsible for. A name goes out because someone decided it could, and that decision has a date.
+
+<!-- table:client-safe-names.rows role=register id=Name -->
+
+| Name | Role | Approved by | Date |
+|---|---|---|---|
+
+An empty table is the correct starting state. The sponsor is not on it by default — ask.

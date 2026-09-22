@@ -135,6 +135,11 @@ if (sub === "sketch") {
   console.log(`  ${c.steps} step(s) · ${c.exceptions} exception(s) · ${c.deadEnds} dead end(s) · ${c.questions} open question(s) · ${c.constraints} constraint(s)`);
   console.log("  From accepted rows only. Pending proposals were not read; nothing was invented.");
   console.log("");
+  console.log(
+    res.redactions.length
+      ? `  Client-safe pass: ${res.redactions.length} name(s) rendered as roles — ${res.redactions.map((r) => r.what).join("; ")}. Approve a name in 00-Setup/client-safe-names.md to show it.`
+      : "  Client-safe pass: nothing removed.",
+  );
   console.log("  PROVISIONAL — pre-G1 alignment sketch. Show it to be corrected, not approved.");
   const thin = [c.steps === 0 && "no steps", c.exceptions === 0 && "no exceptions", c.questions === 0 && "no open questions"].filter(Boolean);
   if (thin.length) console.log(`  Sparse: ${thin.join(", ")}. That is the honest picture — accept more rows, do not pad the page.`);

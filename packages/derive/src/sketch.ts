@@ -23,6 +23,7 @@ import { idPattern } from "./ids.ts";
 import { INSTRUMENTS } from "./instruments.ts";
 import { deriveState } from "./state.ts";
 import { nextConversations } from "./coach.ts";
+import { clientSafe, formatRedactionReport, loadNames, type Redaction } from "./clientsafe.ts";
 
 export const SKETCH_DIR = "sketch";
 export const PROVISIONAL = "PROVISIONAL — pre-G1 alignment sketch";
@@ -44,6 +45,9 @@ export interface SketchResult {
   absolutePath: string;
   date: string;
   counts: { steps: number; exceptions: number; deadEnds: number; questions: number; constraints: number };
+  /** Names replaced by roles on the way out; the report is written beside the page. */
+  redactions: Redaction[];
+  reportPath: string;
 }
 
 const CLASSES = new Set(["observed", "system", "documented", "stated"]);
@@ -195,6 +199,25 @@ export async function renderSketch(opts: SketchOptions): Promise<SketchResult> {
       .map((r) => ({ what: noIds(plain(cell(r, "Blocker"))), owner: plain(cell(r, "Owner")), when: plain(cell(r, "Mitigation")) })),
   ].filter((c) => has(c.what));
 
+  // The client-safe pass, over every string that reaches the page. Ids are
+  // already stripped by construction; this is the names. Roles come from the
+  // stakeholder map, approvals from the allow-list — the same rule /render
+  // applies, so a name cannot leave through the sketch that could not leave
+  // through a deliverable.
+  const { roles, allow } = await loadNames(engagementDir);
+  const redactions: Redaction[] = [];
+  const safe = (s: string): string => {
+    const r = clientSafe(s, { roles, allow, keepCitations: true, keepQuotes: true });
+    for (const x of r.redactions) if (x.kind === "name" && !redactions.some((y) => y.what === x.what)) redactions.push({ ...x, line: 0 });
+    return r.text;
+  };
+  if (sentence) sentence.text = safe(sentence.text);
+  for (const s of steps) { s.step = safe(s.step); s.actor = safe(s.actor); }
+  for (const e of exs) { e.trigger = safe(e.trigger); e.handling = safe(e.handling); e.holder = safe(e.holder); }
+  for (const d of deadEnds) { d.output = safe(d.output); d.producedBy = safe(d.producedBy); d.consumer = safe(d.consumer); }
+  for (const g of groups) for (const q of g.questions) q.ask = safe(q.ask);
+  for (const c of constraints) { c.what = safe(c.what); c.owner = safe(c.owner); }
+
   // Brand tokens, inlined so the file stands alone on a client laptop.
   let tokens = "";
   if (opts.harnessRoot) {
@@ -295,11 +318,15 @@ footer{background:var(--hgs-blue-900);color:rgba(255,255,255,.55);padding:18px 0
   const file = `${date}.html`;
   const absolutePath = join(outDir, file);
   await writeFile(absolutePath, html, "utf8");
+  const reportPath = join(outDir, `${date}.redactions.md`);
+  await writeFile(reportPath, formatRedactionReport(redactions, "accepted rows (sketch)", `deliverables/${slug}/${SKETCH_DIR}/${file}`), "utf8");
 
   return {
     path: `${slug}/${SKETCH_DIR}/${file}`,
     absolutePath,
     date,
     counts: { steps: steps.length, exceptions: exs.length, deadEnds: deadEnds.length, questions: questionCount, constraints: constraints.length },
+    redactions,
+    reportPath,
   };
 }

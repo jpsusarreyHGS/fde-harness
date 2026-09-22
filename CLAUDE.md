@@ -273,6 +273,7 @@ engagements/{slug}/
 │   ├── engagement-mandate.md         # what was sold, and to whom
 │   ├── entry-hypotheses.md           # what we believe before we land, and what would disprove it
 │   ├── agreement/                    # the commercial paper. NOT evidence, never classified
+│   ├── client-safe-names.md          # names approved to appear in a deliverable; everyone else is a role
 │   ├── evidence-handling-terms.md    # the six terms; signed BEFORE capture
 │   └── stack-decision.md
 ├── 01-Organisation/

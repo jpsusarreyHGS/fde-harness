@@ -323,6 +323,23 @@ Three things to know:
 - **It is the only thing allowed in `deliverables/` before G1**, and it says so — `PROVISIONAL — pre-G1 alignment sketch` in the header and footer. That banner does not come off; the route past it is `/gate 1` and then `/render`.
 - **It shows what you heard, not what you will build.** Solution wireframes are your work after `/allocate`. The badges are the point: a page of *stated* lines is a request to go and watch.
 
+### Step 6¾ — Rendering anything for the client: the client-safe pass
+
+Whatever you render — the sketch now, the operating map and the readout later — goes through a **client-safe pass** before it becomes HTML, and prints a **redaction report** you can read in thirty seconds:
+
+```
+6 item(s) removed — 3 names · 1 citation · 1 source line · 1 source column.
+| Line | Removed                          | Why                                   |
+| 3    | Priya Shah → the process owner   | a named individual; roles are client-safe … |
+| 9    | EV-001, EX-002, REQ-003          | harness ids mean nothing to a client …|
+```
+
+Names become roles unless you have approved them in `00-Setup/client-safe-names.md` (with who approved and when — the sponsor is not on it by default). Harness ids and `Source` lines and columns go. Anything quoted verbatim from `evidence/observed/` is withheld until you confirm, because shadowing consent may not cover publication. When the pass removes nothing, the report says so. `--internal` skips it for a page that is for us; do not send one of those on.
+
+```bash
+node scripts/render-deliverable.mjs <slug> 02-Workflow/operating-map.md
+```
+
 ### Step 7 — See where you stand
 
 ```
@@ -393,6 +410,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
 | I need something to show the client and G1 is NOT READY | `/sketch`. It renders what you have accepted so far under a PROVISIONAL banner. It is a page to be corrected, not a design |
 | The sketch is missing a step I captured | It is in a proposal you have not accepted. `cli.ts pending`, then `accept` — the sketch reads registers only, never proposals |
+| A rendered page says "the process owner" where I wrote a name | The client-safe pass replaced it. To show the name, add it to `00-Setup/client-safe-names.md` with who approved it, and re-render. The `.redactions.md` beside the page lists every replacement |
 | `/allocate` (or any agent command) stops with "`engagements/<slug>` is not visible from this session" | The session is in an isolated git worktree, which holds no engagement folders because they are never committed — or the engagement was created in a different checkout. Run from the main checkout or turn off worktree isolation; `git worktree list` shows which you are in |
 | `/next` keeps asking something I already answered | Answers given in chat are not evidence until written down. Run `cli.ts answer …` with the answer and who said it, then `/capture` and accept. If the answer is already in an instrument — the sponsor brief, the stakeholder map — it should appear under "Verify first", not as a question; if it does not, report it |
 

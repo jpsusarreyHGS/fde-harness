@@ -11,6 +11,8 @@ export { coach, deskWork, nextConversations, verifyFirst, type CoachQuestion } f
 export { recordAnswer } from "./answer.ts";
 export { renderSketch, PROVISIONAL, SKETCH_DIR } from "./sketch.ts";
 export { renderDashboardHtml, readTemplate, isEarlyState, TEMPLATE_PATH } from "./dashboard.ts";
+export { clientSafe, formatRedactionReport, loadNames, loadObserved } from "./clientsafe.ts";
+export type { Redaction, ClientSafeOptions, ClientSafeResult } from "./clientsafe.ts";
 export type { SketchOptions, SketchResult } from "./sketch.ts";
 export type { AnswerClass, RecordAnswerOptions, RecordAnswerResult } from "./answer.ts";
 export { computeRoi, ROI_INPUTS, type RoiModel } from "./roi.ts";

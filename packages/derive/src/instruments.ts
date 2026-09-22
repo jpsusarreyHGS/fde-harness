@@ -85,6 +85,8 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "entry-hypotheses",       label: "Entry hypotheses",       stage: "00", path: "00-Setup/entry-hypotheses.md",        primaryTable: "entry-hypotheses.rows", coverage: true },
   { id: "evidence-handling-terms",label: "Evidence-handling terms",stage: "00", path: "00-Setup/evidence-handling-terms.md",   coverage: true, coverageMode: "fields" },
   { id: "stack-decision",         label: "Stack decision",         stage: "00", path: "00-Setup/stack-decision.md",          primaryTable: "stack-decision.client-platforms", coverage: true },
+  // Not coverage: an empty allow-list is the correct starting state.
+  { id: "client-safe-names",      label: "Client-safe names",      stage: "00", path: "00-Setup/client-safe-names.md",       primaryTable: "client-safe-names.rows" },
 
   // 01 — Map the organisation
   { id: "stakeholder-map",        label: "Stakeholder map",        stage: "01", path: "01-Organisation/stakeholder-map.md",   primaryTable: "stakeholder-map.decision-rights", coverage: true },

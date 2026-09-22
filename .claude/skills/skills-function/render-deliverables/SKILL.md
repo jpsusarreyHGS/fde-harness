@@ -12,18 +12,22 @@ Takes a markdown artefact from `engagements/<slug>/` and writes a branded, self-
 
 **Nothing is a client deliverable until it has been rendered.** An internal working file is not a client artefact, however finished it looks — and the render step is the checkpoint where that distinction gets enforced.
 
-## The redaction checkpoint
+## The client-safe pass
 
-**Before rendering, check what is about to leave the building.** This is the single most important step in this skill, and the easiest to skip.
+**Code checks what is about to leave the building, on every render, by default.** This used to be a reminder to scan the source; a reminder is not a control, and a trainee's page went out with people's names and the call constraints in it. Now the render script runs the pass and prints a **redaction report** — what was removed, from where, why — and writes it beside the page as `<name>.redactions.md`. An FDE reads it in thirty seconds before sending.
 
-Scan the source for:
+| Removed | Rule | To keep it |
+|---|---|---|
+| `Source:` lines and `Source` table columns | provenance is internal | `--internal` |
+| Inline harness ids — `EV-`, `EX-`, `Q-`, `REQ-`, `AL-`, `CQ-`, `HY-`, `WR-` | they point at internal registers | `--with-citations` |
+| Named individuals → their role from `01-Organisation/stakeholder-map.md` | roles are client-safe; names need approval | add the name to `00-Setup/client-safe-names.md`, with who approved it |
+| Text quoted verbatim from `evidence/observed/` → `[quotation withheld — confirm before sending]` | shadowing consent may not cover publication | `--keep-quotes`, once the operator has confirmed |
 
-- **Named individuals.** Roles are fine; names usually are not. The exception register in particular tends to name the holder of an undocumented rule, and surfacing that person to their management can look like surfacing a workaround they are responsible for.
-- **Raw observation rows.** `observation-log.md` is internal by default. A client readout gets the synthesis, not the timestamps.
-- **Internal scoring commentary.** Qualification reasoning that says a stakeholder is unengaged is true, useful, and not a deliverable.
-- **Anything under the redaction term** in `00-Setup/evidence-handling-terms.md`.
+When the pass removes nothing the report says **"client-safe pass: nothing removed"** — silence is never ambiguous. `--internal` skips the pass and the report says so in bold; do not send an `--internal` render to a client.
 
-If you find something, **stop and ask** — do not silently redact, because the operator may want it there, and do not silently render, because they may not.
+Still yours to judge, because code cannot: **raw observation rows** (`observation-log.md` is internal by default — a client gets the synthesis), **internal scoring commentary**, and **anything under the redaction term** in `00-Setup/evidence-handling-terms.md`. If you find one of those, stop and ask.
+
+The same pass runs inside `/sketch`, so a name that cannot leave through a deliverable cannot leave through the sketch either.
 
 ## Canonical set
 
@@ -47,9 +51,13 @@ With an argument, accept any of those names or **any in-engagement relative path
 
 ## Mechanics
 
-1. Read `template.html` in this directory.
-2. Substitute: `{{TITLE}}`, `{{CLIENT}}`, `{{PHASE}}`, `{{DATE}}`, `{{CONTENT}}` (the raw markdown, JSON-escaped into a script block).
-3. Write to `deliverables/<slug>/<phase>/<basename>.html`.
+One command per file. Do not substitute by hand — the client-safe pass lives in the script, and a hand render skips it:
+
+```bash
+node scripts/render-deliverable.mjs <slug> <in-engagement path> [--internal] [--with-citations] [--keep-quotes]
+```
+
+It reads `template.html` in this directory, substitutes `{{TITLE}}`, `{{CLIENT}}`, `{{PHASE}}`, `{{DATE}}` and `{{CONTENT}}` (the markdown after the pass, in a script block), and writes `deliverables/<slug>/<stage folder>/<basename>.html` plus `<basename>.redactions.md`. Read the report back to the operator, every time.
 
 Rendering happens in the browser: `marked.js` for markdown, `mermaid.js` for fenced `mermaid` blocks. Both from a pinned CDN version, with the page degrading to readable pre-formatted text if the CDN is unreachable — a deliverable that renders blank on a client laptop is worse than one that renders plainly.
 

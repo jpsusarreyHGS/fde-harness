@@ -56,9 +56,11 @@ alone on a client laptop. The banner is Orange — an alert colour, on purpose.
    footer and is not removable by argument.** If the operator wants it gone,
    the answer is `/gate 1` and then `/render`.
 4. **Client-safe by construction.** Body text carries no harness ids
-   (`EV-`, `EX-`, `Q-`, `REQ-`), no `Source:` lines, and roles rather than
-   the names in the stakeholder map. The client-safe pass from
-   `render-deliverables` applies to it as to every deliverable.
+   (`EV-`, `EX-`, `Q-`, `REQ-`), no `Source:` lines, and the same
+   name→role pass `render-deliverables` runs: a person in the stakeholder
+   map is rendered as their role unless `00-Setup/client-safe-names.md`
+   approves the name. The report is written beside the page as
+   `<date>.redactions.md`, and the command prints who became a role.
 
 ## What to say when reading it back
 
