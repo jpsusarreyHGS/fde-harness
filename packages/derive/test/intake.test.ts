@@ -417,3 +417,35 @@ test("state sees material waiting that no register can", async () => {
   // The point of the block: it is the one number derived from disk, not rows.
   assert.ok(st.intake.waiting > 0);
 });
+
+// ------------------------------------------------ item 9: placement warnings
+
+test("PLACEMENT: a transcript in observed/ warns; the same file in stated/ does not", async () => {
+  const { placementWarnings } = await import("../src/intake.ts");
+  const root = join(dir, "02-Workflow", "evidence");
+  const vtt = "WEBVTT\n\n1\n00:00:01.000 --> 00:00:02.000\n<v Marta>we never log the ones that matter\n";
+  await writeFile(join(root, "observed", "2026-09-09-ops-call.vtt"), vtt, "utf8");
+  await writeFile(join(root, "stated", "2026-09-09-ops-call.vtt"), vtt, "utf8");
+  await writeFile(join(root, "observed", "notes.md"), "# Interview with the deductions manager\n\nShe said the export is a sample.\n", "utf8");
+  await writeFile(join(root, "stated", "volumes.csv"), "month,bookings\n2026-08,9330\n", "utf8");
+  await writeFile(join(root, "system", "booking-exceptions-policy.md"), "# Policy\n", "utf8");
+
+  const { items } = await scanIntake(dir);
+  const warnings = await placementWarnings(dir, items);
+  const byPath = Object.fromEntries(warnings.map((w) => [w.path, w.message]));
+
+  assert.match(byPath["02-Workflow/evidence/observed/2026-09-09-ops-call.vtt"]!, /is a transcript — observed\/ is for what an FDE watched happen/);
+  assert.match(byPath["02-Workflow/evidence/observed/notes.md"]!, /looks like an interview \("Interview" in its first lines\).*belongs in stated\/.*treats it as primary evidence/);
+  assert.match(byPath["02-Workflow/evidence/stated/volumes.csv"]!, /is an export or a log — stated\/ is for what a person told you.*belongs in system\//);
+  assert.match(byPath["02-Workflow/evidence/system/booking-exceptions-policy.md"]!, /named like a policy or SOP — documented\/ is for written rules/);
+  assert.equal(byPath["02-Workflow/evidence/stated/2026-09-09-ops-call.vtt"], undefined, "a transcript in stated/ is where it belongs");
+
+  // A warning never reclassifies.
+  assert.equal(items.find((i) => i.file === "notes.md" && i.evidenceClass === "observed")!.evidenceClass, "observed");
+});
+
+test("PLACEMENT: the evidence README is not an unclassified file", async () => {
+  await writeFile(join(dir, "02-Workflow", "evidence", "README.md"), "# Where does this file go?\n", "utf8");
+  const { unclassified } = await scanIntake(dir);
+  assert.ok(!unclassified.some((u) => /README\.md$/i.test(u)));
+});

@@ -1,0 +1,21 @@
+# Where does this file go?
+
+**The folder decides the evidence class. Nothing else does.** Four questions, in order — the first yes wins:
+
+<!-- table:evidence-readme.rule role=labels key=Ask yourself -->
+
+| Ask yourself | Folder | It counts as |
+|---|---|---|
+| **Did you watch it happen?** Shift notes, a shadowing log, what you saw on their screen | `observed/` | Primary — can source a requirement on its own |
+| **Did a machine produce it?** An export, a log, a report, a config, a screenshot of a record | `system/` | Primary for volume and frequency; silent on intent |
+| **Is it a written rule or spec?** An SOP, a policy, a procedure, a deck that says how it should work | `documented/` | What *should* happen — aspirational until observed |
+| **Did someone tell you?** An interview, a call, a transcript, an email, notes from a conversation | `stated/` | What someone *believes* happens — corroborating only |
+
+Two mistakes are common on day one, and both are expensive later:
+
+- **Interview notes in `observed/`.** You typed them, so they feel like yours. They record what someone said, and belong in `stated/`. Left in `observed/`, every requirement built on them is treated as watched — and the gap between what people say and what they do is usually where the whole opportunity is.
+- **Leaving `stated/` empty because you "don't know what to do there yet."** You do: it is where the conversation notes go. It is usually the first folder to fill.
+
+A file dropped here, in `evidence/` itself rather than a class folder, is **reported and never guessed**. `intake` will name it. It will also warn when a file's format or first lines disagree with its folder — a transcript in `observed/`, a spreadsheet in `stated/` — but it never moves anything. The folder still decides; you decide the folder.
+
+Audio, video and images need a text version first: write the transcript or description and drop it in the same folder, where it keeps the standing of the original.

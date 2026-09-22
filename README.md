@@ -162,9 +162,11 @@ Commercial paper goes in `00-Setup/agreement/`, which sits outside the evidence 
 /init-engagement
 ```
 
-You will be asked ten things in one go: client name, slug, sponsor, one-line scope, non-goals, target systems, ontology repo, data residency, and whether there is a works council or union.
+You will be asked twelve things in one go, each with a one-line explanation and an example: client name, slug, sponsor, one-line scope and where it came from, non-goals, target systems, ontology repo, target platform, data residency, and whether there is a works council or union.
 
 **Say `TBD` when you do not know.** Do not guess a sponsor or a residency posture — one names who settles a dispute, the other decides whether you can legally start capturing. Every `TBD` becomes an open question with an owner and a note about what it blocks, so nothing quietly goes missing.
+
+**Non-goals** trips people up: it means *what the client has explicitly said this engagement will not do* — replace a system, change a policy, touch a portal. Give at least one. If you genuinely have none, write `none stated — confirm with sponsor` and it becomes a question for the sponsor rather than a blank.
 
 You get `engagements/<slug>/` with ten stage folders, 58 seeded instruments, a mirrored `deliverables/<slug>/`, and a `state.json` that honestly reports almost everything as empty. **That is correct.** An engagement that looks half-full on day one was seeded with fake numbers.
 
@@ -203,7 +205,9 @@ engagements/<slug>/02-Workflow/evidence/
 
 **The folder decides the class, never the content.** A confident-sounding transcript in `stated/` stays Stated evidence, and anything sourced only from it gets labelled `UNVERIFIED`. That discipline is the difference between a requirement that survives UAT and one that does not — so it is structural, not something you have to remember at the end of a long day.
 
-A file dropped outside a class folder is **reported, never guessed at**.
+Four questions, in order — the first yes wins. **Did you watch it happen** → `observed/`. **Did a machine produce it** → `system/`. **Is it a written rule or spec** → `documented/`. **Did someone tell you** → `stated/`. The two day-one mistakes: interview notes in `observed/` (you typed them, but they record what someone *said* — that is `stated/`), and leaving `stated/` empty because you were not sure what went there. There is a `README.md` inside `evidence/` with the same rule.
+
+A file dropped outside a class folder is **reported, never guessed at**. And when a file's format or first lines disagree with its folder — a `.vtt` transcript in `observed/`, a `.csv` in `stated/`, a file called `policy` anywhere but `documented/` — `intake` prints a one-line warning saying what it looks like, where it belongs and what leaving it there costs. It never moves anything. The folder still decides; you decide the folder.
 
 PDFs, Word, PowerPoint and Excel need converting first:
 
@@ -402,6 +406,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 |---|---|
 | A command fails with a TypeScript syntax error | You are on Node 22. This needs 24 — check with `node -v` |
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
+| `intake` says my notes "look like an interview" | They are in `observed/` and read as something someone told you. If a person told you, move the file to `stated/`. If you genuinely watched it, leave it — the warning never moves anything, and the folder decides |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
 | The dashboard is "empty" on a new engagement | It is not — it is in early state. Look at the strip at the top: material waiting, rows pending, the G1 checklist. The coverage grid appears after your first accept. If the page is genuinely blank, open the browser console and report the error |
 | An accept is refused | It cites an id that does not exist. The message names it |

@@ -21,26 +21,31 @@ So there is now one scaffold, and it is the one with tests.
 
 ## Step 1 — Gather metadata in one batch
 
-Use `AskUserQuestion` once, not one question at a time.
+Use `AskUserQuestion` once, not one question at a time. **Put the `means` line
+and the example in the prompt for every field** — a trainee who did not know
+what "non-goals" meant typed `TBD`, and a field nobody understands is a field
+nobody answers.
 
-| Field | Key | Notes |
-|---|---|---|
-| Client name | `CLIENT_NAME` | Display name |
-| Slug | *(the folder name)* | kebab-case. Not a JSON field — it comes from the path |
-| Executive sponsor | `SPONSOR` | Role and name if known |
-| Scope, one line | `SCOPE` | What the pilot is |
-| **Where that scope came from** | `SCOPE_SOURCE` | `mandate` / `document` / `recollection` / `tbd`. Every scope decision is later judged against this line — `recollection` is honest and still raises a question |
-| Non-goals | `NON_GOALS` | At least one. A scope with no non-goals has not been bounded |
-| Starting stage | `STAGE` | Usually `00-Setup` |
-| Target systems | `SYSTEMS` | Comma-separated, or `TBD` |
-| Ontology repo | `ONTOLOGY_REPO` | URL, or `tbd` |
-| Data residency | `RESIDENCY` | `client-tenant` / `hgs-tenant` / `tbd` |
-| Labour representation | `LABOUR` | `works-council` / `union` / `none` / `unknown` — drives the monitoring constraint |
+| Field | Key | Means | Example |
+|---|---|---|---|
+| Client name | `CLIENT_NAME` | The display name on every artefact | `Caldera Logistics` |
+| Slug | *(the folder name)* | kebab-case folder under `engagements/`. Not a JSON field — it comes from the path | `caldera-logistics` |
+| Executive sponsor | `SPONSOR` | The person whose definition of success will be judged, and who settles a dispute. Role, and name if known | `Marta Oyelaran, VP Operations` |
+| Scope, one line | `SCOPE` | What the pilot is — the workflow, in the client's words, not the technology | `Exception handling on inbound freight bookings` |
+| **Where that scope came from** | `SCOPE_SOURCE` | `mandate` / `document` / `recollection` / `tbd`. Every later scope decision is judged against this line; `recollection` is honest and still raises a question | `document` |
+| Non-goals | `NON_GOALS` | **What the client has explicitly said this engagement will not do** — replace a system, change a policy, touch a portal. At least one; a scope with no non-goals has not been bounded. If you truly have none, write `none stated — confirm with sponsor` and it becomes a `Q-` | `No rate negotiation. No changes to the customer portal.` |
+| Starting stage | `STAGE` | Where the engagement is when you arrive. Almost always `00-Setup` | `00-Setup` |
+| Target systems | `SYSTEMS` | The applications the workflow runs through, as the client names them. Comma-separated, or `TBD` | `TMS, Outlook, WhatsApp` |
+| Ontology repo | `ONTOLOGY_REPO` | Where the client's approved vocabulary and data model will be published once stage 03 produces it. URL, or `tbd` — a setup question, not a G1 one | `tbd` |
+| Target platform | `TARGET_PLATFORM` | The platform the built solution will run on — the compile target: `jena` / `databricks` / `fabric` / `undecided`. Choose from the competency questions once they exist; `undecided` is honest until then | `undecided` |
+| Data residency | `RESIDENCY` | Where captured evidence is allowed to live — `client-tenant` / `hgs-tenant` / `tbd`. **Capture cannot start until this is settled** | `client-tenant` |
+| Labour representation | `LABOUR` | `works-council` / `union` / `none` / `unknown`. Anything but `none` means observation needs **consultation, not notice** | `union` |
 
 **Do not guess a sponsor or a residency posture.** Both have consequences: one
 names who can settle a dispute, the other decides whether capture can legally
-begin. Unknown is `TBD`, and the scaffolder turns each `TBD` into a `Q-` with an
-owner — you do not have to write those yourself.
+begin. Unknown is `TBD`, and the scaffolder turns each `TBD` — and a
+`none stated` non-goal — into a `Q-` with an owner. You do not have to write
+those yourself.
 
 **You will usually arrive with a brief.** Record what was agreed in
 `00-Setup/engagement-mandate.md` and what you believe in

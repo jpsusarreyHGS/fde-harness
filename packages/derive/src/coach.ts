@@ -183,6 +183,10 @@ const GOES: Record<string, string> = {
  * re-run the scaffold or edit the setup file directly.
  */
 const INIT_FIELDS: Record<string, { ask?: string; means: string; goes: string }> = {
+  NON_GOALS: {
+    means: "What the client has explicitly said this engagement will not do — replace a system, change a policy, touch a portal. A scope with no non-goals has not been bounded, and every later scope change is judged against them.",
+    goes: "00-Setup/pilot-charter.md — Non-goals; re-run /init-engagement or edit the file directly",
+  },
   SYSTEMS: {
     means: "Which applications the workflow actually runs through. Names are enough for now; owners and access come with the systems inventory.",
     goes: "03-Systems/systems-inventory.md — System column; re-run /init-engagement or edit the file directly",

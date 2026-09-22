@@ -154,3 +154,31 @@ test("the skill no longer carries its own copy of the directory list", async () 
   );
   assert.match(skill, /cli\.ts scaffold/, "SKILL.md must delegate to the scaffold subcommand");
 });
+
+// ------------------------------------------------ item 9: non-goals
+
+test("NON_GOALS of 'none stated — confirm with sponsor' becomes a Q- for the sponsor", async () => {
+  const { mkdtemp, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join, resolve } = await import("node:path");
+  const { initEngagement, validateVars } = await import("../src/init.ts");
+  const HARNESS = resolve(import.meta.dirname, "..", "..", "..");
+  const tmp = await mkdtemp(join(tmpdir(), "fde-nongoals-"));
+  try {
+    const vars = validateVars({
+      CLIENT_NAME: "Solara Foods", SPONSOR: "Dana Whitfield", SCOPE: "Deductions",
+      NON_GOALS: "none stated — confirm with sponsor", RESIDENCY: "client-tenant", LABOUR: "none",
+    }, "solara-foods");
+    const dir = join(tmp, "engagements", "solara-foods");
+    const res = await initEngagement({ engagementDir: dir, harnessRoot: HARNESS, vars, deliverablesRoot: join(tmp, "deliverables") });
+    assert.ok(res.questionsRaised.length >= 1);
+    const oq = await readFile(join(dir, "02-Workflow", "open-questions.md"), "utf8");
+    assert.match(oq, /What has the client explicitly said this engagement will not do/);
+    assert.match(oq, /NON_GOALS was left unresolved at init\./);
+    assert.match(oq, /Executive sponsor/);
+    // And the scaffolded evidence folder carries its README.
+    await readFile(join(dir, "02-Workflow", "evidence", "README.md"), "utf8");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});

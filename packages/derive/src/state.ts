@@ -11,7 +11,7 @@ import {
   answeredRows, dataRows, findTable, parseAnchoredTables, type ParsedTable,
 } from "./anchors.ts";
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
-import { scanIntake } from "./intake.ts";
+import { scanIntake, placementWarnings } from "./intake.ts";
 import { coach, type CoachQuestion } from "./coach.ts";
 import { CONTRACT_SCHEMA } from "./instruments.ts";
 import { checkContract, readContract } from "./contract.ts";
@@ -88,6 +88,8 @@ export interface State {
     needsService: number;
     /** Proposals with neither an accept nor a reject marker. */
     pendingProposals: string[];
+    /** Files whose format or first lines disagree with their folder. A warning; the folder still decides. */
+    placementWarnings: { path: string; message: string }[];
   };
   sessions: {
     count: number; latest: string | null;
@@ -527,6 +529,7 @@ export async function deriveState(opts: {
     intakeByClass[i.evidenceClass] = (intakeByClass[i.evidenceClass] ?? 0) + 1;
   }
   const waitingProposals = await pendingProposals(engagementDir);
+  const misplaced = await placementWarnings(engagementDir, intakeItems);
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -551,6 +554,7 @@ export async function deriveState(opts: {
       unclassified: intakeUnclassified,
       needsService: intakeItems.filter((i) => i.handling === "needs-service").length,
       pendingProposals: waitingProposals,
+      placementWarnings: misplaced,
     },
     harnessImprover: {
       lastRun: null, openProposals: 0,

@@ -114,6 +114,8 @@ export async function scanIntake(engagementDir: string): Promise<{
   for (const e of top) {
     if (e.name.startsWith(".")) continue;
     if (e.isFile()) {
+      // The folder's own README explains the four classes; it is not material.
+      if (/^readme\.md$/i.test(e.name)) continue;
       unclassified.push(`${EVIDENCE_ROOT}/${e.name}`);
       continue;
     }
@@ -153,6 +155,81 @@ export async function scanIntake(engagementDir: string): Promise<{
 
   items.sort((a, b) => a.path.localeCompare(b.path));
   return { items, unclassified };
+}
+
+export interface PlacementWarning {
+  /** Path relative to the engagement root. */
+  path: string;
+  /** What it looks like, where it belongs, and what leaving it costs. */
+  message: string;
+}
+
+/**
+ * Files that look misfiled — a warning, never a reclassification.
+ *
+ * In the first field simulation a trainee put his interview notes in
+ * `observed/`, and the folder rule would have treated every requirement from
+ * them as primary evidence. The rule stays: the folder decides. But the
+ * obvious mismatches are cheap to spot, so intake says so at drop time, in
+ * words that explain the cost, and then does exactly nothing about it.
+ *
+ * Three heuristics, deliberately narrow so the warning stays credible:
+ * a transcript or email format, or interview language in the first forty
+ * lines, sitting in `observed/`; a spreadsheet or export sitting in
+ * `stated/`; a policy, SOP or procedure by name outside `documented/`.
+ */
+export async function placementWarnings(
+  engagementDir: string,
+  items: readonly IntakeItem[],
+): Promise<PlacementWarning[]> {
+  const out: PlacementWarning[] = [];
+  const root = join(engagementDir, ...EVIDENCE_ROOT.split("/"));
+  for (const i of items) {
+    const ext = extname(i.file).toLowerCase();
+    const name = i.file.toLowerCase();
+
+    if (i.evidenceClass === "observed") {
+      let why: string | null = null;
+      if ([".vtt", ".srt", ".eml"].includes(ext)) {
+        why = `is a ${ext === ".eml" ? "n email" : " transcript"}`.replace(/^is a n/, "is an").replace(/^is a  /, "is a ");
+      } else if (i.handling === "text") {
+        try {
+          const head = (await readFile(join(root, i.evidenceClass, i.file), "utf8"))
+            .split(/\r?\n/).slice(0, 40).join("\n");
+          const m = /\b(interview|transcript|said|call with|on the call|meeting notes)\b/i.exec(head);
+          if (m) why = `looks like an interview ("${m[1]}" in its first lines)`;
+        } catch { /* unreadable — nothing to say */ }
+      }
+      if (why) {
+        out.push({
+          path: i.path,
+          message:
+            `${i.path} ${why} — observed/ is for what an FDE watched happen. ` +
+            "If a person told you this, it belongs in stated/. Leaving it here treats it as primary evidence.",
+        });
+      }
+    }
+
+    if (i.evidenceClass === "stated" && [".csv", ".tsv", ".xlsx", ".xlsm", ".xls", ".json", ".jsonl", ".log"].includes(ext)) {
+      out.push({
+        path: i.path,
+        message:
+          `${i.path} is an export or a log — stated/ is for what a person told you. ` +
+          "A machine produced this; it belongs in system/. Leaving it here understates it: system evidence is primary for volume and frequency.",
+      });
+    }
+
+    if (i.evidenceClass !== "documented" && /\b(policy|policies|sop|sops|procedure|procedures|standard|guideline|guidelines)\b/i.test(name.replace(/[-_.]/g, " "))) {
+      out.push({
+        path: i.path,
+        message:
+          `${i.path} is named like a policy or SOP — documented/ is for written rules and specs. ` +
+          `In ${i.evidenceClass}/ it will be read as ${i.evidenceClass === "observed" ? "something you watched" : i.evidenceClass === "system" ? "a system record" : "something someone said"}, ` +
+          "and the documented-versus-observed gap — usually where the opportunity is — becomes invisible.",
+      });
+    }
+  }
+  return out;
 }
 
 /** Readable text for an item, or null when it needs a service first. */

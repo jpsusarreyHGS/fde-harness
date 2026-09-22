@@ -153,6 +153,18 @@ async function raiseTbdQuestions(
   const gaps: { field: string; question: string; who: string; blocks: string }[] = [];
   const tbd = (s: string | undefined) => !s || !s.trim() || /^tbd$/i.test(s.trim());
 
+  // "none stated — confirm with sponsor" is the honest answer when the client
+  // has not bounded the scope. It is also a gap: a scope with no non-goals has
+  // not been bounded, and every later scope change is adjudicated against
+  // them. So it becomes a question with the sponsor's name on it.
+  if (/none stated/i.test(vars.NON_GOALS ?? "") || tbd(vars.NON_GOALS)) {
+    gaps.push({
+      field: "NON_GOALS",
+      question: "What has the client explicitly said this engagement will not do — replace a system, change a policy, touch a portal?",
+      who: "Executive sponsor",
+      blocks: "the pilot charter's non-goals — scope changes are adjudicated against them",
+    });
+  }
   if (tbd(vars.SYSTEMS)) {
     gaps.push({
       field: "SYSTEMS",

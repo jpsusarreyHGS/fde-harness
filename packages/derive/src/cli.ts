@@ -35,7 +35,7 @@ import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
 import { ID_ALTERNATION, mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
-import { scanIntake, CLASS_MEANING, EVIDENCE_CLASSES, EVIDENCE_ROOT, handlingFor } from "./intake.ts";
+import { scanIntake, placementWarnings, CLASS_MEANING, EVIDENCE_CLASSES, EVIDENCE_ROOT, handlingFor } from "./intake.ts";
 import {
   acceptProposal,
   parseProposalBlocks,
@@ -352,6 +352,14 @@ if (sub === "intake") {
       : i.handling === "convert" && !i.converted ? "  needs conversion"
       : "";
     console.log(`${i.evidenceClass.padEnd(11)} ${i.file}${flag}`);
+  }
+  // Warn, never reclassify. The folder decided; this says when the folder
+  // and the file disagree, in words that explain what the disagreement costs.
+  const warnings = await placementWarnings(engagementDir, items);
+  if (warnings.length) {
+    console.log("");
+    console.log("Placement — the folder still decides the class; check these:");
+    for (const w of warnings) console.log(`  ${w.message}`);
   }
   if (unclassified.length) {
     console.log("");
