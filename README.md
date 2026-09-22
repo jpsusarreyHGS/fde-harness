@@ -268,9 +268,14 @@ This is the half that talks back. It reads the evidence chain and the open gate'
 Ana Fuentes — Exception holder
   · EX-002: who actually decides this one? Not the team — the person you
     go to when it is not obvious.
-      why: blocks the #1 workflow (claims triage); exception without rule holder
-      write it to: 02-Workflow/exception-register.md
+      why:    blocks the #1 workflow (claims triage); exception without rule holder
+      means:  The rule holder is the person the eval golden set is built from.
+              A good answer is one name and the rule in their own words —
+              "the team" means nobody.
+      goes:   02-Workflow/exception-register.md — Rule holder (role) column
 ```
+
+Every question comes with the same four lines. **why** is the ranking. **means** is what a good answer looks like and why you should care — read it before you decide a question is noise; the sharpest ones often look like pedantry without it. **goes** is the file and column the answer lands in. Questions that came from a `TBD` at `/init-engagement` say so, and their fix is the setup file, not a client conversation.
 
 It is ranked by **what each question blocks** — joined to your prioritisation table — and by **how fast the answer perishes**. An operator's undocumented rule is elicitable while you are sitting beside them and effectively gone three weeks later; a broken citation costs minutes at a desk in November. Every line says why it ranks where it does. If the reason looks wrong, fix the prioritisation table rather than the order.
 

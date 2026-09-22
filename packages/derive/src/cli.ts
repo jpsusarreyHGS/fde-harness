@@ -556,23 +556,25 @@ if (sub === "next") {
     console.log("Nothing to ask. Every gate criterion is met and the chain is intact.");
     process.exit(0);
   }
+  // Four lines under every entry, always in this order. `why` is the
+  // ranking; `means` is the question; `goes` is the cell. A question that
+  // arrives without its meaning gets dismissed as noise — the best one in
+  // the SIM-01 queue was.
+  const entry = (q: (typeof state.coach)[number]) => {
+    console.log(`  · ${q.ask}`);
+    console.log(`      why:    ${q.why}`);
+    if (q.blocks) console.log(`      blocks: ${q.blocks}`);
+    console.log(`      means:  ${q.means}`);
+    console.log(`      goes:   ${q.goes}`);
+  };
   if (verify.length) {
     console.log("\nVerify first — already on file; the bar is being able to say it");
-    for (const q of verify) {
-      console.log(`  · ${q.ask}`);
-      console.log(`      why: ${q.why}`);
-      console.log(`      on file at: ${q.location}`);
-    }
+    for (const q of verify) entry(q);
   }
   for (const g of groups) {
     console.log(`
 ${g.whoName ? `${g.whoName} — ${g.who}` : `${g.who} (no name in the stakeholder map)`}`);
-    for (const q of g.questions.slice(0, 4)) {
-      console.log(`  · ${q.ask}`);
-      console.log(`      why: ${q.why}`);
-      if (q.blocks) console.log(`      blocks: ${q.blocks}`);
-      console.log(`      write it to: ${q.location}`);
-    }
+    for (const q of g.questions.slice(0, 4)) entry(q);
     if (g.questions.length > 4) {
       console.log(`  … and ${g.questions.length - 4} more for the same conversation`);
     }
@@ -580,10 +582,7 @@ ${g.whoName ? `${g.whoName} — ${g.who}` : `${g.who} (no name in the stakeholde
   const desk = deskWork(state.coach);
   if (desk.length) {
     console.log("\nYours to fix — no conversation will resolve these");
-    for (const q of desk.slice(0, 5)) {
-      console.log(`  · ${q.ask}`);
-      console.log(`      ${q.location}`);
-    }
+    for (const q of desk.slice(0, 5)) entry(q);
     if (desk.length > 5) console.log(`  … and ${desk.length - 5} more`);
   }
 
