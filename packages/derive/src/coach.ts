@@ -364,7 +364,8 @@ function onFile(
     const accomplish = rowsOf(tables, "sponsor-brief.questions")
       .find((r) => /trying to accomplish/i.test(cell(r, "Question")));
     const goal = accomplish ? cell(accomplish, "Answer") : "";
-    const quote = has(sentence) ? sentence : has(goal) ? goal : "";
+    // The cell may already carry the sponsor's quotation marks; do not double them.
+    const quote = (has(sentence) ? sentence : has(goal) ? goal : "").replace(/^["“]\s*|\s*["”]$/g, "").trim();
     if (!quote) return null;
     return {
       ask:
@@ -448,6 +449,46 @@ function gateQuestions(
         means: "A gate criterion with no owner is one nobody is closing. A good answer is one name per criterion — a role is enough if the map names the person.",
         goes: `${gateMemo(g.id)} — Owner column`,
         score: 110,
+        work: "ask",
+        source: "gate",
+        id: null,
+      });
+    }
+
+    // The sharpest test in G1 is a *behaviour*, not a criterion: can the team
+    // state the sponsor's real problem in one sentence that is not the
+    // request. The coach used to read only criteria, so on an engagement
+    // whose brief already held the sentence it neither verified nor asked —
+    // and the memo's criteria table, written from the template, never
+    // mentions the sponsor at all.
+    for (const b of g.behaviours.filter((x) => !x.observed && /sponsor.*(real problem|one sentence)/i.test(x.name))) {
+      const held = onFile(b.name, tables);
+      const sponsorName = names.get("executive sponsor") ?? null;
+      out.push(held ? {
+        key: `${g.id}:behaviour:${b.name}`,
+        ask: held.ask,
+        who: "FDE",
+        whoName: null,
+        blocks: `${g.id} — ${g.between}`,
+        location: held.location,
+        why: `${g.id} behaviour; the sponsor's words are on file, the bar is saying the problem back in one sentence`,
+        means: "You captured this already. A good answer is you saying it back without reading it — if what comes out is the request reworded, discovery has not happened yet.",
+        goes: `${gateMemo(g.id)} — Behaviours table, Where column`,
+        score: 100,
+        work: "verify",
+        source: "gate",
+        id: null,
+      } : {
+        key: `${g.id}:behaviour:${b.name}`,
+        ask: `What is ${sponsorName ? sponsorName.split(",")[0]!.trim() : "the sponsor"} actually trying to accomplish — in their own words, not the request? Get the sentence verbatim.`,
+        who: "Executive sponsor",
+        whoName: sponsorName,
+        blocks: `${g.id} — ${g.between}`,
+        location: "01-Organisation/sponsor-brief.md",
+        why: `${g.id} behaviour: the sponsor's real problem in one sentence that is not what they asked for — nothing is on file yet`,
+        means: "The sharpest test in the gate. Customers describe solutions, not problems; the request you were handed is a solution somebody chose. A good answer is what happens if nothing changes, and what they are measured on.",
+        goes: "01-Organisation/sponsor-brief.md — the seven questions, Answer column (a fill, via /capture or `answer`)",
+        score: 100,
         work: "ask",
         source: "gate",
         id: null,

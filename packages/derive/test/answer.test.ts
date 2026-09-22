@@ -204,3 +204,48 @@ test("systems on file turns the readiness criterion into a verify that still ask
   // Evidence terms have no instrument the coach can read a signature from: still an ask.
   assert.equal(qs.find((q) => /Evidence-handling/.test(q.key))!.work, "ask");
 });
+
+test("the sponsor's sentence is a G1 behaviour, not a criterion — asked when absent, verified when on file", async () => {
+  const G1b: Gate = {
+    id: "G1", label: "Discovery", between: "03→04", status: "not-run",
+    date: null, decidedBy: null,
+    criteria: [],
+    behaviours: [
+      { name: "Can state the sponsor's real problem **in one sentence that is not what they asked for**", observed: false, where: "" },
+      { name: "Chose observation over interview, unprompted", observed: false, where: "" },
+    ],
+    antiPatterns: [],
+  };
+  const { parseAnchoredTables } = await import("../src/anchors.ts");
+  const empty = parseAnchoredTables(`
+<!-- table:stakeholder-map.five-roles role=labels key=Role answer=Name -->
+
+| Role | Name |
+|---|---|
+| Executive sponsor | Marta Oyelaran, VP Operations |
+
+<!-- table:sponsor-brief.questions role=labels key=Question answer=Answer -->
+
+| Question | Answer |
+|---|---|
+| What are you trying to accomplish? |  |
+`);
+  const asked = coach({ findings: [], gates: [G1b], tables: empty }).find((q) => q.key.startsWith("G1:behaviour"))!;
+  assert.equal(asked.work, "ask");
+  assert.equal(asked.who, "Executive sponsor");
+  assert.equal(asked.whoName, "Marta Oyelaran, VP Operations");
+  assert.match(asked.ask, /^What is Marta Oyelaran actually trying to accomplish/);
+  assert.match(asked.goes, /sponsor-brief\.md — the seven questions/);
+
+  const filled = parseAnchoredTables(`
+<!-- table:sponsor-brief.questions role=labels key=Question answer=Answer -->
+
+| Question | Answer |
+|---|---|
+| What are you trying to accomplish? | "I want to know how many exceptions we actually have." |
+`);
+  const verified = coach({ findings: [], gates: [G1b], tables: filled }).find((q) => q.key.startsWith("G1:behaviour"))!;
+  assert.equal(verified.work, "verify");
+  assert.match(verified.ask, /on file \(sponsor-brief\.md\): "I want to know how many exceptions we actually have\."/);
+  assert.ok(!coach({ findings: [], gates: [G1b], tables: filled }).some((q) => /observation over interview/.test(q.key)), "other behaviours are not the coach's to ask");
+});
