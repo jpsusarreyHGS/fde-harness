@@ -51,14 +51,19 @@ export interface CoachQuestion {
   why: string;
   score: number;
   /**
-   * Whether this needs a person or a desk.
+   * Whether this needs a person, a desk, or a moment's honesty.
    *
    * A dangling citation is a real defect, but nobody at the client can answer
    * it — it is the FDE's own repair. Mixing the two produces a "who to ask
    * tomorrow" list containing items with nobody to ask, which is how a queue
    * loses its meaning.
+   *
+   * `verify` is a gate criterion whose answer is already on file — the
+   * sponsor's sentence in the brief, the five roles named in the map. Asking
+   * the FDE for it again teaches them the queue does not read what they
+   * wrote. The criterion still stands: they must be able to *say* it.
    */
-  work: "ask" | "fix";
+  work: "ask" | "fix" | "verify";
   source: "gate" | "chain" | "open-question" | "stakeholder" | "contract";
   /** The harness id this is about, where there is one. */
   id: string | null;
@@ -244,12 +249,90 @@ function blockScore(
 }
 
 /**
+ * What the engagement already holds against a gate criterion.
+ *
+ * The G1 memo's criteria are written from the bootcamp bar, and the coach
+ * used to turn each unmet one straight into a question — including "state
+ * the sponsor's real problem" on an engagement whose sponsor brief already
+ * carried the sentence, verbatim, from a source the FDE had captured. The
+ * trainee answered it again in chat; the next `/next` asked again.
+ *
+ * So before a criterion becomes an `ask`, look in the instrument that would
+ * hold its answer. If it is there, the criterion becomes a `verify`: here is
+ * what is on file, now say it. The bar has not moved — G1 still requires the
+ * sentence to be said, in words that are not the request — but the queue
+ * stops pretending it has not read the file.
+ */
+function onFile(
+  criterion: string,
+  tables: readonly ParsedTable[],
+): { ask: string; location: string } | null {
+  const c = criterion.toLowerCase();
+
+  if (/sponsor|real problem|success sentence|trying to accomplish/.test(c)) {
+    const restatement = rowsOf(tables, "sponsor-brief.restatement")
+      .find((r) => /real problem/i.test(cell(r, "Item")));
+    const sentence = restatement ? cell(restatement, "Value") : "";
+    const accomplish = rowsOf(tables, "sponsor-brief.questions")
+      .find((r) => /trying to accomplish/i.test(cell(r, "Question")));
+    const goal = accomplish ? cell(accomplish, "Answer") : "";
+    const quote = has(sentence) ? sentence : has(goal) ? goal : "";
+    if (!quote) return null;
+    return {
+      ask:
+        `Sponsor's ${has(sentence) ? "real problem" : "goal"} is on file (sponsor-brief.md): "${quote}". ` +
+        "At G1 you must be able to say it in one sentence that is *not* the request. Say it now — " +
+        "if what comes out is the request reworded, discovery has not happened yet.",
+      location: "01-Organisation/sponsor-brief.md",
+    };
+  }
+
+  if (/stakeholder|five roles|decision rights|process owner|exception holder/.test(c)) {
+    const roles = rowsOf(tables, "stakeholder-map.five-roles")
+      .map((r) => ({ role: cleanRole(cell(r, "Role")), name: cell(r, "Name") }))
+      .filter((r) => has(r.role));
+    const named = roles.filter((r) => has(r.name));
+    const need = ["process owner", "exception holder"];
+    if (!need.every((n) => named.some((r) => r.role.toLowerCase() === n))) return null;
+    const missing = roles.filter((r) => !has(r.name)).map((r) => r.role.toLowerCase());
+    return {
+      ask:
+        `${named.length} of the five roles are named on file (stakeholder-map.md): ` +
+        `${named.map((r) => `${r.role.toLowerCase()} — ${r.name}`).join("; ")}` +
+        `${missing.length ? `; still unnamed: ${missing.join(", ")}` : ""}. ` +
+        "Decision rights are defensible when you could state them to the sponsor and they would agree — could you?",
+      location: "01-Organisation/stakeholder-map.md",
+    };
+  }
+
+  if (/systems|readiness|landmine|data/.test(c)) {
+    const systems = rowsOf(tables, "systems-inventory.applications")
+      .map((r) => cell(r, "System")).filter(has);
+    if (!systems.length) return null;
+    const scored = rowsOf(tables, "readiness-scorecard.rows").length;
+    return {
+      ask:
+        `${systems.length} system(s) on file (systems-inventory.md): ${systems.slice(0, 6).join(", ")}` +
+        `${systems.length > 6 ? ", …" : ""}. Readiness scorecard: ${scored} source(s) scored. ` +
+        "A landmine is a named blocker with a named owner — is each amber one there, or only the system?",
+      location: "03-Systems/readiness-scorecard.md",
+    };
+  }
+
+  return null;
+}
+
+/**
  * Gate criteria that are not met.
  *
  * These outrank everything else at the same stage: a gate criterion is the
  * client's own definition of ready, and each already carries an owner.
  */
-function gateQuestions(gates: readonly Gate[], names: Map<string, string>): CoachQuestion[] {
+function gateQuestions(
+  gates: readonly Gate[],
+  names: Map<string, string>,
+  tables: readonly ParsedTable[],
+): CoachQuestion[] {
   const out: CoachQuestion[] = [];
   // Only the gate you are actually working toward. Every criterion of G2 and
   // G3 is unmet on day one, and a queue that opens with "prove it with evals"
@@ -285,6 +368,25 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
       if (unowned.length > 1 && !has(c.owner)) continue;
       const who = cleanRole(c.owner) || "Unassigned";
       const label = cleanRole(c.name);
+      // Already on file? Then it is the FDE's to say, not the client's to
+      // answer — and the FDE is the one who has to say it at the gate.
+      const held = onFile(c.name, tables);
+      if (held) {
+        out.push({
+          key: `${g.id}:${c.name}`,
+          ask: held.ask,
+          who: "FDE",
+          whoName: null,
+          blocks: `${g.id} — ${g.between}`,
+          location: held.location,
+          why: `${g.id} criterion; the answer is on file, the bar is being able to say it`,
+          score: 100,
+          work: "verify",
+          source: "gate",
+          id: null,
+        });
+        continue;
+      }
       out.push({
         key: `${g.id}:${c.name}`,
         ask: has(c.toClose)
@@ -533,7 +635,7 @@ export function coach(input: CoachInput): CoachQuestion[] {
   }
 
   const all = [
-    ...gateQuestions(input.gates, names),
+    ...gateQuestions(input.gates, names, input.tables),
     ...contractQuestions(input.contract ?? [], names),
     ...stakeholderQuestions(input.tables),
     ...chainQuestions(input.findings, names, prio, blocksById, alreadyAsked),
@@ -582,4 +684,15 @@ export function nextConversations(
  */
 export function deskWork(questions: readonly CoachQuestion[]): CoachQuestion[] {
   return questions.filter((q) => q.work === "fix");
+}
+
+/**
+ * Gate criteria whose answer is already on file.
+ *
+ * Printed before the conversations, because they cost nothing to close —
+ * the FDE reads what they captured and says it back — and because a queue
+ * that opens by asking for something it is holding is one nobody trusts twice.
+ */
+export function verifyFirst(questions: readonly CoachQuestion[]): CoachQuestion[] {
+  return questions.filter((q) => q.work === "verify");
 }

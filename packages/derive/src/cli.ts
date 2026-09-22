@@ -14,6 +14,8 @@
  *   cli.ts reject  <engagement-dir> <proposal> <reason>  decline it
  *   cli.ts sweep   <engagement-dir> <source> [--against <proposal>]
  *                                              what a source names — a floor under /capture
+ *   cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>" [--class stated|documented]
+ *                                              write a chat answer into evidence/ so /capture can propose it
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
@@ -44,16 +46,17 @@ import {
 } from "./proposals.ts";
 import { INSTRUMENTS } from "./instruments.ts";
 import { dataRows, findTable, parseAnchoredTables } from "./anchors.ts";
-import { deskWork, nextConversations } from "./coach.ts";
+import { deskWork, nextConversations, verifyFirst } from "./coach.ts";
 import { initEngagement, InitRefused, validateVars } from "./init.ts";
 import { checkContract, readContract } from "./contract.ts";
 import { WriteRefused } from "./writer.ts";
 import { coverage, formatCoverage, formatSweep, sweepText } from "./sweep.ts";
+import { recordAnswer, type AnswerClass } from "./answer.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check", "roi", "sweep",
+  "scaffold", "contract-check", "roi", "sweep", "answer",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -116,6 +119,48 @@ async function sponsorName(): Promise<string | undefined> {
 }
 
 // --------------------------------------------------------------- subcommands
+
+if (sub === "answer") {
+  const fromAt = args.indexOf("--from");
+  const classAt = args.indexOf("--class");
+  const from = fromAt >= 0 ? args[fromAt + 1] : undefined;
+  const cls = classAt >= 0 ? args[classAt + 1] : undefined;
+  // Positional arguments, minus the flag values.
+  const consumed = new Set([fromAt + 1, classAt + 1].filter((i) => i > 0));
+  const positional = args.filter((a, i) => !a.startsWith("--") && !consumed.has(i));
+  const question = positional[1];
+  const answer = positional[2];
+  if (!question || !answer || !from) {
+    console.error('usage: cli.ts answer <engagement-dir> "<Q-id or question>" "<answer>" --from "<who said it>" [--class stated|documented]');
+    console.error("");
+    console.error("Writes the answer, verbatim, into 02-Workflow/evidence/<class>/<date>-answers.md,");
+    console.error("where intake lists it and /capture reads it. Nothing reaches a register from");
+    console.error("here — that still takes a proposal and an accept. The class defaults to stated,");
+    console.error("because an answer given in conversation is something a person said.");
+    process.exit(2);
+  }
+  if (cls !== undefined && cls !== "stated" && cls !== "documented") {
+    console.error(`--class must be stated or documented, not ${JSON.stringify(cls)}. An answer cannot be observed or system evidence.`);
+    process.exit(2);
+  }
+  try {
+    const res = await recordAnswer(engagementDir, {
+      question, answer, from, evidenceClass: cls as AnswerClass | undefined,
+    });
+    console.log(`${res.created ? "Created" : "Appended to"} ${res.path} (${res.evidenceClass}${res.questionId ? `, answers ${res.questionId}` : ""})`);
+    console.log("");
+    console.log("Nothing has reached a register. Propose it with:");
+    console.log("");
+    console.log(`  /capture ${res.path}`);
+    process.exit(0);
+  } catch (err) {
+    if (err instanceof WriteRefused) {
+      console.error(`Refused: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
+  }
+}
 
 if (sub === "sweep") {
   const rest = args.filter((a) => !a.startsWith("--"));
@@ -506,9 +551,18 @@ for (const v of violations) console.error(`warn  ${v.rule}  ${v.detail}`);
 if (sub === "next") {
   const n = Number(args.filter((a) => !a.startsWith("--"))[1] ?? "3");
   const groups = nextConversations(state.coach, Number.isFinite(n) ? n : 3);
-  if (!groups.length) {
+  const verify = verifyFirst(state.coach);
+  if (!groups.length && !verify.length) {
     console.log("Nothing to ask. Every gate criterion is met and the chain is intact.");
     process.exit(0);
+  }
+  if (verify.length) {
+    console.log("\nVerify first — already on file; the bar is being able to say it");
+    for (const q of verify) {
+      console.log(`  · ${q.ask}`);
+      console.log(`      why: ${q.why}`);
+      console.log(`      on file at: ${q.location}`);
+    }
   }
   for (const g of groups) {
     console.log(`
@@ -535,10 +589,11 @@ ${g.whoName ? `${g.whoName} — ${g.who}` : `${g.who} (no name in the stakeholde
 
   console.log("");
   console.log(
-    `${state.coach.length} item(s) in the queue: ${state.coach.length - desk.length} to ask, ` +
-      `${desk.length} to fix. Answers go into the instrument, not into chat — ` +
-      "that is what makes them count.",
+    `${state.coach.length} item(s) in the queue: ${state.coach.length - desk.length - verify.length} to ask, ` +
+      `${verify.length} to verify, ${desk.length} to fix.`,
   );
+  console.log("An answer given in conversation is lost by morning. Write it down as you get it:");
+  console.log(`  node packages/derive/src/cli.ts answer ${dirArg} "<Q-id or question>" "<answer>" --from "<who>"`);
   process.exit(0);
 }
 

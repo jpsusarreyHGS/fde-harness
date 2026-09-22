@@ -7,7 +7,9 @@
 export { parseAnchoredTables, dataRows, registerRows, answeredRows, isRetired, findTable, splitRow } from "./anchors.ts";
 export type { ParsedTable, TableAnchor, TableRole } from "./anchors.ts";
 export { deriveChain, extractIds, filled } from "./chain.ts";
-export { coach, deskWork, nextConversations, type CoachQuestion } from "./coach.ts";
+export { coach, deskWork, nextConversations, verifyFirst, type CoachQuestion } from "./coach.ts";
+export { recordAnswer } from "./answer.ts";
+export type { AnswerClass, RecordAnswerOptions, RecordAnswerResult } from "./answer.ts";
 export { computeRoi, ROI_INPUTS, type RoiModel } from "./roi.ts";
 export type { ChainCounts, ChainAudit, AuditFinding } from "./chain.ts";
 export { INSTRUMENTS, STAGES, instrumentById, instrumentsForStage, instrumentStatus } from "./instruments.ts";

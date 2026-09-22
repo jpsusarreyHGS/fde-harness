@@ -181,7 +181,9 @@ node packages/derive/src/cli.ts propose <engagement-dir> <spec.json>  # agents w
 node packages/derive/src/cli.ts pending <engagement-dir>              # awaiting a decision
 node packages/derive/src/cli.ts accept  <engagement-dir> <proposal.md>
 node packages/derive/src/cli.ts reject  <engagement-dir> <proposal.md> "<reason>"
-node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to ask
+node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to verify, then what to ask
+node packages/derive/src/cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>"
+                                                                       # a chat answer, written into evidence/stated/ for /capture
 node packages/derive/src/cli.ts contract-check <engagement-dir>       # will the compiler take it?
 ```
 
