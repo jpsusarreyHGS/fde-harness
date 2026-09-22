@@ -301,6 +301,39 @@ footer b{color:rgba(255,255,255,.8);font-weight:500}
   .irow .nm{flex-basis:130px}.irow .up{display:none}
   .mast .gen{margin-left:0;text-align:left}
 }
+
+/* ---------- waiting / pending strip (v2) ---------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line-soft);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:18px}
+.strip .cell{background:var(--surface);padding:13px 16px}
+.strip .k{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500}
+.strip .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:3px}
+.strip .v small{font-size:11px;font-weight:400;color:var(--ink-3);margin-left:6px}
+.strip .d{font-size:11px;color:var(--ink-2);margin-top:4px;line-height:1.5}
+.strip .cmd{display:block;margin-top:7px;font-size:11px;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line-soft);border-radius:3px;padding:4px 7px;font-family:var(--f-display);
+  font-weight:400;white-space:nowrap;overflow-x:auto}
+.strip .cell.hot .v{color:var(--active)}
+.strip .cell.bad .v{color:var(--fail)}
+/* G1 checklist */
+.check{list-style:none;margin:0;padding:0}
+.check li{display:flex;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+.check li:last-child{border-bottom:0}
+.check .mk{flex:0 0 18px;font-weight:600;font-size:14px;line-height:1.3}
+.check .mk.y{color:var(--pass)}.check .mk.n{color:var(--fail)}.check .mk.p{color:var(--caveat)}
+.check .t{font-size:12.5px;color:var(--ink)}
+.check .c{font-size:11.5px;color:var(--ink-2);margin-top:2px}
+.check .c b{font-weight:500;color:var(--ink)}
+/* conversations */
+.conv{padding:12px 16px;border-bottom:1px solid var(--line-soft)}
+.conv:last-child{border-bottom:0}
+.conv .who{font-size:12.5px;font-weight:500;color:var(--ink)}
+.conv .who span{font-weight:300;color:var(--ink-3)}
+.conv ul{margin:6px 0 0;padding-left:18px}
+.conv li{font-size:12px;color:var(--ink-2);margin-bottom:5px}
+.conv li b{font-weight:400;color:var(--ink)}
+.conv li .m{display:block;font-size:11px;color:var(--ink-3)}
+.mini10{display:flex;gap:2px}.mini10 i{flex:1;height:4px;border-radius:2px;background:var(--line-soft)}
 </style>
 
 <aside class="rail">
@@ -333,16 +366,16 @@ footer b{color:rgba(255,255,255,.8);font-weight:500}
 <footer>
   <div class="wrap">
     <div><b>HGS</b> · Forward deployed engineering</div>
-    <div>FDE harness MVP · console v1 · example data</div>
+    <div>FDE harness · derived from state.json v2</div>
   </div>
 </footer>
 
 <script>
 /* ============================================================
-   STATE — replaced at render time by the /dashboard command.
-   render-dashboard derives one object per engagement from the
+   STATE — replaced at render time by scripts/render-dashboard.mjs,
+   which derives one state.json v2 object per engagement from the
    filesystem (see state-schema.md) and substitutes the JSON array
-   for the __STATE__ token below.
+   for the STATE assignment below.
 
    Never hand-edit a rendered dashboard to change what it shows.
    Fix the engagement files and re-derive.
@@ -354,6 +387,14 @@ var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
 var pct = function(a,b){ return b>0 ? Math.round(a/b*100) : 0; };
 var kb  = function(n){ return n>=1e6 ? (n/1e6).toFixed(1)+" MB" : Math.round(n/1e3)+" KB"; };
+var plain = function(s){ return String(s==null?"":s).replace(/[*_`]/g,""); };
+var when = function(iso){ return iso ? String(iso).replace("T"," ").slice(0,16)+" UTC" : "—"; };
+/* ageDays is never stored — computed from Raised at read time (state-schema rule 4). */
+var age = function(raised, at){
+  var d = Date.parse(raised); if(!isFinite(d)) return null;
+  return Math.max(0, Math.round((Date.parse(at||new Date().toISOString()) - d)/86400000)); };
+var col = function(r){ for(var i=1;i<arguments.length;i++){ if(r && r[arguments[i]]!==undefined) return String(r[arguments[i]]).trim(); } return ""; };
+var filled = function(v){ v=String(v==null?"":v).trim(); return v!=="" && v!=="—" && v!=="-" && v!=="n/a" && !/^tbd$/i.test(v); };
 
 var GATE_LABEL = {"not-run":"Not run","ready":"Ready","caveats":"Ready with caveats",
                   "not-ready":"Not ready","passed":"Passed"};
@@ -361,8 +402,37 @@ var PILL = {met:"pass",partial:"caveat",unmet:"fail",
             populated:"pass",thin:"caveat",empty:"idle",
             passed:"pass",ready:"active",caveats:"caveat","not-ready":"fail","not-run":"idle",
             complete:"pass",active:"active","not-started":"idle",blocked:"fail",
-            built:"pass","in-build":"active",top:"active",candidate:"idle",deferred:"idle",blocked2:"fail"};
+            build:"active",decline:"idle",defer:"idle"};
 var STATUS_VAR = {populated:"var(--pass)",thin:"var(--caveat)",empty:"var(--idle)"};
+
+/* Stage 01–03 instruments carry no accepted rows yet: the coverage grid would
+   be an honest but empty wall, so the card leads with what to do instead.
+   Open questions do not count — init raises several for every TBD. */
+function isEarly(s){
+  return !s.instruments.some(function(i){ return (i.stage==="01"||i.stage==="02"||i.stage==="03") && i.id!=="open-questions" && i.rows>0; });
+}
+
+/* What closes a G1 criterion, when the memo does not say. Keyed on the
+   criterion's wording from the template; the memo's own "To close" wins. */
+function closesIt(name){
+  var n = name.toLowerCase();
+  if(/operating map|exception/.test(n)) return "Drop a shadowing note in <b>evidence/observed/</b>, run <b>/capture</b>, accept the steps and the exceptions.";
+  if(/stakeholder|five roles|decision rights/.test(n)) return "Name the five roles — <b>/capture</b> an interview that names them, or <b>/next</b> asks the sponsor who they are.";
+  if(/readiness|landmine/.test(n)) return "Score each source in <b>03-Systems/readiness-scorecard.md</b>; every amber needs a named blocker and a named owner.";
+  if(/ontology|grain/.test(n)) return "Capture the client's own words into the vocabulary audit; <b>/ontology</b> chooses and defends the grain.";
+  if(/evidence-handling|monitoring|terms/.test(n)) return "Sign <b>00-Setup/evidence-handling-terms.md</b> — capture is blocked until it is.";
+  if(/hypothes/.test(n)) return "Mark each of the three in <b>00-Setup/entry-hypotheses.md</b> supported or disproved, with the evidence named.";
+  return "The gate memo says what closes this once <b>/gate 1</b> has been run.";
+}
+
+/* The coach's queue, grouped the way /next groups it: one conversation per
+   person, ranked by the strongest question in it. */
+function conversations(coach, limit){
+  var by = {};
+  coach.forEach(function(q){ if(q.work!=="ask") return; (by[q.who] = by[q.who]||[]).push(q); });
+  return Object.keys(by).map(function(w){ return {who:w, whoName:by[w][0].whoName, qs:by[w]}; })
+    .sort(function(a,b){ return b.qs[0].score-a.qs[0].score; }).slice(0, limit||3);
+}
 
 var view = 0; // 0..n-1 = engagement, -1 = portfolio
 
@@ -370,11 +440,12 @@ var view = 0; // 0..n-1 = engagement, -1 = portfolio
 function buildSwitch(){
   var h = '<div class="lbl">Engagements</div>';
   h += '<button type="button" data-v="-1" class="'+(view===-1?"on":"")+'">All engagements'
-     + '<span>'+STATE.length+' active</span></button>';
+     + '<span>'+STATE.length+' derived</span></button>';
   STATE.forEach(function(s,i){
+    var e = s.engagement;
     h += '<button type="button" data-v="'+i+'" class="'+(view===i?"on":"")+'">'
-       + esc(s.engagement.client.replace(" (example)",""))
-       + '<span>'+esc(s.engagement.phase.replace(/^\d\d-/,""))+' · '+s.sessions.count+' sessions</span></button>';
+       + esc(e.client||e.slug)
+       + '<span>'+esc(String(e.stage||"").replace(/^\d\d-/,"")||"—")+' · '+s.sessions.count+' session'+(s.sessions.count===1?"":"s")+'</span></button>';
   });
   document.getElementById("switch").innerHTML = h;
   Array.prototype.forEach.call(document.querySelectorAll("#switch button"),function(b){
@@ -382,45 +453,81 @@ function buildSwitch(){
   });
 }
 
-var SECTIONS = [
-  ["chain","Evidence chain"],["discovery","Discovery instruments"],
-  ["questions","Questions and RAID"],["usecases","Use-case portfolio"],
-  ["ontology","Ontology and evals"],["ops","Deliverables and ops"]];
+var SECTIONS_FULL = [
+  ["chain","Evidence chain"],["discovery","Instrument coverage"],
+  ["gate","Gate criteria"],["questions","Questions and RAID"],
+  ["placement","Placement"],["ontology","Ontology and evals"],["ops","Deliverables and ops"]];
+var SECTIONS_EARLY = [["next","Start here"],["gate","G1 checklist"],["questions","Questions and RAID"],["ops","Deliverables and ops"]];
 
 function buildNav(s){
   var nav = document.getElementById("nav");
   if(view===-1){ nav.innerHTML=""; return; }
-  var counts = { chain:s.chain.requirements.total, discovery:s.instruments.filter(function(i){return i.status!=="empty";}).length,
-    questions:s.openQuestions.length+s.raid.length, usecases:s.useCases.length,
-    ontology:s.chain.competencyQuestions.total, ops:s.deliverables.length };
-  nav.innerHTML = SECTIONS.map(function(sec,i){
+  var early = isEarly(s);
+  var counts = { chain:s.chain.requirements.total,
+    discovery:s.instruments.filter(function(i){return i.status!=="empty";}).length,
+    gate:(s.gates[0]&&s.gates[0].criteria?s.gates[0].criteria.length:0),
+    questions:s.openQuestions.length+s.raid.length, placement:s.prioritisation.length,
+    ontology:s.chain.competencyQuestions.total, ops:s.deliverables.length+(s.sketches||[]).length,
+    next:s.intake.waiting+s.intake.pendingProposals.length };
+  nav.innerHTML = (early?SECTIONS_EARLY:SECTIONS_FULL).map(function(sec,i){
     return '<a href="#'+sec[0]+'"><i>'+String(i+1).padStart(2,"0")+'</i>'+sec[1]
          + '<em>'+counts[sec[0]]+'</em></a>'; }).join("");
 }
 
+/* ---------- shared: the waiting / pending strip ---------- */
+function stripHtml(s){
+  var it = s.intake, slug = s.engagement.slug;
+  var classes = Object.keys(it.byClass||{}).map(function(k){ return it.byClass[k]+" "+k; }).join(" · ");
+  var sk = s.sketches||[];
+  return '<div class="strip">'
+    + '<div class="cell '+(it.waiting?"hot":"")+'"><div class="k">Material waiting</div>'
+    + '<div class="v">'+it.waiting+(classes?'<small>'+esc(classes)+'</small>':'')+'</div>'
+    + '<div class="d">'+(it.waiting?'Raw material in <b>evidence/</b> no register has seen yet.':'Nothing in evidence/. Drop what you produced into the folder that says what it is.')
+    + (it.needsService?' <b>'+it.needsService+'</b> need a transcript or description first.':'')+'</div>'
+    + (it.waiting?'<code class="cmd">/capture</code>':'')+'</div>'
+    + '<div class="cell '+(it.pendingProposals.length?"hot":"")+'"><div class="k">Proposed rows awaiting accept</div>'
+    + '<div class="v">'+it.pendingProposals.length+'</div>'
+    + '<div class="d">'+(it.pendingProposals.length?'Rows /capture extracted. Review, fix any cell, then accept — nothing reaches a register until you do.':'No proposals waiting. Rows reach a register only when you accept a proposal.')+'</div>'
+    + (it.pendingProposals.length?'<code class="cmd">node packages/derive/src/cli.ts pending engagements/'+esc(slug)+'</code>':'')+'</div>'
+    + '<div class="cell '+(it.unclassified.length?"bad":"")+'"><div class="k">Outside a class folder</div>'
+    + '<div class="v">'+it.unclassified.length+'</div>'
+    + '<div class="d">'+(it.unclassified.length?'Dropped in evidence/ but not in observed/, system/, documented/ or stated/. The class is never guessed — move them.':'Every file is in a class folder. The folder decides the class.')+'</div>'
+    + (it.unclassified.length?'<code class="cmd">'+esc(it.unclassified[0])+(it.unclassified.length>1?' …':'')+'</code>':'')+'</div>'
+    + '<div class="cell"><div class="k">Sketches</div>'
+    + '<div class="v">'+sk.length+'</div>'
+    + '<div class="d">'+(sk.length?'Latest <b>'+esc(sk[sk.length-1].date)+'</b> — provisional, pre-G1. Shown to be corrected, not approved.':'The pre-G1 alignment page: what we heard, from accepted rows only.')+'</div>'
+    + '<code class="cmd">'+(sk.length?'deliverables/'+esc(sk[sk.length-1].path):'/sketch')+'</code></div>'
+    + '</div>';
+}
+
 /* ---------- portfolio ---------- */
 function renderPortfolio(){
+  var gen = STATE.length ? STATE.map(function(s){return s.generatedAt;}).sort().pop() : null;
   var h = '<section class="mast"><div class="wrap"><div class="top"><div>'
     + '<h1>All engagements</h1>'
-    + '<div class="who">'+STATE.length+' active · derived from each engagement&rsquo;s <b>state.json</b></div></div>'
-    + '<div class="gen">Generated 2026-09-08 09:14 UTC<br>Rebuild with <code>/dashboard</code></div>'
+    + '<div class="who">'+STATE.length+' derived from each engagement&rsquo;s <b>state.json</b></div></div>'
+    + '<div class="gen">Generated '+esc(when(gen))+'<br>Rebuild with <code>/dashboard</code></div>'
     + '</div><div style="height:24px"></div></div></section>';
 
   h += '<div class="wrap"><section class="sec"><div class="sec-h"><h2>Portfolio</h2>'
-    + '<div class="note">Sorted by what needs attention: failed or caveated gates first.</div></div><div class="pf">';
+    + '<div class="note">Sorted by what needs attention: failed or caveated gates first, then material waiting on a person.</div></div><div class="pf">';
 
+  var w = {"not-ready":0,"caveats":1,"not-run":2,"ready":3,"passed":4};
   var order = STATE.map(function(s,i){ return {s:s,i:i}; }).sort(function(a,b){
-    var w = {"not-ready":0,"caveats":1,"not-run":2,"ready":3,"passed":4};
     var ga = Math.min.apply(null,a.s.gates.map(function(g){return w[g.status];}));
     var gb = Math.min.apply(null,b.s.gates.map(function(g){return w[g.status];}));
-    return ga-gb; });
+    if(ga!==gb) return ga-gb;
+    return (b.s.intake.waiting+b.s.intake.pendingProposals.length)-(a.s.intake.waiting+a.s.intake.pendingProposals.length); });
 
   order.forEach(function(o){
-    var s=o.s, e=s.engagement, c=s.chain;
+    var s=o.s, e=s.engagement, c=s.chain, it=s.intake;
     var alerts=[];
+    if(it.waiting) alerts.push(it.waiting+" file"+(it.waiting===1?"":"s")+" waiting — /capture");
+    if(it.pendingProposals.length) alerts.push(it.pendingProposals.length+" proposed row set"+(it.pendingProposals.length===1?"":"s")+" awaiting accept");
+    if(it.unclassified.length) alerts.push(it.unclassified.length+" file"+(it.unclassified.length===1?"":"s")+" outside a class folder");
     s.gates.forEach(function(g){ if(g.status==="not-ready") alerts.push(g.id+" not ready");
       else if(g.status==="caveats") alerts.push(g.id+" carries caveats"); });
-    if(e.sponsor==="TBD") alerts.push("No named sponsor");
+    if(!filled(e.sponsor)) alerts.push("No named sponsor");
     if(e.residency==="tbd") alerts.push("Residency unsettled — capture blocked");
     if(e.labour==="works-council"||e.labour==="union") alerts.push("Monitoring needs consultation");
     if(e.labour==="unknown") alerts.push("Labour representation unknown");
@@ -429,15 +536,15 @@ function renderPortfolio(){
     s.autonomy.forEach(function(a){ if(a.agreement===null) alerts.push(a.workflow+" rung asserted, not measured"); });
 
     h += '<button class="pfc" type="button" data-v="'+o.i+'">'
-      + '<div class="hd"><div class="ph2">'+esc(e.phase.replace(/^\d\d-/,""))+'</div>'
-      + '<h3>'+esc(e.client)+'</h3><div class="sc">'+esc(e.scope)+'</div></div>'
-      + '<div class="mini">'+s.phases.map(function(p){
-          var col = p.status==="complete"?"var(--pass)":p.status==="active"?"var(--active)":
+      + '<div class="hd"><div class="ph2">'+esc(String(e.stage||"").replace(/^\d\d-/,"")||"stage unknown")+'</div>'
+      + '<h3>'+esc(e.client||e.slug)+'</h3><div class="sc">'+esc(e.scope||"")+'</div></div>'
+      + '<div class="mini10">'+s.stages.map(function(p){
+          var colr = p.status==="complete"?"var(--pass)":p.status==="active"?"var(--active)":
                     p.status==="blocked"?"var(--fail)":"var(--line-soft)";
-          return '<i style="background:'+col+'"></i>'; }).join("")+'</div>'
+          return '<i style="background:'+colr+'" title="'+esc(p.id+" "+p.label+" · "+p.pct+"%")+'"></i>'; }).join("")+'</div>'
       + '<div class="kv"><div>Evidence <b>'+c.evidence.total+'</b></div>'
+      + '<div>Exceptions <b>'+c.exceptions.total+'</b></div>'
       + '<div>Reqs <b>'+c.requirements.total+'</b></div>'
-      + '<div>CQ answerable <b>'+c.competencyQuestions.answerable+'/'+c.competencyQuestions.total+'</b></div>'
       + '<div>Open Qs <b>'+s.openQuestions.length+'</b></div></div>'
       + (alerts.length ? alerts.slice(0,3).map(function(a){
             return '<div class="alert">'+esc(a)+'</div>'; }).join("")
@@ -452,8 +559,8 @@ function renderPortfolio(){
   var totProp = STATE.reduce(function(a,s){return a+s.harnessImprover.openProposals;},0);
   var totPend = STATE.reduce(function(a,s){return a+s.harnessImprover.pendingPromptEdits;},0);
   var totSup  = STATE.reduce(function(a,s){return a+s.skills.supersedes.length;},0);
-  var totFric = STATE.reduce(function(a,s){return a+s.friction.filter(function(f){return f.note!=="None.";}).length;},0);
-  h += '<div class="op"><div class="k">Open proposals</div><div class="v">'+totProp+'</div>'
+  var totFric = STATE.reduce(function(a,s){return a+s.friction.length;},0);
+  h += '<div class="op"><div class="k">Open improvement proposals</div><div class="v">'+totProp+'</div>'
      + '<div class="d">Harness improvements awaiting per-proposal approval.</div></div>'
      + '<div class="op"><div class="k">Pending prompt edits</div><div class="v">'+totPend+'</div>'
      + '<div class="d">Agent-prompt changes held in feedback for deliberate promotion. Never auto-applied.</div></div>'
@@ -470,20 +577,20 @@ function renderPortfolio(){
 
 /* ---------- engagement ---------- */
 function renderEngagement(s){
-  var e=s.engagement, c=s.chain;
+  var e=s.engagement, c=s.chain, early=isEarly(s);
   var h="";
 
   /* masthead */
   h += '<section class="mast"><div class="wrap"><div class="top"><div>'
-    + '<h1>'+esc(e.client)+'</h1>'
-    + '<div class="who">'+esc(e.scope)+' · sponsor <b>'+esc(e.sponsor)+'</b>'
-    + ' · started '+esc(e.startedAt)+' · residency <b>'+esc(e.residency)+'</b></div></div>'
-    + '<div class="gen">Session <code>'+esc(s.sessions.latest)+'</code> · '+s.sessions.count+' logged<br>'
-    + 'Generated 2026-09-08 09:14 UTC</div></div>';
+    + '<h1>'+esc(e.client||e.slug)+'</h1>'
+    + '<div class="who">'+esc(e.scope||"")+(filled(e.sponsor)?' · sponsor <b>'+esc(e.sponsor)+'</b>':' · <b>no named sponsor</b>')
+    + (e.started?' · started '+esc(e.started):'')+' · residency <b>'+esc(e.residency||"tbd")+'</b></div></div>'
+    + '<div class="gen">'+(s.sessions.latest?'Session <code>'+esc(s.sessions.latest)+'</code> · '+s.sessions.count+' logged':'No session logged yet')+'<br>'
+    + 'Generated '+esc(when(s.generatedAt))+'</div></div>';
 
-  /* phase pipeline */
-  h += '<div class="pipe">'+s.phases.map(function(p,i){
-      return '<div class="ph '+p.status+'"><div class="n">'+String(i+1).padStart(2,"0")+'</div>'
+  /* stage pipeline 00–09 */
+  h += '<div class="pipe">'+s.stages.map(function(p){
+      return '<div class="ph '+p.status+'"><div class="n">'+esc(p.id)+'</div>'
         + '<div class="t">'+esc(p.label)+'</div>'
         + '<div class="p">'+p.pct+'%</div>'
         + (p.status==="active"?'<div class="bar" style="width:'+p.pct+'%"></div>':'')
@@ -491,9 +598,8 @@ function renderEngagement(s){
 
   /* gates */
   h += '<div class="gates">'+s.gates.map(function(g){
-      var det = g.criteria && g.criteria.length
-        ? g.criteria.filter(function(x){return x.status==="met";}).length+'/'+g.criteria.length+' criteria'
-        : (g.date ? g.date : "—");
+      var met = (g.criteria||[]).filter(function(x){return x.status==="met";}).length;
+      var det = g.status==="not-run" ? "memo not run" : (g.criteria&&g.criteria.length ? met+'/'+g.criteria.length+' criteria' : (g.date||"—"));
       return '<div class="gate '+g.status+'"><span class="dot"></span>'
         + '<span class="g">'+g.id+'</span><span class="s">'+GATE_LABEL[g.status]+'</span>'
         + '<span class="m">'+esc(det)+'</span></div>'; }).join("")+'</div>';
@@ -509,15 +615,97 @@ function renderEngagement(s){
       + 'Desktop task mining and session replay are employee monitoring, and here they require <b>consultation, not notice</b> — '
       + 'a process with a counterparty who can say no. Prefer consented, time-boxed shadowing; it produces better material anyway.</p></div>';
   }
+
+  /* the strip — always, in both layouts */
+  h += stripHtml(s);
   h += '<div style="height:22px"></div></div></section><div class="wrap">';
 
-  /* ===== the chain (hero) ===== */
+  if(early){
+    h += renderEarly(s);
+  } else {
+    h += renderFull(s);
+  }
+
+  /* questions + RAID — both layouts */
+  h += questionsHtml(s);
+
+  /* ops — both layouts */
+  h += opsHtml(s);
+
+  /* last session */
+  h += '<section class="sec"><div class="card"><div class="card-h"><h3>Last session</h3>'
+    + '<div class="r">'+(s.sessions.latest?'<code>'+esc(s.sessions.latest)+'</code> · '+esc(s.sessions.latestDate):'none')+'</div></div>'
+    + '<div class="card-b"><p style="margin:0;max-width:80ch;font-size:13.5px">'+(s.sessions.latestSummary?esc(s.sessions.latestSummary):'No session log yet. <b>/chronicle</b> at the end of a session writes one.')+'</p></div></div>'
+    + '<div style="height:8px"></div></section></div>';
+
+  document.getElementById("page").innerHTML = h;
+}
+
+/* ===== early state: nothing accepted into 01–03 yet ===== */
+function renderEarly(s){
+  var h = '';
+  var g1 = s.gates[0] || {id:"G1",criteria:[],status:"not-run"};
+  var verify = s.coach.filter(function(q){return q.work==="verify";});
+  var convs = conversations(s.coach, 3);
+
+  h += '<section class="sec" id="next"><div class="sec-h"><h2>Start here</h2>'
+    + '<div class="note">Nothing has been accepted into the discovery instruments yet. That is the honest picture on day one — here is what moves it.</div></div>'
+    + '<div class="grid g23">';
+
+  /* G1 checklist */
+  h += '<div class="card" id="gate"><div class="card-h"><h3>G1 — Discovery gate, as a checklist</h3>'
+    + '<div class="r">'+GATE_LABEL[g1.status]+'</div></div>';
+  if(g1.criteria && g1.criteria.length){
+    h += '<ul class="check">'+g1.criteria.map(function(x){
+        var mk = x.status==="met"?"y":x.status==="partial"?"p":"n";
+        var sym = mk==="y"?"✓":mk==="p"?"◐":"✗";
+        return '<li><div class="mk '+mk+'">'+sym+'</div><div><div class="t">'+esc(plain(x.name))+'</div>'
+          + (mk!=="y"?'<div class="c">'+(filled(x.toClose)?'<b>To close:</b> '+esc(x.toClose):closesIt(plain(x.name)))
+          + (filled(x.owner)?' <span style="color:var(--ink-3)">· owner '+esc(plain(x.owner))+'</span>':'')+'</div>':'')
+          + '</div></li>'; }).join("")+'</ul>';
+  } else {
+    h += '<div class="empty">The G1 memo has not been scaffolded. Run /init-engagement to bring the engagement forward.</div>';
+  }
+  h += '<div class="legend">The bar is the bootcamp&rsquo;s Week 1 bar. It does not move for a compressed engagement; with one day of discovery, NOT READY is the correct reading.</div></div>';
+
+  /* next conversations */
+  h += '<div class="card"><div class="card-h"><h3>The next conversations</h3><div class="r">from /next</div></div>';
+  if(verify.length){
+    h += '<div class="conv"><div class="who">Verify first <span>— already on file; the bar is being able to say it</span></div><ul>'
+      + verify.slice(0,3).map(function(q){ return '<li><b>'+esc(q.ask)+'</b></li>'; }).join("")+'</ul></div>';
+  }
+  if(convs.length){
+    h += convs.map(function(cv){
+      return '<div class="conv"><div class="who">'+esc(cv.whoName?cv.whoName+" — "+cv.who:cv.who)+(cv.whoName?'':' <span>— no name in the stakeholder map</span>')+'</div><ul>'
+        + cv.qs.slice(0,3).map(function(q){ return '<li><b>'+esc(q.ask)+'</b>'+(q.means?'<span class="m">'+esc(q.means)+'</span>':'')+'</li>'; }).join("")
+        + (cv.qs.length>3?'<li style="color:var(--ink-3)">… and '+(cv.qs.length-3)+' more for the same conversation</li>':'')
+        + '</ul></div>'; }).join("");
+  } else if(!verify.length){
+    h += '<div class="empty">Nothing to ask yet. Drop material in evidence/ and run /capture — the queue fills from what you accept.</div>';
+  }
+  h += '<div class="legend"><code>node packages/derive/src/cli.ts next engagements/'+esc(s.engagement.slug)+'</code> for the full queue with why, means and goes.</div></div>';
+
+  h += '</div></section>';
+
+  h += '<section class="sec"><div class="card"><div class="card-b" style="font-size:12.5px;color:var(--ink-2)">'
+    + 'Instrument coverage, the evidence chain and the placement tables appear here once the first rows are accepted into a stage 01–03 instrument. '
+    + 'Until then they would be a grid of zeros — correct, and not useful. The loop: <b>watch → drop in evidence/ → /capture → accept → /next → ask → answer → repeat</b>.'
+    + '</div></div></section>';
+  return h;
+}
+
+/* ===== full layout ===== */
+function renderFull(s){
+  var c=s.chain, h='';
+
+  /* chain hero */
   var links = [
     {stage:"Observed",   n:c.evidence.observed,          of:c.evidence.total,      ofl:"evidence rows", note:"primary evidence"},
     {stage:"Exceptions", n:c.exceptions.withRuleHolder,  of:c.exceptions.total,    ofl:"logged",        note:"with a named rule holder"},
-    {stage:"Requirements",n:c.requirements.sourced,      of:c.requirements.total,  ofl:"in register",   note:"carrying a Source:"},
+    {stage:"Requirements",n:c.requirements.sourced,      of:c.requirements.total,  ofl:"in register",   note:"carrying a Source"},
+    {stage:"Allocations",n:c.allocations.withReason,     of:c.allocations.total,   ofl:"steps placed",  note:"with a written reason"},
     {stage:"Ontology",   n:c.ontologyObjects.promoted,   of:c.ontologyObjects.promoted+c.ontologyObjects.backlog, ofl:"candidates", note:"promoted"},
-    {stage:"Questions",  n:c.competencyQuestions.answerable, of:c.competencyQuestions.total, ofl:"written", note:"answerable, run and verified"},
+    {stage:"Questions",  n:c.competencyQuestions.answerable, of:c.competencyQuestions.total, ofl:"written", note:"answerable"},
     {stage:"Eval cases", n:c.evalCases.passing,          of:c.evalCases.total,     ofl:"cases",         note:"passing"}];
 
   h += '<section class="sec" id="chain"><div class="sec-h"><h2>Evidence chain</h2>'
@@ -526,44 +714,41 @@ function renderEngagement(s){
     + links.map(function(l){
         var p = pct(l.n,l.of);
         var cls = l.of===0 ? "ok" : p>=90 ? "ok" : p>=60 ? "warn" : "bad";
-        var col = l.of===0 ? "var(--line-soft)" : p>=90 ? "var(--pass)" : p>=60 ? "var(--caveat)" : "var(--fail)";
+        var colr = l.of===0 ? "var(--line-soft)" : p>=90 ? "var(--pass)" : p>=60 ? "var(--caveat)" : "var(--fail)";
         return '<div class="link"><div class="stage">'+l.stage+'</div>'
           + '<div class="num">'+l.n+'</div>'
           + '<div class="of">of '+l.of+' '+l.ofl+'</div>'
           + '<div class="att '+cls+'">'+(l.of===0?"—":p+"% "+l.note)+'</div>'
-          + '<div class="track"><div class="fill" style="width:'+p+'%;background:'+col+'"></div></div>'
+          + '<div class="track"><div class="fill" style="width:'+p+'%;background:'+colr+'"></div></div>'
           + '</div>'; }).join("")
     + '</div>';
 
-  /* three health ratios */
   var r1=pct(c.requirements.sourced,c.requirements.total),
       r2=pct(c.exceptions.withRuleHolder,c.exceptions.total),
-      r3=pct(c.competencyQuestions.answerable,c.competencyQuestions.total);
+      r3=pct(c.allocations.withReason,c.allocations.total);
   h += '<div class="ratios">'
     + '<div class="ratio"><div class="k">Sourcing discipline</div>'
-    + '<div class="v" style="color:'+(r1===100?"var(--pass)":"var(--fail)")+'">'+r1+'%<small>'
+    + '<div class="v" style="color:'+(c.requirements.total===0?"var(--ink-3)":r1===100?"var(--pass)":"var(--fail)")+'">'+r1+'%<small>'
     + c.requirements.sourced+'/'+c.requirements.total+'</small></div>'
     + '<div class="d">'+(c.requirements.total-c.requirements.sourced>0
         ? '<b>'+(c.requirements.total-c.requirements.sourced)+' unsourced rows</b> sit in the register looking sourced. These block modelling.'
-        : 'Every requirement cites evidence.')+'</div></div>'
+        : c.requirements.total? 'Every requirement cites evidence.' : 'No requirements yet.')+'</div></div>'
     + '<div class="ratio"><div class="k">Rule holders named</div>'
-    + '<div class="v" style="color:'+(r2>=90?"var(--pass)":r2>=60?"var(--caveat)":"var(--fail)")+'">'+r2+'%<small>'
+    + '<div class="v" style="color:'+(c.exceptions.total===0?"var(--ink-3)":r2>=90?"var(--pass)":r2>=60?"var(--caveat)":"var(--fail)")+'">'+r2+'%<small>'
     + c.exceptions.withRuleHolder+'/'+c.exceptions.total+'</small></div>'
     + '<div class="d">The ceiling on eval quality. An exception with no rule holder cannot be adjudicated.</div></div>'
-    + '<div class="ratio"><div class="k">Ontology coverage</div>'
-    + '<div class="v" style="color:'+(r3>=90?"var(--pass)":r3>=60?"var(--caveat)":"var(--idle)")+'">'+r3+'%<small>'
-    + c.competencyQuestions.answerable+'/'+c.competencyQuestions.total+'</small></div>'
-    + '<div class="d">Answerable means <b>run and verified</b> — not that the entities exist and it should work.</div></div>'
+    + '<div class="ratio"><div class="k">Allocations with a reason</div>'
+    + '<div class="v" style="color:'+(c.allocations.total===0?"var(--ink-3)":r3===100?"var(--pass)":"var(--fail)")+'">'+r3+'%<small>'
+    + c.allocations.withReason+'/'+c.allocations.total+'</small></div>'
+    + '<div class="d">The reason is the artefact. At G2 the grid has to survive challenge.</div></div>'
     + '</div></div></section>';
 
-  /* evidence class split */
+  /* evidence class split + confidence */
   h += '<section class="sec"><div class="grid g23">'
     + '<div class="card"><div class="card-h"><h3>Evidence by class</h3>'
     + '<div class="r">'+c.evidence.total+' rows</div></div><div class="card-b">';
-  var classes=[["Observed",c.evidence.observed,"var(--pass)","An FDE watched it. Primary — can source a requirement alone."],
-    ["System",c.evidence.system,"var(--primary-blue)","Log or export. Primary for volume; silent on intent."],
-    ["Documented",c.evidence.documented,"var(--caveat)","SOP or policy. Aspirational until observed."],
-    ["Stated",c.evidence.stated,"var(--idle)","Interview or transcript. Corroborating only."]];
+  var classes=[["Observed",c.evidence.observed,"var(--pass)"],["System",c.evidence.system,"var(--primary-blue)"],
+    ["Documented",c.evidence.documented,"var(--caveat)"],["Stated",c.evidence.stated,"var(--idle)"]];
   h += classes.map(function(x){
       var p = pct(x[1],c.evidence.total);
       return '<div class="irow" style="padding-left:0;padding-right:0">'
@@ -574,8 +759,6 @@ function renderEngagement(s){
     + '<div class="legend" style="padding-left:0;padding-right:0">Requirements sourced only from '
     + '<b>&nbsp;Stated&nbsp;</b> evidence are labelled UNVERIFIED and must be verified before build.</div>'
     + '</div></div>';
-
-  /* confidence */
   h += '<div class="card"><div class="card-h"><h3>Requirement confidence</h3></div><div class="card-b">'
     + [["Verified",c.requirements.verified,"pass"],["Unverified",c.requirements.unverified,"caveat"],
        ["Assumption",c.requirements.assumption,"idle"],["With acceptance criteria",c.requirements.withAC,
@@ -587,95 +770,66 @@ function renderEngagement(s){
         + '</div>'; }).join("")
     + '</div></div></div></section>';
 
-  /* ===== instruments ===== */
-  var maxRows = Math.max.apply(null,s.instruments.map(function(i){return i.rows;}).concat([1]));
-  h += '<section class="sec" id="discovery"><div class="sec-h"><h2>Discovery instruments</h2>'
+  /* instruments, by stage */
+  var cover = s.instruments.filter(function(i){ return i.present; });
+  var maxRows = Math.max.apply(null,cover.map(function(i){return i.rows;}).concat([1]));
+  h += '<section class="sec" id="discovery"><div class="sec-h"><h2>Instrument coverage</h2>'
     + '<div class="note">Coverage is not readiness. An engagement can have full instruments and still fail G1.</div></div>'
     + '<div class="card"><div class="instr">'
-    + s.instruments.map(function(i){
-        return '<div class="irow"><div class="nm"><b>'+esc(i.label)+'</b></div>'
+    + cover.map(function(i){
+        return '<div class="irow"><div class="nm"><span style="color:var(--ink-3);font-size:10.5px;margin-right:6px">'+esc(i.stage)+'</span><b>'+esc(i.label)+'</b></div>'
           + '<div class="meter"><i style="width:'+pct(i.rows,maxRows)+'%;background:'+STATUS_VAR[i.status]+'"></i></div>'
           + '<div class="ct">'+i.rows+'</div>'
           + '<div class="st"><span class="pill '+PILL[i.status]+'">'+i.status+'</span></div>'
-          + '<div class="up">'+esc(i.updated)+'</div></div>'; }).join("")
+          + '<div class="up">'+esc(i.updated||"—")+'</div></div>'; }).join("")
     + '</div><div class="legend">'
     + '<span><i style="background:var(--pass)"></i>populated — 5+ rows</span>'
     + '<span><i style="background:var(--caveat)"></i>thin — 1 to 4</span>'
     + '<span><i style="background:var(--idle)"></i>empty — 0</span>'
-    + '<span style="margin-left:auto">Bar is relative to the largest instrument in this engagement.</span>'
+    + '<span style="margin-left:auto">Register rows only; the bar is relative to the largest instrument here.</span>'
     + '</div></div></section>';
 
-  /* ===== gate criteria detail ===== */
-  var openGate = s.gates.filter(function(g){return g.criteria&&g.criteria.length;})[0];
-  if(openGate){
-    h += '<section class="sec"><div class="sec-h"><h2>'+openGate.id+' — '+esc(openGate.label)+'</h2>'
+  /* gate criteria */
+  var openGate = s.gates.filter(function(g){return g.status!=="passed";})[0];
+  if(openGate && openGate.criteria && openGate.criteria.length){
+    h += '<section class="sec" id="gate"><div class="sec-h"><h2>'+openGate.id+' — '+esc(openGate.label)+'</h2>'
       + '<div class="note">A gate is a stop, not a status update. The memo recommends; the operator decides.</div></div>'
       + '<div class="card"><div class="card-h"><h3>Criteria</h3>'
       + '<div class="r">'+GATE_LABEL[openGate.status]+'</div></div><div class="scroll"><table>'
       + '<thead><tr><th>Criterion</th><th>Status</th><th>Evidence</th><th>To close</th><th>Owner</th></tr></thead><tbody>'
       + openGate.criteria.map(function(x){
-          return '<tr><td><b>'+esc(x.name)+'</b></td>'
-            + '<td><span class="pill '+PILL[x.status]+'">'+x.status+'</span></td>'
+          return '<tr><td><b>'+esc(plain(x.name))+'</b></td>'
+            + '<td><span class="pill '+(PILL[x.status]||"idle")+'">'+esc(x.status)+'</span></td>'
             + '<td><code>'+esc(x.evidence||"—")+'</code></td>'
-            + '<td>'+esc(x.toClose||"—")+'</td><td>'+esc(x.owner||"—")+'</td></tr>'; }).join("")
-      + '</tbody></table></div></div></section>';
+            + '<td>'+(filled(x.toClose)?esc(x.toClose):closesIt(plain(x.name)))+'</td><td>'+esc(plain(x.owner)||"—")+'</td></tr>'; }).join("")
+      + '</tbody></table></div>'
+      + (openGate.behaviours&&openGate.behaviours.length ? '<div class="legend">Behaviours: '
+          + openGate.behaviours.map(function(b){ return '<span><i style="background:'+(b.observed?"var(--pass)":"var(--idle)")+'"></i>'+esc(plain(b.name))+'</span>'; }).join("")+'</div>' : '')
+      + '</div></section>';
   }
 
-  /* ===== questions + RAID ===== */
-  h += '<section class="sec" id="questions"><div class="sec-h"><h2>Questions and RAID</h2>'
-    + '<div class="note">Ranked by what is blocked, not by curiosity. Aged questions blocking a top use case come first.</div></div>'
-    + '<div class="grid g2"><div class="card"><div class="card-h"><h3>Open questions</h3>'
-    + '<div class="r">'+s.openQuestions.length+' unanswered</div></div>';
-  if(s.openQuestions.length){
-    h += '<div class="scroll"><table><thead><tr><th>Id</th><th>Question</th><th>Blocks</th><th class="n">Age</th></tr></thead><tbody>'
-      + s.openQuestions.slice().sort(function(a,b){return b.ageDays-a.ageDays;}).map(function(q){
-          var ac = q.ageDays>=14?"stale":q.ageDays>=7?"old":"";
-          return '<tr><td><code>'+esc(q.id)+'</code></td>'
-            + '<td><b>'+esc(q.question)+'</b><br><span style="color:var(--ink-3);font-size:11.5px">'+esc(q.why)+'</span></td>'
-            + '<td>'+esc(q.blocks)+'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(q.owner)+'</span></td>'
-            + '<td class="n"><span class="age '+ac+'">'+q.ageDays+'d</span></td></tr>'; }).join("")
-      + '</tbody></table></div>';
-  } else { h += '<div class="empty">No open questions.</div>'; }
-  h += '</div>';
-
-  h += '<div class="card"><div class="card-h"><h3>RAID</h3><div class="r">'+s.raid.length+' open</div></div>';
-  if(s.raid.length){
-    h += '<div class="scroll"><table><thead><tr><th>Type</th><th>Item</th><th>Owner</th><th>Review</th></tr></thead><tbody>'
-      + s.raid.map(function(r){
-          var bad = !r.owner || !r.review;
-          return '<tr><td><span class="pill '+(r.impact==="high"?"fail":r.impact==="medium"?"caveat":"idle")+'">'+esc(r.type)+'</span></td>'
-            + '<td>'+esc(r.item)+'</td><td>'+esc(r.owner||"—")+'</td>'
-            + '<td>'+(bad ? '<span class="pill fail">untracked</span>' : esc(r.review))+'</td></tr>'; }).join("")
-      + '</tbody></table></div><div class="legend">An entry with no owner or no review date is not tracked — it renders as a defect, deliberately.</div>';
-  } else { h += '<div class="empty">RAID log empty.</div>'; }
-  h += '</div></div></section>';
-
-  /* ===== use cases ===== */
-  h += '<section class="sec" id="usecases"><div class="sec-h"><h2>Use-case portfolio</h2>'
-    + '<div class="note">Feasibility is capped at the data score. Any dimension at 1 is a stop, not a low score to average away.</div></div>';
-  if(s.useCases.length){
-    var DIMS=["value","feasibility","data","aiSuitability","risk","timeToValue","reusability"];
-    h += '<div class="card"><div class="scroll"><table><thead><tr><th class="n">#</th><th>Use case</th>'
-      + '<th>Scores</th><th class="n">Total</th><th class="n">Cost / txn</th><th>Blocker</th><th>Status</th></tr></thead><tbody>'
-      + s.useCases.map(function(u){
-          var bars = DIMS.map(function(d){
-            var v=u.scores[d]; var capped = (d==="feasibility" && u.scores.feasibility>u.scores.data);
-            return '<i class="'+(capped?"cap":"f")+'" style="height:'+(v/5*16)+'px" title="'+d+': '+v+'"></i>'; }).join("");
-          return '<tr><td class="n">'+u.rank+'</td>'
-            + '<td><b>'+esc(u.name)+'</b></td>'
-            + '<td><div class="sbar">'+bars+'</div></td>'
-            + '<td class="n"><b>'+u.total+'</b></td>'
-            + '<td class="n">'+esc(u.unitCost)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(u.volumeAssumed)+'</span></td>'
-            + '<td>'+(u.blocker?esc(u.blocker)+'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(u.blockerOwner)+'</span>':'—')+'</td>'
-            + '<td><span class="pill '+(PILL[u.status]||"idle")+'">'+esc(u.status)+'</span></td></tr>'; }).join("")
-      + '</tbody></table></div><div class="legend">'
-      + '<span>Bars, left to right: value · feasibility · data · AI fit · risk · time to value · reusability</span>'
-      + '<span><i style="background:var(--caveat)"></i>feasibility exceeding the data score — cap it</span>'
-      + '</div></div>';
-  } else { h += '<div class="card"><div class="empty">No candidates scored yet. Run <b>/qualify</b>.</div></div>'; }
+  /* placement */
+  h += '<section class="sec" id="placement"><div class="sec-h"><h2>Placement</h2>'
+    + '<div class="note">Two axes. Feasibility is the lowest factor, not the average — it is a chain that breaks at its weakest link.</div></div>';
+  if(s.prioritisation.length){
+    h += '<div class="card"><div class="scroll"><table><thead><tr><th class="n">#</th><th>Workflow</th>'
+      + '<th>Value at stake</th><th>Feasibility</th><th>Weakest factor</th><th>Blocker</th><th>Recommendation</th></tr></thead><tbody>'
+      + s.prioritisation.map(function(u){
+          var rec = col(u,"Recommendation").toLowerCase();
+          return '<tr><td class="n">'+esc(col(u,"Rank"))+'</td>'
+            + '<td><b>'+esc(col(u,"Workflow"))+'</b></td>'
+            + '<td>'+esc(col(u,"Value at stake","Value"))+'</td>'
+            + '<td>'+esc(col(u,"Feasibility"))+'</td>'
+            + '<td>'+esc(col(u,"Weakest factor"))+'</td>'
+            + '<td>'+esc(col(u,"Blocker"))+(filled(col(u,"Blocker owner"))?'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(col(u,"Blocker owner"))+'</span>':'')+'</td>'
+            + '<td><span class="pill '+(PILL[rec]||"idle")+'">'+esc(rec||"—")+'</span></td></tr>'; }).join("")
+      + '</tbody></table></div><div class="legend">The declines are part of the assessment. <code>leave-alone</code> at zero on a real engagement is a signal, not an achievement.</div></div>';
+  } else {
+    h += '<div class="card"><div class="empty">Nothing ranked yet. Placement comes after G1 — <b>/allocate</b>.</div></div>';
+  }
   h += '</section>';
 
-  /* ===== ontology + evals + autonomy ===== */
+  /* ontology + evals + autonomy */
   h += '<section class="sec" id="ontology"><div class="sec-h"><h2>Ontology and evals</h2>'
     + '<div class="note">Competency questions map 1:1 to governed read templates, so coverage is countable rather than asserted.</div></div>'
     + '<div class="ops" style="margin-bottom:16px">'
@@ -693,44 +847,88 @@ function renderEngagement(s){
     + '<div class="r">a rung is a measurement, not a phase name</div></div>';
   if(s.autonomy.length){
     h += '<div class="scroll"><table><thead><tr><th>Workflow</th><th>Rung</th><th class="n">Agreement</th>'
-      + '<th class="n">Sample</th><th>Divergence</th><th>Decided by</th></tr></thead><tbody>'
+      + '<th class="n">Sample</th><th>Disagreement</th><th>Decided by</th></tr></thead><tbody>'
       + s.autonomy.map(function(a){
-          var measured = a.agreement!==null;
+          var measured = a.agreement!==null && a.agreement!==undefined;
           return '<tr><td><b>'+esc(a.workflow)+'</b></td>'
             + '<td><span class="pill '+(measured?"active":"fail")+'">'+esc(a.rung)+'</span></td>'
-            + '<td class="n">'+(measured
-                ? '<b>'+Math.round(a.agreement*100)+'%</b>'
-                : '<span class="pill fail">asserted, not measured</span>')+'</td>'
-            + '<td class="n">'+(a.sample?a.sample+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(a.window)+'</span>':'—')+'</td>'
-            + '<td>'+(a.divergence==="n/a"?'—':'<span class="pill '+(a.divergence==="clustered"?"caveat":"fail")+'">'+a.divergence+'</span>'
-                + '<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(a.divergenceDetail)+'</span>')+'</td>'
+            + '<td class="n">'+(measured ? '<b>'+esc(a.agreement)+'</b>' : '<span class="pill fail">asserted, not measured</span>')+'</td>'
+            + '<td class="n">'+(a.sample?esc(a.sample)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(a.window)+'</span>':'—')+'</td>'
+            + '<td>'+(a.disagreementPattern?'<span class="pill '+(a.disagreementPattern==="clustered"?"caveat":"fail")+'">'+esc(a.disagreementPattern)+'</span>'
+                + (a.understood?'':'<br><span style="color:var(--fail);font-size:11.5px">not yet understood</span>'):'—')+'</td>'
             + '<td>'+esc(a.decidedBy||"—")+'</td></tr>'; }).join("")
-      + '</tbody></table></div><div class="legend">Clustered divergence is a fixable gap — usually a rule already in the '
-      + 'exception register. Scattered divergence is a capability ceiling. They look identical in a summary metric.</div>';
+      + '</tbody></table></div><div class="legend">Clustered disagreement is a fixable gap — usually a rule already in the '
+      + 'exception register. Scattered disagreement is a capability ceiling. They look identical in a summary metric.</div>';
   } else { h += '<div class="empty">No workflows measured. Nothing has earned a rung.</div>'; }
   h += '</div></section>';
+  return h;
+}
 
-  /* ===== ops ===== */
-  h += '<section class="sec" id="ops"><div class="sec-h"><h2>Deliverables and ops</h2>'
-    + '<div class="note">Nothing is a client deliverable until it has been rendered.</div></div>'
+/* ===== questions + RAID (both layouts) ===== */
+function questionsHtml(s){
+  var h = '<section class="sec" id="questions"><div class="sec-h"><h2>Questions and RAID</h2>'
+    + '<div class="note">Ranked by what is blocked, not by curiosity. /next says who to ask, and why each ranks where it does.</div></div>'
+    + '<div class="grid g2"><div class="card"><div class="card-h"><h3>Open questions</h3>'
+    + '<div class="r">'+s.openQuestions.length+' unanswered</div></div>';
+  if(s.openQuestions.length){
+    var rows = s.openQuestions.map(function(q){ return {q:q, a:age(col(q,"Raised"), s.generatedAt)}; })
+      .sort(function(x,y){ return (y.a||0)-(x.a||0); });
+    h += '<div class="scroll"><table><thead><tr><th>Id</th><th>Question</th><th>Who · blocks</th><th class="n">Age</th></tr></thead><tbody>'
+      + rows.map(function(r){
+          var q=r.q, a=r.a, ac = a===null?"":a>=14?"stale":a>=7?"old":"";
+          return '<tr><td><code>'+esc(col(q,"Id"))+'</code></td>'
+            + '<td><b>'+esc(col(q,"Question"))+'</b><br><span style="color:var(--ink-3);font-size:11.5px">'+esc(col(q,"Why it matters"))+'</span></td>'
+            + '<td>'+esc(plain(col(q,"Who can answer")))+'<br><span style="color:var(--ink-3);font-size:11.5px">'+esc(col(q,"Blocks"))+'</span></td>'
+            + '<td class="n">'+(a===null?'—':'<span class="age '+ac+'">'+a+'d</span>')+'</td></tr>'; }).join("")
+      + '</tbody></table></div>';
+  } else { h += '<div class="empty">No open questions.</div>'; }
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-h"><h3>RAID</h3><div class="r">'+s.raid.length+' open</div></div>';
+  if(s.raid.length){
+    h += '<div class="scroll"><table><thead><tr><th>Item</th><th>Owner</th><th>Review</th></tr></thead><tbody>'
+      + s.raid.map(function(r){
+          var owner = col(r,"Owner"), review = col(r,"Review","Review by","Confirm by");
+          var bad = !filled(owner) || !filled(review);
+          var impact = col(r,"Impact").toLowerCase();
+          return '<tr><td>'+(impact?'<span class="pill '+(impact==="high"?"fail":impact==="medium"?"caveat":"idle")+'">'+esc(impact)+'</span> ':'')
+            + esc(col(r,"Risk","Assumption","Issue","Dependency","Item"))+'</td><td>'+esc(owner||"—")+'</td>'
+            + '<td>'+(bad ? '<span class="pill fail">untracked</span>' : esc(review))+'</td></tr>'; }).join("")
+      + '</tbody></table></div><div class="legend">An entry with no owner or no review date is not tracked — it renders as a defect, deliberately.</div>';
+  } else { h += '<div class="empty">RAID log empty.</div>'; }
+  h += '</div></div></section>';
+  return h;
+}
+
+/* ===== deliverables, sketches, datasources, skills, improver (both layouts) ===== */
+function opsHtml(s){
+  var sk = s.sketches||[];
+  var h = '<section class="sec" id="ops"><div class="sec-h"><h2>Deliverables and ops</h2>'
+    + '<div class="note">Nothing is a client deliverable until it has been rendered. A sketch is provisional and is listed apart.</div></div>'
     + '<div class="grid g2">';
 
   h += '<div class="card"><div class="card-h"><h3>Deliverables</h3><div class="r">'
-    + s.deliverables.filter(function(d){return d.rendered;}).length+' of '+s.deliverables.length+' rendered</div></div>';
-  if(s.deliverables.length){
-    h += '<div class="instr">'+s.deliverables.map(function(d){
+    + s.deliverables.length+' rendered'+(sk.length?' · '+sk.length+' sketch'+(sk.length===1?'':'es'):'')+'</div></div>';
+  if(s.deliverables.length || sk.length){
+    h += '<div class="instr">'
+      + sk.map(function(d){
+        return '<div class="irow"><div class="nm" style="flex:1;flex-basis:auto"><b>Alignment sketch</b>'
+          + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.path)+'</span></div>'
+          + '<div class="st"><span class="pill caveat">provisional</span></div>'
+          + '<div class="up">'+esc(d.date)+'</div></div>'; }).join("")
+      + s.deliverables.map(function(d){
         return '<div class="irow"><div class="nm" style="flex:1;flex-basis:auto"><b>'+esc(d.name)+'</b>'
-          + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.phase)+'</span></div>'
-          + '<div class="st"><span class="pill '+(d.rendered?"pass":"idle")+'">'+(d.rendered?"rendered":"pending")+'</span></div>'
-          + '<div class="up">'+esc(d.renderedAt||"—")+'</div></div>'; }).join("")+'</div>';
-  } else { h += '<div class="empty">Nothing rendered yet. Run <b>/render</b>.</div>'; }
+          + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.stage)+'</span></div>'
+          + '<div class="st"><span class="pill pass">rendered</span></div>'
+          + '<div class="up">—</div></div>'; }).join("")+'</div>';
+  } else { h += '<div class="empty">Nothing rendered yet. Before G1, <b>/sketch</b>; after it, <b>/render</b>.</div>'; }
   h += '</div>';
 
   h += '<div class="card"><div class="card-h"><h3>Datasources</h3><div class="r">read-only to the harness</div></div>';
   if(s.datasources.length){
-    h += '<div class="scroll"><table><thead><tr><th>File</th><th>Source</th><th>Class</th><th class="n">Size</th></tr></thead><tbody>'
+    h += '<div class="scroll"><table><thead><tr><th>File</th><th>Class</th><th class="n">Size</th></tr></thead><tbody>'
       + s.datasources.map(function(d){
-          return '<tr><td><code>'+esc(d.name)+'</code></td><td>'+esc(d.source)+'</td>'
+          return '<tr><td><code>'+esc(d.name)+'</code></td>'
             + '<td><span class="pill '+(d.classification==="redacted"?"pass":d.classification==="converted"?"active":"caveat")+'">'
             + esc(d.classification)+'</span></td>'
             + '<td class="n">'+kb(d.sizeBytes)+'</td></tr>'; }).join("")
@@ -738,7 +936,6 @@ function renderEngagement(s){
   } else { h += '<div class="empty">No sources received.</div>'; }
   h += '</div></div>';
 
-  /* skills + improver */
   h += '<div class="grid g2" style="margin-top:16px">'
     + '<div class="card"><div class="card-h"><h3>Skills in force</h3><div class="r">'
     + (s.skills.practice+s.skills.engagement+s.skills.function)+' loaded</div></div><div class="card-b">'
@@ -750,7 +947,7 @@ function renderEngagement(s){
     + '<b>Function</b> <span style="color:var(--ink-3)">— harness operation</span></div><div class="ct">'+s.skills.function+'</div></div>';
   if(s.skills.supersedes.length){
     h += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">'
-      + '<div class="k" style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px">Active supersedes</div>'
+      + '<div style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px">Active supersedes</div>'
       + s.skills.supersedes.map(function(x){
           return '<div style="font-size:12px;color:var(--ink-2);margin-bottom:4px"><code>'+esc(x.engagementSkill)
             + '</code> &rarr; overrides <code>'+esc(x.practiceSkill)+'</code></div>'; }).join("")
@@ -768,26 +965,16 @@ function renderEngagement(s){
     + '<div class="v" style="color:'+(hi.pendingPromptEdits?"var(--caveat)":"var(--ink)")+'">'+hi.pendingPromptEdits+'</div>'
     + '<div class="d">Held in feedback for deliberate promotion. <b>harness-improver never edits an agent prompt.</b></div></div>'
     + '</div>';
-  if(s.friction.length){
-    var real = s.friction.filter(function(f){return f.note!=="None.";});
-    h += '<div style="margin-top:4px;padding-top:12px;border-top:1px solid var(--line-soft)">'
-      + '<div style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px">'
-      + 'Friction cited in recent sessions</div>'
-      + (real.length ? real.map(function(f){
-          return '<div style="font-size:12px;color:var(--ink-2);margin-bottom:8px;padding-left:11px;border-left:2px solid var(--line)">'
-            + esc(f.note)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(f.session)+'</span></div>'; }).join("")
-        : '<div style="font-size:12px;color:var(--ink-3)">None logged. Legitimate — but a permanently empty list means the loop is not running.</div>')
-      + '</div>';
-  }
+  h += '<div style="margin-top:4px;padding-top:12px;border-top:1px solid var(--line-soft)">'
+    + '<div style="font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:8px">'
+    + 'Friction cited in recent sessions</div>'
+    + (s.friction.length ? s.friction.map(function(f){
+        return '<div style="font-size:12px;color:var(--ink-2);margin-bottom:8px;padding-left:11px;border-left:2px solid var(--line)">'
+          + esc(f.note)+'<br><span style="color:var(--ink-3);font-size:11px">'+esc(f.session)+'</span></div>'; }).join("")
+      : '<div style="font-size:12px;color:var(--ink-3)">None logged. Legitimate — but a permanently empty list means the loop is not running.</div>')
+    + '</div>';
   h += '</div></div></div></section>';
-
-  /* last session */
-  h += '<section class="sec"><div class="card"><div class="card-h"><h3>Last session</h3>'
-    + '<div class="r"><code>'+esc(s.sessions.latest)+'</code> · '+esc(s.sessions.latestDate)+'</div></div>'
-    + '<div class="card-b"><p style="margin:0;max-width:80ch;font-size:13.5px">'+esc(s.sessions.latestSummary)+'</p></div></div>'
-    + '<div style="height:8px"></div></section></div>';
-
-  document.getElementById("page").innerHTML = h;
+  return h;
 }
 
 function render(){
@@ -818,5 +1005,8 @@ document.getElementById("themebtn").addEventListener("click",function(){
   document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
 });
 
+/* A single engagement opens on itself; a portfolio opens on the overview. */
+if(STATE.length!==1) view = -1;
 render();
+
 </script>

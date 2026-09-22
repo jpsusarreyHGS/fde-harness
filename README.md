@@ -329,7 +329,13 @@ Three things to know:
 /dashboard
 ```
 
-Rebuilds `state.json` from what is actually on disk, then renders self-contained HTML. Opens by double-click; no server, no build step.
+Rebuilds `state.json` from what is actually on disk, then renders self-contained HTML — `dashboard.html` at the root for every engagement, `engagements/<slug>/dashboard.html` for one. Opens by double-click; no server, no build step. Outside Claude Code the same thing is:
+
+```bash
+node scripts/render-dashboard.mjs
+```
+
+**On day one it will not be a grid of numbers, and that is deliberate.** Until you have accepted your first rows into a discovery instrument, the engagement card leads with what to do next: material waiting in `evidence/` (with the `/capture` command), proposed rows awaiting accept, anything dropped outside a class folder, the G1 bar as a checklist with the one line that closes each item, and the next three conversations from `/next`. The full coverage grid and evidence chain appear once rows exist — and the waiting/pending strip stays at the top from then on, because a file dropped this morning is invisible to every register count.
 
 **A red gate or an empty instrument is the harness working.** Never hand-edit `state.json` to make it look better — it is derived, and if it disagrees with the files, the files are right.
 
@@ -380,6 +386,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | A command fails with a TypeScript syntax error | You are on Node 22. This needs 24 — check with `node -v` |
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
+| The dashboard is "empty" on a new engagement | It is not — it is in early state. Look at the strip at the top: material waiting, rows pending, the G1 checklist. The coverage grid appears after your first accept. If the page is genuinely blank, open the browser console and report the error |
 | An accept is refused | It cites an id that does not exist. The message names it |
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
 | An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |

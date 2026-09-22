@@ -192,11 +192,9 @@ Failures are grouped **by class**, because a class is fixable and a scattered pe
 
 ## `openQuestions[]`
 
-```
-{ "id", "question", "why", "owner", "blocks", "raised" }
-```
+The unanswered rows of `open-questions.rows`, **with the register's own column names as keys** — `Id`, `Question`, `Why it matters`, `Who can answer`, `Blocks`, `Raised`, `Answered`, `Answer`. They are not renamed on the way through: the parser is the same one every other consumer uses, and a rename here would be a second schema to keep in step.
 
-No `ageDays`. Compute from `raised`. Sort by age descending; an aged question blocking a top-ranked workflow is the most actionable thing on the dashboard.
+No `ageDays`. Compute from `Raised`. Sort by age descending; an aged question blocking a top-ranked workflow is the most actionable thing on the dashboard.
 
 ## `raid[]`
 

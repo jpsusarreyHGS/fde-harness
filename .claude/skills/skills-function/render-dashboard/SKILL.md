@@ -56,10 +56,14 @@ Fire the counting calls in one batch:
 
 ## Phase 2 — Render
 
-> **Status: the bundled `dashboard-template.html` still renders schema v1** (`phases[]`, `useCases[]`, four autonomy rungs). It is retained so the existing view keeps working, but it does **not** show stages `00`-`09`, the allocation grid, the four tests or the ROI model. It is regenerated against v2 when the derive package lands, and the web app takes over the UI after that. Do not extend it in the meantime — fix the schema and the parser first.
+Both phases are one command. Do not substitute the JSON by hand — that is how the template drifted a schema version behind the state it was fed and painted a blank page:
 
+```bash
+node scripts/render-dashboard.mjs            # every engagement
+node scripts/render-dashboard.mjs <slug>     # one
+```
 
-Read `dashboard-template.html` in this directory. Substitute the state as a JSON blob into the `STATE` placeholder and write the result.
+It derives each engagement fresh, refuses a tampered one (exit 3), regenerates `state.json`, and substitutes into `dashboard-template.html`, which renders **schema v2**: stages `00`–`09`, the three gates, the judgment chain, instrument coverage by stage, placement, the autonomy ledger, deliverables and sketches.
 
 Outputs:
 
@@ -67,6 +71,18 @@ Outputs:
 - `engagements/<slug>/dashboard.html` — single-engagement view
 
 The template is self-contained: no build step, no server, no dependency beyond the Kanit webfont, which degrades to a system stack offline. It opens by double-click.
+
+### The early-state layout
+
+An engagement with **no accepted rows in any stage 01–03 instrument** does not get the coverage grid — that would be an honest wall of zeros, and it reads as broken. It gets, in this order:
+
+1. **The waiting / pending strip** — material in `evidence/` by class with the `/capture` command; proposed rows awaiting accept with the `pending` command; files outside a class folder; sketches.
+2. **G1 as a checklist** — each criterion ✓ / ◐ / ✗ with the one line that closes it (the memo's `To close` when present, else a default per criterion).
+3. **The next conversations** — "Verify first" if anything is on file, then the top three groups from the coach, each question with its `means`.
+
+Once any 01–03 instrument has rows the full layout takes over, and **the strip stays at the top permanently** — a file dropped this morning is invisible to every register count, and the strip is the only place it shows. Never blank; never a red wall with no next action.
+
+`packages/derive/test/dashboard.test.ts` executes the page script against v2 state, so a template edit that throws fails the suite.
 
 ## Brand
 
