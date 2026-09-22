@@ -51,6 +51,7 @@ Every table in every instrument carries an HTML-comment anchor immediately above
 | `roi` | object | Inputs labelled by provenance, and outputs |
 | `deliverables` | array | Rendered client-facing artefacts |
 | `sketches` | array | Pre-G1 alignment sketches — `{ date, path }` under `deliverables/<slug>/sketch/`. Listed apart from `deliverables[]` so a provisional page is never counted as a deliverable |
+| `mockups` | array | Concept mockups — `{ version, date, path }` under `deliverables/<slug>/mockups/`, synthetic and watermarked, each with a row in `05-Build/mockup-ledger.md`. Listed apart from `deliverables[]` |
 | `datasources` | array | Input files and classification |
 | `skills` | object | Counts and detected supersedes |
 | `harnessImprover` | object | Loop health |

@@ -467,7 +467,7 @@ function buildNav(s){
     discovery:s.instruments.filter(function(i){return i.status!=="empty";}).length,
     gate:(s.gates[0]&&s.gates[0].criteria?s.gates[0].criteria.length:0),
     questions:s.openQuestions.length+s.raid.length, placement:s.prioritisation.length,
-    ontology:s.chain.competencyQuestions.total, ops:s.deliverables.length+(s.sketches||[]).length,
+    ontology:s.chain.competencyQuestions.total, ops:s.deliverables.length+(s.sketches||[]).length+(s.mockups||[]).length,
     next:s.intake.waiting+s.intake.pendingProposals.length };
   nav.innerHTML = (early?SECTIONS_EARLY:SECTIONS_FULL).map(function(sec,i){
     return '<a href="#'+sec[0]+'"><i>'+String(i+1).padStart(2,"0")+'</i>'+sec[1]
@@ -902,15 +902,20 @@ function questionsHtml(s){
 
 /* ===== deliverables, sketches, datasources, skills, improver (both layouts) ===== */
 function opsHtml(s){
-  var sk = s.sketches||[];
+  var sk = s.sketches||[], mk = s.mockups||[];
   var h = '<section class="sec" id="ops"><div class="sec-h"><h2>Deliverables and ops</h2>'
-    + '<div class="note">Nothing is a client deliverable until it has been rendered. A sketch is provisional and is listed apart.</div></div>'
+    + '<div class="note">Nothing is a client deliverable until it has been rendered. A sketch is provisional and a mockup is synthetic; both are listed apart.</div></div>'
     + '<div class="grid g2">';
 
   h += '<div class="card"><div class="card-h"><h3>Deliverables</h3><div class="r">'
-    + s.deliverables.length+' rendered'+(sk.length?' · '+sk.length+' sketch'+(sk.length===1?'':'es'):'')+'</div></div>';
-  if(s.deliverables.length || sk.length){
+    + s.deliverables.length+' rendered'+(sk.length?' · '+sk.length+' sketch'+(sk.length===1?'':'es'):'')+(mk.length?' · '+mk.length+' mockup'+(mk.length===1?'':'s'):'')+'</div></div>';
+  if(s.deliverables.length || sk.length || mk.length){
     h += '<div class="instr">'
+      + mk.map(function(d){
+        return '<div class="irow"><div class="nm" style="flex:1;flex-basis:auto"><b>Concept mockup v'+d.version+'</b>'
+          + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.path)+' · synthetic · see 05-Build/mockup-ledger.md</span></div>'
+          + '<div class="st"><span class="pill caveat">concept</span></div>'
+          + '<div class="up">'+esc(d.date)+'</div></div>'; }).join("")
       + sk.map(function(d){
         return '<div class="irow"><div class="nm" style="flex:1;flex-basis:auto"><b>Alignment sketch</b>'
           + '<br><span style="color:var(--ink-3);font-size:11px">'+esc(d.path)+'</span></div>'

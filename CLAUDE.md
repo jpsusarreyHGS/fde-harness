@@ -89,6 +89,7 @@ The harness is a **team of specialist subagents**. The session you are in is the
 | **solution-architect** | The allocation grid, prioritisation, architecture, the build plan, and the build loop | `04`–`05` |
 | **engagement-manager** | Setup, charter, roadmap, RAID, scope changes, gate readiness, ROI model | `00`, `08` |
 | **builder** | Implements the MVP — pipelines, connectors, governed templates, surface | `05` |
+| **concept-mockup** | One self-contained HTML page of what it could look like — synthetic data, every discovery gap a labelled assumption, watermarked, logged. Stage-agnostic; invoked on the FDE's judgment | any |
 | **evaluator** | The four tests, golden sets, failure taxonomy, regression gate, autonomy measurement | `06`–`07` |
 | **chronicle** | Session log and engagement memory | all |
 | **harness-improver** | Reviews the harness, proposes improvements, runs the library contribution at close | `09` |
@@ -147,7 +148,7 @@ Full engagement state in three reads plus one command. **Do not Glob, Bash-enume
 
 - **`.claude/skills/skills-practice/`** — the practice's canonical method, refreshed from upstream
 - **`engagements/<slug>/skills-engagement/`** — client-calibrated; **supersedes** practice skills for that engagement
-- **`.claude/skills/skills-function/`** — harness operation
+- **`.claude/skills/skills-function/`** — harness operation, and the **house UI**: `hgs-app-ui` is the visual language for anything the harness renders *as an app* — the concept mockup (Path B, single file) and the MVP (Path A, Vite + shadcn). Documents — sketch, deliverables, dashboard — keep the Kanit brand tokens in `assets/`. Two registers, deliberately: a document is not a product
 
 **Supersede rule.** Where an engagement skill and a practice skill cover the same topic, the engagement one wins — read both, prefer the engagement values, and say which applied.
 
@@ -191,6 +192,7 @@ node packages/derive/src/cli.ts next    <engagement-dir> [groups]     # what to 
 node packages/derive/src/cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>"
                                                                        # a chat answer, written into evidence/stated/ for /capture
 node packages/derive/src/cli.ts sketch  <engagement-dir>              # the pre-G1 alignment sketch, accepted rows only
+node packages/derive/src/cli.ts mockup  <engagement-dir> next|log …   # concept mockup: version, what it rests on; then the ledger row
 node packages/derive/src/cli.ts contract-check <engagement-dir>       # will the compiler take it?
 ```
 
@@ -314,6 +316,7 @@ engagements/{slug}/
 │   ├── access-model.md
 │   ├── build-plan-{date}.md
 │   ├── manual-tasks.md
+│   ├── mockup-ledger.md              # every concept mockup: built from what, assumed what, shown to whom, reaction
 │   └── builds/
 ├── 06-Evals/
 │   ├── golden-sets/
@@ -347,6 +350,8 @@ engagements/{slug}/
 Client-facing outputs land in `deliverables/{slug}/`, mirroring the stage folders. **Nothing is a deliverable until it has been rendered there.**
 
 One exception exists before G1: `/sketch` writes `deliverables/{slug}/sketch/<date>.html` — the alignment sketch, built from accepted rows only, every line badged with its evidence class, under a `PROVISIONAL — pre-G1 alignment sketch` banner that is not removable by argument. It shows what was heard, never what will be built; it never reads a pending proposal and never invents a step. `state.json` lists it under `sketches[]`, apart from `deliverables[]`.
+
+A second exception exists at any stage, on the FDE's judgment: `/mockup` writes `deliverables/{slug}/mockups/mockup-v<N>-<date>.html` — the **concept mockup**, what it *could* look like, in the HGS app house style with **synthetic data only** and every discovery gap rendered as a labelled assumption to be corrected. `Concept visualization — not a build commitment or spec` is in its header and footer and is not removable. Code mints the version and writes the row in `05-Build/mockup-ledger.md` (what existed when it was built, what was assumed, who saw it, what they said) and refuses a page without the watermark or with a real name. **The reactions it draws are evidence** — through `answer` and `/capture`, like an interview — and the buy-in is the direction-setting decision, recorded in the ledger and in `decisions.md`. `builder` reads the last confirmed mockup before touching an app surface. `state.json` lists mockups under `mockups[]`.
 
 ### Canonical paths — read the path, do not probe
 

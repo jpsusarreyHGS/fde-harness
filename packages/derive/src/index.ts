@@ -12,6 +12,8 @@ export { recordAnswer } from "./answer.ts";
 export { renderSketch, PROVISIONAL, SKETCH_DIR } from "./sketch.ts";
 export { renderDashboardHtml, readTemplate, isEarlyState, TEMPLATE_PATH } from "./dashboard.ts";
 export { clientSafe, formatRedactionReport, loadNames, loadObserved } from "./clientsafe.ts";
+export { listMockups, planMockup, logMockup, WATERMARK, MOCKUP_DIR, LEDGER_PATH } from "./mockup.ts";
+export type { MockupRef, MockupPlan, LogMockupOptions, LogMockupResult } from "./mockup.ts";
 export type { Redaction, ClientSafeOptions, ClientSafeResult } from "./clientsafe.ts";
 export type { SketchOptions, SketchResult } from "./sketch.ts";
 export type { AnswerClass, RecordAnswerOptions, RecordAnswerResult } from "./answer.ts";

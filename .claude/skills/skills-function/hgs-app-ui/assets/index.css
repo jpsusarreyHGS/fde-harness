@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    /* Fallback stack matters: if the Geist import fails (offline install,
+       unreachable registry, no bundler), the UI must degrade to a close
+       neutral grotesque — never to the browser's default serif-ish
+       sans-serif alone. Inter → system UI stacks keep the metrics and
+       register close enough that the layout still reads as intended. */
+    --font-sans: 'Geist Variable', 'Geist', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --color-header: var(--header);
+    --color-header-foreground: var(--header-foreground);
+    --color-canvas: var(--canvas);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-8: var(--chart-8);
+    --color-chart-7: var(--chart-7);
+    --color-chart-6: var(--chart-6);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-status-good: var(--status-good);
+    --color-status-warning: var(--status-warning);
+    --color-status-serious: var(--status-serious);
+    --color-status-critical: var(--status-critical);
+    --color-brand-navy: var(--brand-navy);
+    --color-brand-lime: var(--brand-lime);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+
+    /* Elevation — soft, low-opacity, multi-layer shadows in the Linear/
+       Stripe register (an ambient embient layer + a tighter key shadow)
+       rather than Tailwind's stock single-layer defaults. Registering
+       under --shadow-* overrides the shadow-xs/sm/md/lg/xl utilities
+       app-wide with no per-component changes required. */
+    --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+    --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 1px 0 rgb(15 23 42 / 0.03);
+    --shadow-md: 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+    --shadow-lg: 0 12px 20px -6px rgb(15 23 42 / 0.08), 0 4px 8px -4px rgb(15 23 42 / 0.04);
+    --shadow-xl: 0 24px 40px -10px rgb(15 23 42 / 0.12), 0 8px 16px -8px rgb(15 23 42 / 0.06);
+
+    /* Motion — one shared easing curve (a gentle decelerate, not a linear
+       or bouncy one) and duration scale, used for hover/press states and
+       layered on top of base-ui's own open/close transitions. */
+    --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+}
+
+:root {
+    /* Brand — from the HGS mark (public/logo.svg): deep navy wordmark,
+       lime accent icon. Navy carries primary actions/focus/active-nav;
+       lime is used sparingly (the logomark itself, a handful of chart
+       series) rather than as a UI-wide accent — enterprise software reads
+       as considered, not playful. */
+    --brand-navy: #26476b;
+    --brand-lime: #abcf02;
+
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+    --primary: var(--brand-navy);
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: var(--brand-navy);
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #eef2f7;
+    --accent-foreground: var(--brand-navy);
+    --destructive: #dc2626;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: color-mix(in oklch, var(--brand-navy) 55%, white);
+    --chart-1: #2a78d6;
+    --chart-2: #1baf7a;
+    --chart-3: #eda100;
+    --chart-4: #008300;
+    --chart-5: #4a3aa7;
+    --chart-6: #e34948;
+    --chart-7: #e87ba4;
+    --chart-8: #eb6834;
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+    --radius: 0.625rem;
+
+    /* Chrome — the navy shell (sidebar + header). Both wear the brand
+       colour in every theme; the header is always a step darker than the
+       sidebar so the two chrome surfaces read as distinct instead of one
+       flat block. Derived from --sidebar with color-mix so this holds
+       automatically in dark mode too — never hardcode a second header
+       color per theme. */
+    --sidebar: var(--brand-navy);
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: var(--brand-navy);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgb(255 255 255 / 10%);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgb(255 255 255 / 14%);
+    --sidebar-ring: var(--ring);
+    --header: color-mix(in srgb, var(--sidebar) 78%, black);
+    --header-foreground: #ffffff;
+
+    /* Canvas — the page background behind cards/tables in <main>. A pale
+       tint, not pure white, so panels read as raised surfaces instead of
+       blending into a flat page. Distinct from --background, which stays
+       white for cards, popovers, inputs, etc. */
+    --canvas: var(--muted);
+}
+
+.dark {
+    --brand-navy: #4a729e;
+    --brand-lime: #abcf02;
+
+    --background: #0a0f18;
+    --foreground: #f1f5f9;
+    --card: #101826;
+    --card-foreground: #f1f5f9;
+    --popover: #101826;
+    --popover-foreground: #f1f5f9;
+    --primary: #6f93bd;
+    --primary-foreground: #0a0f18;
+    --secondary: #1a2333;
+    --secondary-foreground: #f1f5f9;
+    --muted: #1a2333;
+    --muted-foreground: #94a3b8;
+    --accent: #1c2740;
+    --accent-foreground: #f1f5f9;
+    --destructive: #f87171;
+    --border: rgb(255 255 255 / 10%);
+    --input: rgb(255 255 255 / 12%);
+    --ring: color-mix(in oklch, #6f93bd 60%, white);
+    --chart-1: #3987e5;
+    --chart-2: #199e70;
+    --chart-3: #c98500;
+    --chart-4: #008300;
+    --chart-5: #9085e9;
+    --chart-6: #e66767;
+    --chart-7: #d55181;
+    --chart-8: #d95926;
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+
+    /* Chrome stays the brand navy, just a deeper tone so it doesn't read
+       brighter than the dark content it frames. --header is still derived,
+       not hardcoded — it falls out of the color-mix above automatically. */
+    --sidebar: #16283c;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #6f93bd;
+    --sidebar-primary-foreground: #0a0f18;
+    --sidebar-accent: rgb(255 255 255 / 10%);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgb(255 255 255 / 10%);
+    --sidebar-ring: var(--ring);
+
+    --canvas: var(--background);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
+    }
+  html {
+    @apply font-sans;
+    /* Native scrollbars follow the app's own theme, not the OS/browser
+       preference — otherwise a light-mode page can render dark-styled
+       scrollbars (or vice versa) that look mismatched against the page. */
+    color-scheme: light;
+    }
+  html.dark {
+    color-scheme: dark;
+    }
+  h1, h2, h3, h4 {
+    letter-spacing: -0.01em;
+    }
+}
+
+@layer utilities {
+  /* Apply to any element that scrolls on one axis only (a tab strip, a
+     horizontally-scrolling table). Always pair with overflow-y-hidden —
+     setting only overflow-x leaves overflow-y at its default `visible`,
+     which the spec then silently promotes to `auto`, producing a spurious
+     vertical scrollbar (with default OS arrows) on elements that never
+     actually overflow vertically. */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+}

@@ -94,7 +94,7 @@ Two kinds of artefact. **Accepted rows** come out of `/capture` as proposed rows
 | **G3** | Memo, as G1 | `engagement-management/stage-gate-3-readiness.md` | `/gate 3` | prose |
 | `09` | Retrospective; a library contribution **accepted by the library owner** | `09-Loop/retrospective.md` · `library-contribution.md` | `/harness-improver close` | prose + rows |
 
-Any time: `/sketch` (before G1), `/dashboard`, `/render` (after G1), `/next`, `/chronicle`.
+Any time: `/sketch` (before G1), `/mockup` (whenever you can name what the screen is for — logged in `05-Build/mockup-ledger.md`), `/dashboard`, `/render` (after G1), `/next`, `/chronicle`.
 
 ### Compressed engagements and simulations
 
@@ -110,8 +110,9 @@ If you have one day of discovery — a training simulation, a two-hour call, a c
 
 | | |
 |---|---|
-| **8 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, chronicle, harness-improver |
-| **16 slash commands** | the stage pipeline plus sketch, dashboard, render and the improvement loop |
+| **9 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, concept-mockup, chronicle, harness-improver |
+| **17 slash commands** | the stage pipeline plus sketch, mockup, dashboard, render and the improvement loop |
+| **A house UI** | `hgs-app-ui` — the HGS app design system (navy chrome, Geist, tokens, page patterns) behind every concept mockup and every MVP surface |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
 | **A published contract** | `03-Systems/ontology/` compiles to a governed assistant — see [`docs/contract.md`](docs/contract.md) |
@@ -359,6 +360,22 @@ Three things to know:
 - **It is the only thing allowed in `deliverables/` before G1**, and it says so — `PROVISIONAL — pre-G1 alignment sketch` in the header and footer. That banner does not come off; the route past it is `/gate 1` and then `/render`.
 - **It shows what you heard, not what you will build.** Solution wireframes are your work after `/allocate`. The badges are the point: a page of *stated* lines is a request to go and watch.
 
+### Step 6⅞ — Show them what it could look like, before anyone builds it: `/mockup`
+
+```
+/mockup the exceptions queue the coordinator works from
+```
+
+Any time you can name what a screen is for — a workflow, a use case, a pain point — you can put a picture of it in front of the people who hold the answers. `/mockup` renders **one self-contained HTML page** in the HGS app house style (navy chrome, Geist, the same tokens the MVP will use), with **synthetic data shaped to what discovery found** and, beside it, a panel headed *We assumed — correct us*: every gap in discovery, numbered, each pointing at a callout on the page and naming who can correct it. It opens anywhere, including a conference room with no network.
+
+Three things make it safe to do this cheaply:
+
+- **The watermark.** *Concept visualization — not a build commitment or spec*, in the header and the footer. Stakeholders screenshot these and forward them; the label travels with it. Code refuses to log a page without it.
+- **The ledger.** `05-Build/mockup-ledger.md` records, for every version, what existed when it was built, what was assumed, who saw it and what they said — so "why does the MVP differ from the mockup?" has a written answer. Code mints the version; you never type one.
+- **Reactions are evidence.** What the stakeholder says goes in through `answer` and `/capture`, like an interview. *"Saw v2, confirmed direction, 22 Sep"* is the single most valuable line in the discovery record — it is the decision everything downstream builds on. Corrections make v3.
+
+It is not the sketch (what we *heard*, evidence-badged) and not the MVP (what it *does*, on real data). If you cannot name what the screen is for, the agent will say so and point you at `/next` instead — that is a judgment, not a gate, and you can overrule it.
+
 ### Step 6¾ — Rendering anything for the client: the client-safe pass
 
 Whatever you render — the sketch now, the operating map and the readout later — goes through a **client-safe pass** before it becomes HTML, and prints a **redaction report** you can read in thirty seconds:
@@ -446,7 +463,9 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
 | An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
-| I need something to show the client and G1 is NOT READY | `/sketch`. It renders what you have accepted so far under a PROVISIONAL banner. It is a page to be corrected, not a design |
+| I need something to show the client and G1 is NOT READY | `/sketch` for what you heard, `/mockup` for what it could look like. Both are pages to be corrected, not designs — the sketch is evidence-badged, the mockup is synthetic with its assumptions listed |
+| `mockup log` refused my file | Either the watermark is missing from the header or footer (it must appear twice, verbatim), or the page names a real person from the stakeholder map. A mockup is synthetic — use the role, or approve the name in `00-Setup/client-safe-names.md` |
+| The MVP does not look like the mockup the sponsor approved | `05-Build/mockup-ledger.md` says which version they confirmed; `builder` must write the difference down in its build report and in `decisions.md` before building. If it did not, that is the finding |
 | The sketch is missing a step I captured | It is in a proposal you have not accepted. `cli.ts pending`, then `accept` — the sketch reads registers only, never proposals |
 | A rendered page says "the process owner" where I wrote a name | The client-safe pass replaced it. To show the name, add it to `00-Setup/client-safe-names.md` with who approved it, and re-render. The `.redactions.md` beside the page lists every replacement |
 | `/allocate` (or any agent command) stops with "`engagements/<slug>` is not visible from this session" | The session is in an isolated git worktree, which holds no engagement folders because they are never committed — or the engagement was created in a different checkout. Run from the main checkout or turn off worktree isolation; `git worktree list` shows which you are in |

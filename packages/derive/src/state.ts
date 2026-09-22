@@ -61,6 +61,12 @@ export interface State {
    * rendered client deliverable.
    */
   sketches: { date: string; path: string }[];
+  /**
+   * Concept mockups under `deliverables/<slug>/mockups/` — synthetic,
+   * watermarked, logged in `05-Build/mockup-ledger.md`. Listed apart from
+   * `deliverables[]` for the same reason sketches are.
+   */
+  mockups: { version: number; date: string; path: string }[];
   datasources: { name: string; sizeBytes: number; classification: string }[];
   skills: {
     practice: number; engagement: number; function: number;
@@ -455,6 +461,7 @@ export async function deriveState(opts: {
 
   const deliverables: State["deliverables"] = [];
   const sketches: State["sketches"] = [];
+  const mockups: State["mockups"] = [];
   if (opts.deliverablesDir) {
     for (const s of STAGES) {
       for (const f of await lsIf(join(opts.deliverablesDir, slug, s.slug))) {
@@ -467,6 +474,11 @@ export async function deriveState(opts: {
       const m = /^(\d{4}-\d{2}-\d{2})\.html$/.exec(f);
       if (m) sketches.push({ date: m[1]!, path: `${slug}/sketch/${f}` });
     }
+    for (const f of (await lsIf(join(opts.deliverablesDir, slug, "mockups")))) {
+      const m = /^mockup-v(\d+)-(\d{4}-\d{2}-\d{2})\.html$/.exec(f);
+      if (m) mockups.push({ version: Number(m[1]), date: m[2]!, path: `${slug}/mockups/${f}` });
+    }
+    mockups.sort((a, b) => a.version - b.version);
   }
 
   // ---- engagement identity ----------------------------------------------
@@ -546,6 +558,7 @@ export async function deriveState(opts: {
     prioritisation,
     deliverables,
     sketches,
+    mockups,
     datasources,
     skills: { practice, engagement: engagementSkills.length, function: fn, supersedes: [] },
     intake: {

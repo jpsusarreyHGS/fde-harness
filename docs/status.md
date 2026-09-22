@@ -24,7 +24,7 @@ Last verified 15 September 2026 by cloning the repo fresh and walking a full fir
 | **ROI** | `cli.ts roi` computes all four outputs from the nine inputs and prints the working. Three buckets tracked |
 | **Conformance** | Canon vendored in `docs/canon/`; `docs/conformance.md` records implemented / extension / divergent / missing |
 
-16 slash commands · 55 templates · 47 instruments · 173 tests.
+17 slash commands · 56 templates · 48 instruments · 182 tests.
 
 ## What is usable but manual
 

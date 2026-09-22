@@ -1,0 +1,14 @@
+# Mockup ledger — {{CLIENT_NAME}}
+
+Every concept mockup shown to anyone, and what happened. A mockup is cheap to make and easy to forward; this is what keeps it from becoming an unwritten promise. When someone asks "why does the MVP differ from the mockup?", the answer is on this page.
+
+**Written by code**, via `node packages/derive/src/cli.ts mockup <engagement-dir> log <file> …` — which refuses a file without the watermark and mints the version. Do not hand-write a row.
+
+<!-- table:mockup-ledger.rows role=register id=Version -->
+
+| Version | Date | File | Built from | Assumptions | Shown to | Reaction | Evidence |
+|---|---|---|---|---|---|---|---|
+
+- **Built from** — the instruments that had accepted rows when it was made. Everything else on the page was assumed.
+- **Assumptions** — how many, and where they are listed (the page's assumptions panel; the sibling `.assumptions.md`).
+- **Shown to · Reaction · Evidence** — filled after the showing. The reaction goes into `evidence/stated/` through `answer`, like any other thing a stakeholder said, and the buy-in — "saw v2, confirmed direction, 22 Sep" — is the direction-setting decision everything downstream builds on. Record it as such.

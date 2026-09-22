@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{APP_NAME}} — concept v{{VERSION}}</title>
+<!-- Path B font delivery (hgs-app-ui/references/fallback-primitives.md §1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   HGS app tokens — hgs-app-ui/assets/index.css, :root and .dark verbatim.
+   Colors come ONLY from these variables. Lime is the logomark, nothing else.
+   ============================================================ */
+:root{
+  --brand-navy:#26476b;--brand-lime:#abcf02;
+  --background:#ffffff;--foreground:#0f172a;--card:#ffffff;--card-foreground:#0f172a;
+  --popover:#ffffff;--popover-foreground:#0f172a;--primary:var(--brand-navy);--primary-foreground:#ffffff;
+  --secondary:#f1f5f9;--secondary-foreground:var(--brand-navy);--muted:#f1f5f9;--muted-foreground:#64748b;
+  --accent:#eef2f7;--accent-foreground:var(--brand-navy);--destructive:#dc2626;--border:#e2e8f0;--input:#e2e8f0;
+  --ring:color-mix(in oklch,var(--brand-navy) 55%,white);
+  --chart-1:#2a78d6;--chart-2:#1baf7a;--chart-3:#eda100;--chart-4:#008300;--chart-5:#4a3aa7;--chart-6:#e34948;--chart-7:#e87ba4;--chart-8:#eb6834;
+  --status-good:#0ca30c;--status-warning:#fab219;--status-serious:#ec835a;--status-critical:#d03b3b;
+  --radius:0.625rem;
+  --sidebar:var(--brand-navy);--sidebar-foreground:#ffffff;--sidebar-primary:var(--brand-navy);--sidebar-primary-foreground:#ffffff;
+  --sidebar-accent:rgb(255 255 255 / 10%);--sidebar-accent-foreground:#ffffff;--sidebar-border:rgb(255 255 255 / 14%);--sidebar-ring:var(--ring);
+  --header:color-mix(in srgb,var(--sidebar) 78%,black);--header-foreground:#ffffff;
+  --canvas:var(--muted);
+  --shadow-xs:0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-md:0 4px 8px -2px rgb(15 23 42 / 0.06),0 2px 4px -2px rgb(15 23 42 / 0.04);
+  --ease-premium:cubic-bezier(0.16,1,0.3,1);--duration-fast:120ms;
+  --font-sans:'Geist Variable','Geist','Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+.dark{
+  --brand-navy:#4a729e;--brand-lime:#abcf02;
+  --background:#0a0f18;--foreground:#f1f5f9;--card:#101826;--card-foreground:#f1f5f9;
+  --popover:#101826;--popover-foreground:#f1f5f9;--primary:#6f93bd;--primary-foreground:#0a0f18;
+  --secondary:#1a2333;--secondary-foreground:#f1f5f9;--muted:#1a2333;--muted-foreground:#94a3b8;
+  --accent:#1c2740;--accent-foreground:#f1f5f9;--destructive:#f87171;--border:rgb(255 255 255 / 10%);--input:rgb(255 255 255 / 12%);
+  --ring:color-mix(in oklch,#6f93bd 60%,white);
+  --chart-1:#3987e5;--chart-2:#199e70;--chart-3:#c98500;--chart-4:#008300;--chart-5:#9085e9;--chart-6:#e66767;--chart-7:#d55181;--chart-8:#d95926;
+  --sidebar:#16283c;--sidebar-primary:#6f93bd;--sidebar-primary-foreground:#0a0f18;--sidebar-border:rgb(255 255 255 / 10%);
+  --canvas:var(--background);
+}
+/* ---------- base (index.css @layer base, by hand) ---------- */
+*{box-sizing:border-box;border-color:var(--border)}
+html{font-family:var(--font-sans);color-scheme:light}html.dark{color-scheme:dark}
+body{margin:0;background:var(--background);color:var(--foreground);font-size:14px;line-height:1.5;font-feature-settings:"cv11","ss01"}
+h1,h2,h3,h4{margin:0;letter-spacing:-0.01em;font-weight:600}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+/* ---------- the watermark: header bar and footer. Do not remove or restyle. ---------- */
+.wm{background:var(--status-warning);color:#1a1200;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:6px 16px}
+.wm.foot{font-weight:500;text-transform:none;letter-spacing:0}
+/* ---------- shell: navy sidebar + darker navy header + canvas main ---------- */
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
+.sidebar{background:var(--sidebar);color:var(--sidebar-foreground);display:flex;flex-direction:column;border-right:1px solid var(--sidebar-border)}
+.sidebar .brand{display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar .brand svg{width:20px;height:20px;flex:none}
+.sidebar .brand b{font-size:14px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar .group{padding:12px 8px 0}
+.sidebar .label{font-size:11px;color:rgb(255 255 255 / 55%);padding:6px 8px;font-weight:500}
+.sidebar nav a{display:flex;align-items:center;gap:8px;height:32px;padding:0 8px;border-radius:calc(var(--radius) * .8);text-decoration:none;color:rgb(255 255 255 / 82%);font-size:14px}
+.sidebar nav a:hover{background:var(--sidebar-accent)}
+.sidebar nav a.active{background:var(--sidebar-accent);color:#fff;font-weight:500}
+.sidebar nav svg{width:16px;height:16px;flex:none}
+.content{display:flex;flex-direction:column;min-width:0}
+.header{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--header);color:var(--header-foreground);border-bottom:1px solid rgb(255 255 255 / 15%)}
+.header .spacer{flex:1}
+.header .crumb{font-size:13px;color:rgb(255 255 255 / 70%)}
+.header .ibtn{width:36px;height:36px;display:grid;place-items:center;border-radius:calc(var(--radius) * .8);color:rgb(255 255 255 / 70%);background:transparent;border:0;cursor:pointer}
+.header .ibtn:hover{background:rgb(255 255 255 / 10%);color:#fff}
+main{flex:1;overflow:auto;background:var(--canvas);padding:24px}
+.page{display:flex;flex-direction:column;gap:24px;max-width:1200px}
+.section{display:flex;flex-direction:column;gap:16px}
+/* ---------- primitives, to the dimensional contract (fallback-primitives.md §3) ---------- */
+.page-h{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.page-h h1{font-size:24px;line-height:1.2}
+.page-h p{margin:2px 0 0;font-size:14px;color:var(--muted-foreground)}
+.btn{height:36px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:14px;font-weight:500;border-radius:calc(var(--radius) * .8);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--primary-foreground);transition:background var(--duration-fast) var(--ease-premium)}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:translateY(1px)}
+.btn.outline{background:var(--background);color:var(--foreground);border-color:var(--border)}.btn.outline:hover{background:var(--accent);filter:none}
+.btn.ghost{background:transparent;color:var(--foreground)}.btn.ghost:hover{background:var(--accent);filter:none}
+.btn.sm{height:32px;padding:0 12px}
+.btn svg{width:16px;height:16px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.input,.select{height:36px;padding:0 12px;font:inherit;font-size:14px;border-radius:calc(var(--radius) * .8);border:1px solid var(--input);background:var(--background);color:var(--foreground)}
+.input::placeholder{color:var(--muted-foreground)}
+.search{position:relative;flex:1;max-width:384px}
+.search svg{position:absolute;left:10px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--muted-foreground)}
+.search .input{width:100%;padding-left:32px}
+.row{display:flex;align-items:center;gap:12px}
+.card{background:var(--card);color:var(--card-foreground);border:1px solid var(--border);border-radius:calc(var(--radius) * 1.4);box-shadow:var(--shadow-xs)}
+.card .hd,.card .bd{padding:24px}.card .hd + .bd{padding-top:0}
+.card .hd h3{font-size:16px;font-weight:500;line-height:1.35}
+.card .hd p{margin:4px 0 0;font-size:14px;color:var(--muted-foreground)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:calc(var(--radius) * 1.4);box-shadow:var(--shadow-xs);padding:24px;display:flex;flex-direction:column;gap:6px}
+.kpi .k{font-size:14px;color:var(--muted-foreground);display:flex;justify-content:space-between;align-items:center}
+.kpi .k svg{width:16px;height:16px}
+.kpi .v{font-size:24px;font-weight:600;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
+.tablewrap{border:1px solid var(--border);border-radius:calc(var(--radius) * 1);box-shadow:var(--shadow-xs);overflow-x:auto;overflow-y:hidden;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{height:40px;padding:0 8px;text-align:left;font-weight:500;color:var(--muted-foreground);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--accent)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted-foreground)}
+td.name{font-weight:500}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:calc(var(--radius) * .8);font-size:12px;font-weight:500;background:var(--muted);color:var(--muted-foreground)}
+.badge.sky{background:#e0f2fe;color:#0369a1}.badge.indigo{background:#e0e7ff;color:#4338ca}.badge.amber{background:#fef3c7;color:#b45309}.badge.emerald{background:#d1fae5;color:#047857}.badge.red{background:#fee2e2;color:#b91c1c}
+.dark .badge.sky{background:#082f49;color:#7dd3fc}.dark .badge.indigo{background:#1e1b4b;color:#a5b4fc}.dark .badge.amber{background:#451a03;color:#fcd34d}.dark .badge.emerald{background:#022c22;color:#6ee7b7}.dark .badge.red{background:#450a0a;color:#fca5a5}
+.empty{min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:var(--muted-foreground);border:1px dashed var(--border);border-radius:calc(var(--radius) * 1)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden}
+.tabs button{height:36px;padding:0 12px;font:inherit;font-size:14px;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted-foreground);cursor:pointer;margin-bottom:-1px}
+.tabs button.active{color:var(--foreground);border-bottom-color:var(--primary);font-weight:500}
+/* ---------- assumptions: the panel and the inline callout. This is the discovery instrument. ---------- */
+.layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+.assume{position:sticky;top:80px;display:flex;flex-direction:column;gap:12px}
+.assume .card .hd h3{display:flex;align-items:center;gap:8px}
+.assume ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.assume li b{font-weight:500}
+.assume li .who{display:block;font-size:12px;color:var(--muted-foreground)}
+.callout{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:calc(var(--radius) * .8);padding:2px 8px;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.dark .callout{color:#fcd34d;background:#451a03;border-color:#78350f}
+.callout sup{font-weight:600}
+@media (max-width:1080px){.shell{grid-template-columns:1fr}.sidebar{display:none}.layout{grid-template-columns:1fr}.assume{position:static}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.kpis{grid-template-columns:1fr}main{padding:16px}}
+@media print{.wm{background:#fff;color:#b45309;border-bottom:2px solid #b45309}.sidebar{display:none}.shell{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wm">Concept visualization — not a build commitment or spec · v{{VERSION}} · {{DATE}} · synthetic data</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <svg viewBox="376 -5 162 168" aria-label="HGS"><path fill="#abcf02" fill-rule="evenodd" d="M479.1057,147.2957c2.6753,0,4.8421,2.1681,4.8421,4.8421s-2.1668,4.8421-4.8421,4.8421-4.8421-2.168-4.8421-4.8421,2.1668-4.8421,4.8421-4.8421ZM438.0406,60.8584c14.1995-5.4098,26.902-3.6998,39.0395,4.0799,9.0548,5.8053,15.5634,17.3154,20.47,30.195.9523,2.4989-.3026,5.2965-2.8003,6.2487-2.4977.9519-5.294-.3018-6.2463-2.8012-4.7776-12.5411-10.3743-21.4655-16.6528-25.4897-9.652-6.1878-19.1425-7.4568-30.3641-3.1829-14.5263,5.5337-24.7069,24.3199-19.6388,43.4644,3.3451,12.6431,10.0272,23.0044,21.8863,34.4774,1.9247,1.859,1.9732,4.9248.117,6.8471-1.8602,1.9219-4.9268,1.9732-6.8475.1142-12.7549-12.3341-20.6032-24.1658-24.5172-38.9612-6.21-23.4523,5.9477-47.5225,25.5542-54.9918ZM447.4302,39.1717c23.4156-1.9514,40.0644,7.0046,51.1407,18.9561,10.9109,11.7748,16.3502,26.36,17.9925,36.1092,2.2476,13.3388-6.9928,23.983-18.174,26.3382-5.6895,1.198-11.9358.2998-17.5406-3.3293-5.5926-3.6191-10.2128-9.7298-13.1826-18.4182-3.2805-9.5793-10.1523-12.7529-15.7933-12.207-5.7338.5552-11.2458,4.9946-11.9762,13.2839-.4842,5.4845,1.3558,12.5479,5.6935,19.9943,4.2974,7.3774,10.8544,14.7785,19.2151,20.8578,2.1628,1.5729,2.6389,4.6012,1.0652,6.764-1.5696,2.1624-4.6,2.641-6.7628,1.0681-9.3937-6.833-16.8788-15.2252-21.8863-23.8147-4.9631-8.5197-7.6909-17.5974-6.9726-25.7197,1.1379-12.8941,10.2733-21.0644,20.6919-22.0732,10.5155-1.0177,21.2932,5.2908,25.8851,18.7115,2.4332,7.1074,5.8993,11.2305,9.2847,13.4235,3.3733,2.1826,6.9928,2.6749,10.2814,1.9824,6.7709-1.426,11.8954-7.6877,10.6244-15.2538-1.3881-8.2199-6.1334-20.9724-15.5513-31.1352-9.2525-9.9856-23.0646-17.568-43.2279-15.8874-31.7158,2.643-48.6951,32.3618-46.6202,58.9559.2078,2.6664-1.7847,4.9962-4.4507,5.2045-2.666.2078-4.9958-1.7851-5.204-4.4511-2.3638-30.3003,16.9732-66.1517,55.468-69.36ZM399.3263,121.9811c2.5038-.939,5.2952.3297,6.2358,2.8334,1.7028,4.5451,4.2086,9.7702,7.5779,15.916,1.2872,2.3448.4277,5.288-1.9167,6.5736-2.3444,1.286-5.286.4273-6.574-1.9175-3.4892-6.3625-6.2294-12.0322-8.1566-17.1713-.939-2.5042.3297-5.2953,2.8335-6.2342ZM458.5469,113.4881c2.1829-1.5483,5.2052-1.0358,6.7507,1.1448,12.6903,17.8694,32.7125,18.6385,45.8628,10.0478,2.2355-1.4627,5.2376-.8337,6.7023,1.405,1.4607,2.2391.8312,5.2396-1.4082,6.7023-17.1128,11.1812-43.0907,9.9328-59.0495-12.5487-1.5495-2.1806-1.037-5.2029,1.142-6.7511ZM453.2811,96.05c2.6753,0,4.8421,2.1681,4.8421,4.8421s-2.1668,4.8421-4.8421,4.8421-4.8421-2.168-4.8421-4.8421,2.1668-4.8421,4.8421-4.8421ZM384.8194,58.7755c15.7449-25.1067,39.9135-40.4831,72.9488-38.7806,41.7511,2.1518,60.8814,29.7279,71.2556,50.2669,1.2065,2.3868.2502,5.2993-2.1386,6.505-2.3888,1.2057-5.2981.2478-6.5046-2.1394-9.8013-19.4084-26.5832-43.0781-63.1129-44.9609-29.1051-1.5-50.1279,11.7468-64.2443,34.2542-1.4208,2.2657-4.4087,2.9505-6.6744,1.5297s-2.9505-4.4091-1.5297-6.6748ZM415.9,7.8569c23.6537-9.927,78.6358-16.4682,114.8266,29.5141,1.6544,2.1014,1.2912,5.146-.8111,6.7999-2.1023,1.6536-5.1447,1.2908-6.7992-.8107-32.4058-41.1756-81.9325-35.6114-103.4718-26.5737-2.4654,1.0348-5.3021-.1254-6.3391-2.5913-1.033-2.4658.1291-5.3035,2.5946-6.3383ZM398.7154,17.0599c2.2859-1.3877,5.2642-.6595,6.6531,1.6263,1.3881,2.2858.6577,5.2641-1.6274,6.652-5.0858,3.0879-8.7642,6.5441-13.4812,11.6541-1.8138,1.9649-4.8772,2.0873-6.8423.2735-1.9647-1.8139-2.0873-4.8773-.2732-6.8423,4.9668-5.381,9.359-9.5919,15.571-13.3635Z"/></svg>
+      <b>{{APP_NAME}}</b>
+    </div>
+    <div class="group">
+      <div class="label">Workspace</div>
+      <nav>
+        <!-- {{NAV}} — one <a> per top-level module; the first is .active. Lucide icons, 16px, inline SVG. -->
+      </nav>
+    </div>
+  </aside>
+
+  <div class="content">
+    <header class="header">
+      <span class="crumb">{{CLIENT}} · {{APP_NAME}}</span>
+      <span class="spacer"></span>
+      <button class="ibtn" type="button" aria-label="Toggle theme" onclick="document.documentElement.classList.toggle('dark')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+    </header>
+
+    <main>
+      <div class="layout">
+        <div class="page">
+          <!-- {{PAGE}} — one of the five page shapes from hgs-app-ui/references/page-patterns.md.
+               Every figure is synthetic. Every gap in discovery gets a <span class="callout">assumed <sup>N</sup></span>
+               beside it, numbered to the panel on the right. -->
+        </div>
+
+        <aside class="assume">
+          <div class="card">
+            <div class="hd">
+              <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> We assumed — correct us</h3>
+              <p>Nothing here has been confirmed. Each number points at a callout on the page. Tell us what is wrong; every correction becomes evidence.</p>
+            </div>
+            <div class="bd">
+              <ol>
+                <!-- {{ASSUMPTIONS}} — <li><b>what we assumed</b><span class="who">who can correct it</span></li>, in the order the coach ranked them. -->
+              </ol>
+            </div>
+          </div>
+          <div class="card">
+            <div class="hd"><h3>Built from</h3><p>{{BUILT_FROM}}</p></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="wm foot">Concept visualization — not a build commitment or spec · {{CLIENT}} · v{{VERSION}} · {{DATE}} · all data on this page is synthetic · HGS Forward Deployed Engineering</div>
+</body>
+</html>

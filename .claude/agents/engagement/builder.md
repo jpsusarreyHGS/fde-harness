@@ -18,6 +18,7 @@ Do this **even when the engagement files below do not exist** — a direct POC s
 2. `.claude/skills/skills-practice/evidence-handling/SKILL.md` — before moving any client data
 3. `engagements/<slug>/skills-engagement/` — glob; engagement skills supersede practice skills
 4. The target repo's own `CLAUDE.md` and conventions — read them before writing a line. Do not infer conventions from filenames.
+5. **If the slice has any app surface** — a screen, a form, a dashboard, an assistant UI — `.claude/skills/skills-function/hgs-app-ui/SKILL.md` and its references, on **Path A** (the full Vite + shadcn toolchain). It is the house style for anything the harness ships as an app; do not hand-roll a stack or a palette beside it. A failed install is a fork in the road: state which path you are on.
 
 ## Step 1 — Pre-build checklist
 
@@ -31,6 +32,7 @@ Read in one batch, and state which of these you found:
 - `03-Systems/ontology/personas.md` — the permission matrix you must enforce
 - `05-Build/architecture.md` and `access-model.md`
 - `05-Build/manual-tasks.md`
+- `05-Build/mockup-ledger.md` and the **last mockup a stakeholder confirmed** (its `Reaction` row) — if the slice has an app surface, the build either matches what they confirmed or the difference is written down: in the slice's build report, and as a `decisions.md` entry with the reason. "Why does the MVP differ from the mockup?" must have a written answer before the build, not after the demo.
 
 **If the identity rule is missing, stop and ask.** Which system mints identity for each entity determines every join you are about to write. Guessing produces a build that looks right and is wrong in a way that surfaces months later.
 

@@ -17,6 +17,9 @@
  *   cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>" [--class stated|documented]
  *                                              write a chat answer into evidence/ so /capture can propose it
  *   cli.ts sketch  <engagement-dir>             the pre-G1 alignment sketch, from accepted rows only
+ *   cli.ts mockup  <engagement-dir> next        the next concept mockup: version, file, what it rests on, what it must assume
+ *   cli.ts mockup  <engagement-dir> log <file> [--assumptions ..] [--shown-to ..] [--reaction ..] [--evidence ..]
+ *                                              record it in 05-Build/mockup-ledger.md; refuses without the watermark
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
@@ -54,11 +57,12 @@ import { WriteRefused } from "./writer.ts";
 import { coverage, formatCoverage, formatSweep, sweepText } from "./sweep.ts";
 import { recordAnswer, type AnswerClass } from "./answer.ts";
 import { renderSketch } from "./sketch.ts";
+import { logMockup, planMockup, WATERMARK } from "./mockup.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check", "roi", "sweep", "answer", "sketch",
+  "scaffold", "contract-check", "roi", "sweep", "answer", "sketch", "mockup",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -121,6 +125,62 @@ async function sponsorName(): Promise<string | undefined> {
 }
 
 // --------------------------------------------------------------- subcommands
+
+if (sub === "mockup") {
+  const flag = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
+  const consumed = new Set(["--assumptions", "--shown-to", "--reaction", "--evidence"].map((f) => args.indexOf(f) + 1).filter((i) => i > 0));
+  const positional = args.filter((a, i) => !a.startsWith("--") && !consumed.has(i));
+  const action = positional[1];
+  const slug = basename(engagementDir);
+  const deliverablesDir = resolve(harnessRoot, "deliverables");
+
+  if (action === "next") {
+    const p = await planMockup({ engagementDir, slug, deliverablesDir, harnessRoot });
+    console.log(`Next mockup: v${p.version} → deliverables/${slug}/mockups/${p.file}`);
+    if (p.previous) console.log(`Previous:    v${p.previous.version} (${p.previous.date}) — say what changed since it.`);
+    console.log("");
+    console.log(`Rests on (instruments with accepted rows): ${p.builtFrom.length ? p.builtFrom.join(", ") : "nothing — every panel is an assumption"}`);
+    console.log(`Must assume (nothing accepted): ${p.missing.length ? p.missing.join(", ") : "nothing"}`);
+    if (p.assumptionCandidates.length) {
+      console.log("");
+      console.log("Assumption candidates — the coach's open questions, for the assumptions panel:");
+      for (const c of p.assumptionCandidates) console.log(`  · ${c.ask}  (${c.who})`);
+    }
+    console.log("");
+    console.log(`Watermark, header and footer, verbatim: "${WATERMARK}"`);
+    console.log("Synthetic data only. No real names. No live connectors. Log it when written:");
+    console.log(`  node packages/derive/src/cli.ts mockup ${dirArg} log ${p.file} --assumptions "<N — see panel>"`);
+    process.exit(0);
+  }
+
+  if (action === "log") {
+    const file = positional[2];
+    if (!file) {
+      console.error("usage: cli.ts mockup <engagement-dir> log <mockup-vN-YYYY-MM-DD.html> [--assumptions ..] [--shown-to ..] [--reaction ..] [--evidence ..]");
+      process.exit(2);
+    }
+    try {
+      const r = await logMockup({
+        engagementDir, slug, deliverablesDir, file,
+        assumptions: flag("--assumptions"), shownTo: flag("--shown-to"), reaction: flag("--reaction"), evidence: flag("--evidence"),
+      });
+      console.log(`${r.created ? "Logged" : "Updated"} v${r.version} in 05-Build/mockup-ledger.md — built from: ${r.builtFrom.join(", ") || "nothing accepted yet"}`);
+      if (!flag("--shown-to")) {
+        console.log("");
+        console.log("After the showing, record who saw it and what they said — the buy-in is evidence:");
+        console.log(`  node packages/derive/src/cli.ts answer ${dirArg} "Reaction to mockup v${r.version}" "<what they said, verbatim>" --from "<who>"`);
+        console.log(`  node packages/derive/src/cli.ts mockup ${dirArg} log ${file} --shown-to "<who, date>" --reaction "<confirmed direction | corrected: ...>" --evidence "02-Workflow/evidence/stated/<date>-answers.md"`);
+      }
+      process.exit(0);
+    } catch (err) {
+      if (err instanceof WriteRefused) { console.error(`Refused: ${err.message}`); process.exit(1); }
+      throw err;
+    }
+  }
+
+  console.error("usage: cli.ts mockup <engagement-dir> next | log <file> [flags]");
+  process.exit(2);
+}
 
 if (sub === "sketch") {
   const res = await renderSketch({

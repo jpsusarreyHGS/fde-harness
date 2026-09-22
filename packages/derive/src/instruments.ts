@@ -123,6 +123,7 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "architecture-diagram",   label: "Architecture diagram",   stage: "05", path: "05-Build/architecture-diagram.md" },
   { id: "access-model",           label: "Access model",           stage: "05", path: "05-Build/access-model.md",              primaryTable: "access-model.matrix" },
   { id: "manual-tasks",           label: "Manual tasks",           stage: "05", path: "05-Build/manual-tasks.md",             primaryTable: "manual-tasks.rows" },
+  { id: "mockup-ledger",          label: "Mockup ledger",          stage: "05", path: "05-Build/mockup-ledger.md",            primaryTable: "mockup-ledger.rows" },
 
   // 06 — Prove it with evals
   { id: "eval-report",            label: "Eval report",            stage: "06", path: "06-Evals/eval-report.md",              primaryTable: "eval-report.failures" },
