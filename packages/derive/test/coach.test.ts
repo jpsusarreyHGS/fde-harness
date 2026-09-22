@@ -237,3 +237,113 @@ test("every location the coach prints is a real path", async () => {
     }
   }
 });
+
+// ---------------------------------------------------------- item 3: four lines
+
+test("every question carries all four lines: ask, why, means, goes", async () => {
+  // Every source the coach composes from, in one run.
+  const gates: Gate[] = [{
+    id: "G1", label: "Discovery gate", between: "03→04", status: "not-ready",
+    date: null, decidedBy: null,
+    criteria: [
+      { name: "A", status: "unmet", evidence: "", toClose: "", owner: "" },
+      { name: "B", status: "unmet", evidence: "", toClose: "", owner: "" },
+      { name: "Readiness scorecard — the data landmines found", status: "unmet", evidence: "", toClose: "Score SAP", owner: "Ana" },
+    ],
+    behaviours: [], antiPatterns: [],
+  }];
+  const kinds: AuditFinding["kind"][] = [
+    "unsourced-requirement", "orphan-evidence", "dangling-citation",
+    "unverified-in-placement", "gap-without-question", "unowned-assumption",
+    "allocation-without-reason", "exception-without-rule-holder", "hypothesis-never-revisited",
+  ];
+  const qs = coach({
+    findings: [...kinds.map((k) => finding(k, "X-001")), finding("orphan-evidence", "X-002")],
+    gates,
+    tables: TABLES,
+    contract: [{ code: "term-without-owner", severity: "refuse", where: "glossary.md", detail: "Term 'claim' has no owner", who: "Process owner", location: "03-Systems/ontology/glossary.md" }],
+  });
+  const sources = new Set(qs.map((q) => q.source));
+  for (const s of ["gate", "chain", "open-question", "stakeholder", "contract"]) {
+    assert.ok(sources.has(s as never), `no ${s} question in the run — the test lost coverage`);
+  }
+  for (const q of qs) {
+    assert.ok(q.ask.length > 0, `${q.key}: no ask`);
+    assert.ok(q.why.length > 0, `${q.key}: no why`);
+    assert.ok(q.means.length > 20, `${q.key}: means is missing or a stub`);
+    assert.ok(q.goes.length > 0, `${q.key}: no goes`);
+    assert.notEqual(q.means, q.why, `${q.key}: means must explain the question, not repeat the ranking`);
+  }
+  // `goes` names a column, not just a file.
+  const ex = qs.find((q) => q.id === "X-001" && q.key.startsWith("exception-without"))!;
+  assert.match(ex.goes, /Rule holder \(role\) column/);
+  assert.match(ex.means, /golden set/);
+});
+
+test("a question /init-engagement raised for a TBD is a setup question, and says how to fix it", () => {
+  const tables = parseAnchoredTables(`
+<!-- table:open-questions.rows role=register id=Id -->
+
+| Id | Question | Why it matters | Who can answer | Blocks | Raised | Answered | Answer |
+|---|---|---|---|---|---|---|---|
+| Q-001 | Which repository holds the ontology for this client? | ONTOLOGY_REPO was left unresolved at init. | Technical owner | 03-Systems/ontology/ promotion | 2026-09-15 |  |  |
+| Q-002 | Which platform does the assistant compile to — jena, databricks or fabric? | TARGET_PLATFORM was left unresolved at init. | Technical owner | the ontology compile | 2026-09-15 |  |  |
+| Q-003 | Where does captured evidence live — client tenant or HGS tenant? | RESIDENCY was left unresolved at init. | Security owner | all capture | 2026-09-15 |  |  |
+| Q-004 | Is the 60-line SAP export a full snapshot or a sample? | Every count derived from it is a sample count if so. | Systems gatekeeper | value hypothesis | 2026-09-15 |  |  |
+`);
+  const qs = coach({ findings: [], gates: NO_GATES, tables });
+  const byId = Object.fromEntries(qs.map((q) => [q.id, q]));
+
+  // The two the trainee could not parse, reworded — technical term kept once, in parentheses.
+  assert.equal(byId["Q-001"]!.ask, "Q-001: Where will the client's approved vocabulary and data model be published (the ontology repo)?");
+  assert.equal(byId["Q-002"]!.ask, "Q-002: Which platform will the built solution run on (the compile target: jena, databricks or fabric)?");
+  assert.ok(!/compile to|repo holds/.test(byId["Q-002"]!.ask + byId["Q-001"]!.ask));
+
+  // Every init-raised question names the fix and where it lands.
+  for (const id of ["Q-001", "Q-002", "Q-003"]) {
+    assert.match(byId[id]!.goes, /re-run \/init-engagement or edit the file directly/, `${id} goes`);
+    assert.match(byId[id]!.goes, /^00-Setup\//, `${id} lands in setup, not in an ontology folder`);
+    assert.match(byId[id]!.means, /Left as TBD at \/init-engagement\.$/, `${id} means`);
+  }
+  assert.match(byId["Q-002"]!.means, /does not block G1/);
+  assert.match(byId["Q-003"]!.means, /Capture cannot start/);
+
+  // An ordinary question keeps its wording and inherits its own "why it matters".
+  assert.equal(byId["Q-004"]!.ask, "Q-004: Is the 60-line SAP export a full snapshot or a sample?");
+  assert.match(byId["Q-004"]!.means, /^Every count derived from it is a sample count if so\./);
+  assert.match(byId["Q-004"]!.goes, /open-questions\.md — Answer and Answered columns for Q-004/);
+});
+
+test("a freshly scaffolded caldera raises setup questions the coach explains", async () => {
+  const { mkdtemp, rm, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join, resolve } = await import("node:path");
+  const { initEngagement, validateVars } = await import("../src/init.ts");
+  const { deriveState } = await import("../src/state.ts");
+  const HARNESS = resolve(import.meta.dirname, "..", "..", "..");
+  const tmp = await mkdtemp(join(tmpdir(), "fde-caldera-"));
+  try {
+    const vars = validateVars(
+      JSON.parse(await readFile(join(HARNESS, "examples", "caldera-logistics", "vars.json"), "utf8")),
+      "caldera-logistics",
+    );
+    const dir = join(tmp, "engagements", "caldera-logistics");
+    await initEngagement({ engagementDir: dir, harnessRoot: HARNESS, vars, deliverablesRoot: join(tmp, "deliverables") });
+    const state = await deriveState({ engagementDir: dir, slug: "caldera-logistics", harnessRoot: HARNESS });
+    const setup = state.coach.filter((q) => /re-run \/init-engagement/.test(q.goes));
+    // Caldera leaves SYSTEMS, ONTOLOGY_REPO and RESIDENCY as TBD and omits
+    // SCOPE_SOURCE. TARGET_PLATFORM is "undecided", which is an answer — the
+    // stack decision says so — and raises nothing.
+    assert.ok(setup.length >= 4, `expected the four TBDs as setup questions; got ${setup.length}`);
+    assert.ok(!setup.some((q) => /platform/.test(q.ask)), "undecided is not TBD");
+    for (const q of state.coach) {
+      assert.ok(q.means && q.goes, `${q.key} missing means/goes in derived state`);
+    }
+    // The new wording is what a new engagement writes into the register.
+    const oq = await readFile(join(dir, "02-Workflow", "open-questions.md"), "utf8");
+    assert.match(oq, /Where will the client's approved vocabulary and data model be published/);
+    assert.ok(!/Which repository holds the ontology/.test(oq), "old wording gone");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});

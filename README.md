@@ -268,20 +268,33 @@ This is the half that talks back. It reads the evidence chain and the open gate'
 Ana Fuentes — Exception holder
   · EX-002: who actually decides this one? Not the team — the person you
     go to when it is not obvious.
-      why: blocks the #1 workflow (claims triage); exception without rule holder
-      write it to: 02-Workflow/exception-register.md
+      why:    blocks the #1 workflow (claims triage); exception without rule holder
+      means:  The rule holder is the person the eval golden set is built from.
+              A good answer is one name and the rule in their own words —
+              "the team" means nobody.
+      goes:   02-Workflow/exception-register.md — Rule holder (role) column
 ```
+
+Every question comes with the same four lines. **why** is the ranking. **means** is what a good answer looks like and why you should care — read it before you decide a question is noise; the sharpest ones often look like pedantry without it. **goes** is the file and column the answer lands in. Questions that came from a `TBD` at `/init-engagement` say so, and their fix is the setup file, not a client conversation.
 
 It is ranked by **what each question blocks** — joined to your prioritisation table — and by **how fast the answer perishes**. An operator's undocumented rule is elicitable while you are sitting beside them and effectively gone three weeks later; a broken citation costs minutes at a desk in November. Every line says why it ranks where it does. If the reason looks wrong, fix the prioritisation table rather than the order.
 
-Things nobody at the client can answer come out separately, under *"yours to fix"*.
+Two other sections may appear. **"Verify first"** lists gate criteria whose answer is already in your files — the sponsor's sentence, the named roles, the systems — quoted back so you can check you could say it out loud; it will not ask the client for something you already captured. **"Yours to fix"** is the things nobody at the client can answer.
 
-### Step 6 — Go back and ask. Then repeat.
+### Step 6 — Go back and ask. Write the answer down as you get it.
 
-Answers go **into the instrument, not into chat**. A question answered in conversation and not written down is a question you will ask twice. The easiest route is the loop you already know: bring back the notes, drop them in `evidence/`, and run `/capture` again.
+Answers go **into the instrument, not into chat**. A question answered in conversation and not written down is a question you will ask twice — and `/next` will ask it for you, tomorrow. So when someone gives you an answer, record it on the spot:
+
+```bash
+node packages/derive/src/cli.ts answer engagements/<slug> "Q-004" "It waits. Nobody else has the authority." --from "Priya Shah, deductions manager"
+```
+
+The first argument is a `Q-` id or the question in words; the second is what they said, verbatim; `--from` is who said it. It lands in `02-Workflow/evidence/stated/<date>-answers.md` — *stated*, because something a person told you is corroborating evidence until you have watched it. The next `/capture` turns it into proposed rows, you accept, and the question stops coming back. If you are answering it in chat with Claude, it will offer this command pre-filled; say yes.
+
+For everything else, the loop you already know: bring back the notes, drop them in `evidence/`, and run `/capture` again.
 
 ```
-watch → drop in evidence/<class>/ → /capture → accept → /next → ask → repeat
+watch → drop in evidence/<class>/ → /capture → accept → /next → ask → answer → repeat
 ```
 
 ### Step 7 — See where you stand
@@ -345,6 +358,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
 | An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
+| `/next` keeps asking something I already answered | Answers given in chat are not evidence until written down. Run `cli.ts answer …` with the answer and who said it, then `/capture` and accept. If the answer is already in an instrument — the sponsor brief, the stakeholder map — it should appear under "Verify first", not as a question; if it does not, report it |
 
 Anything the harness gets wrong is worth logging: `/harness-improver`. **Nothing enters the shared library without a named engagement that needed it.**
 

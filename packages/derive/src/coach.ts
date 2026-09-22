@@ -49,16 +49,32 @@ export interface CoachQuestion {
   location: string;
   /** Why it ranks here — shown, never hidden behind the sort. */
   why: string;
+  /**
+   * What a good answer looks like, and why an FDE should care — one plain
+   * sentence. `why` explains the ranking; this explains the question.
+   *
+   * The trainee who dismissed "is the 60-line export a full snapshot or a
+   * sample reconciled to the SOW figure?" as noise was looking at the best
+   * question in the queue. It carried no explanation, so it read as pedantry.
+   */
+  means: string;
+  /** The instrument path and column the answer lands in. */
+  goes: string;
   score: number;
   /**
-   * Whether this needs a person or a desk.
+   * Whether this needs a person, a desk, or a moment's honesty.
    *
    * A dangling citation is a real defect, but nobody at the client can answer
    * it — it is the FDE's own repair. Mixing the two produces a "who to ask
    * tomorrow" list containing items with nobody to ask, which is how a queue
    * loses its meaning.
+   *
+   * `verify` is a gate criterion whose answer is already on file — the
+   * sponsor's sentence in the brief, the five roles named in the map. Asking
+   * the FDE for it again teaches them the queue does not read what they
+   * wrote. The criterion still stands: they must be able to *say* it.
    */
-  work: "ask" | "fix";
+  work: "ask" | "fix" | "verify";
   source: "gate" | "chain" | "open-question" | "stakeholder" | "contract";
   /** The harness id this is about, where there is one. */
   id: string | null;
@@ -120,6 +136,79 @@ const PHRASING: Record<string, (id: string, detail: string) => string> = {
     `${id} is a gap that never became an open question. Who would we have to ask?`,
   "hypothesis-never-revisited": (id) =>
     `${id} was written before we watched anything and is still open. Did discovery support it or disprove it?`,
+};
+
+/** What a good answer looks like, per finding kind, in words a client would follow. */
+const MEANS: Record<string, string> = {
+  "exception-without-rule-holder":
+    "The rule holder is the person the eval golden set is built from. A good answer is one name and the rule in their own words — \"the team\" means nobody.",
+  "unsourced-requirement":
+    "A requirement with nothing seen behind it is a guess with a number on it. A good answer is the EV- or EX- id that produced it; the honest alternative is to make it a Q- or label it ASSUMPTION with an owner.",
+  "dangling-citation":
+    "Something cites an id that does not exist — usually a renumbering that should never have happened. A good answer is the row that was meant.",
+  "orphan-evidence":
+    "Observed and never used. Either it should have produced an exception or a requirement, or it was noise — both are fine answers; silence is not.",
+  "unowned-assumption":
+    "An assumption nobody will confirm is a permanent guess. A good answer is a name and a date to confirm by.",
+  "unverified-in-placement":
+    "Intelligence is about to be placed on what someone said, not on what was watched. A good answer is one observed instance — or the row goes into the grid still marked UNVERIFIED, on purpose.",
+  "allocation-without-reason":
+    "The reason is the artefact; at G2 the grid has to survive challenge. A good answer says why this quadrant and not the next one over.",
+  "gap-without-question":
+    "A known gap with no question attached is one nobody is chasing. A good answer names who could answer it and what it blocks.",
+  "hypothesis-never-revisited":
+    "Written before anything was watched, and expected to be wrong. A good answer is \"supported\" or \"disproved\" with the evidence named — G1 asks which.",
+};
+
+/** The column the answer lands in, per finding kind. */
+const GOES: Record<string, string> = {
+  "exception-without-rule-holder": "Rule holder (role) column",
+  "unsourced-requirement": "Source column",
+  "dangling-citation": "Source column — the cited id",
+  "orphan-evidence": "cite it from an exception or requirement row, or retire it with a reason",
+  "unowned-assumption": "Owner and Confirm-by columns",
+  "unverified-in-placement": "Confidence column, once an observation-log row backs it",
+  "allocation-without-reason": "Reason column",
+  "gap-without-question": "02-Workflow/open-questions.md — a new Q- row",
+  "hypothesis-never-revisited": "Status and Evidence columns",
+};
+
+/**
+ * Questions `/init-engagement` raised for a value left TBD.
+ *
+ * These are setup questions, and the queue used to present two of them as
+ * ontology questions at G1 — "which repo holds the ontology? what platform
+ * does the assistant compile to?" — which a trainee could not parse and
+ * skipped. Each one gets its plain-language form, what it means, and the fix:
+ * re-run the scaffold or edit the setup file directly.
+ */
+const INIT_FIELDS: Record<string, { ask?: string; means: string; goes: string }> = {
+  SYSTEMS: {
+    means: "Which applications the workflow actually runs through. Names are enough for now; owners and access come with the systems inventory.",
+    goes: "03-Systems/systems-inventory.md — System column; re-run /init-engagement or edit the file directly",
+  },
+  RESIDENCY: {
+    means: "Where captured evidence is allowed to live — the client's tenant or ours. Capture cannot start until this is settled, because evidence taken under unresolved terms may have to be destroyed.",
+    goes: "00-Setup/evidence-handling-terms.md — Residency; re-run /init-engagement or edit the file directly",
+  },
+  LABOUR: {
+    means: "Whether a works council or union has a say in observing people at work. If so, observation needs consultation, not notice — getting this wrong ends an engagement.",
+    goes: "01-Organisation/stakeholder-map.md — Labour representation table; re-run /init-engagement or edit the file directly",
+  },
+  ONTOLOGY_REPO: {
+    ask: "Where will the client's approved vocabulary and data model be published (the ontology repo)?",
+    means: "A setup question, not a G1 one: the place the promoted model will land once stage 03 produces it. \"Not decided yet\" is a fine answer until then.",
+    goes: "00-Setup/stack-decision.md — re-run /init-engagement or edit the file directly",
+  },
+  SCOPE_SOURCE: {
+    means: "Where the one-line scope came from — the mandate, a document, or memory. Without a document, every later scope change is judged against a recollection.",
+    goes: "00-Setup/engagement-mandate.md — re-run /init-engagement or edit the file directly",
+  },
+  TARGET_PLATFORM: {
+    ask: "Which platform will the built solution run on (the compile target: jena, databricks or fabric)?",
+    means: "A setup question. Choose it from the competency questions once they exist, not from precedent; until then \"undecided\" is honest and does not block G1.",
+    goes: "00-Setup/stack-decision.md — Target platform; re-run /init-engagement or edit the file directly",
+  },
 };
 
 /** Kinds nobody at the client can answer — the FDE repairs these. */
@@ -244,12 +333,90 @@ function blockScore(
 }
 
 /**
+ * What the engagement already holds against a gate criterion.
+ *
+ * The G1 memo's criteria are written from the bootcamp bar, and the coach
+ * used to turn each unmet one straight into a question — including "state
+ * the sponsor's real problem" on an engagement whose sponsor brief already
+ * carried the sentence, verbatim, from a source the FDE had captured. The
+ * trainee answered it again in chat; the next `/next` asked again.
+ *
+ * So before a criterion becomes an `ask`, look in the instrument that would
+ * hold its answer. If it is there, the criterion becomes a `verify`: here is
+ * what is on file, now say it. The bar has not moved — G1 still requires the
+ * sentence to be said, in words that are not the request — but the queue
+ * stops pretending it has not read the file.
+ */
+function onFile(
+  criterion: string,
+  tables: readonly ParsedTable[],
+): { ask: string; location: string } | null {
+  const c = criterion.toLowerCase();
+
+  if (/sponsor|real problem|success sentence|trying to accomplish/.test(c)) {
+    const restatement = rowsOf(tables, "sponsor-brief.restatement")
+      .find((r) => /real problem/i.test(cell(r, "Item")));
+    const sentence = restatement ? cell(restatement, "Value") : "";
+    const accomplish = rowsOf(tables, "sponsor-brief.questions")
+      .find((r) => /trying to accomplish/i.test(cell(r, "Question")));
+    const goal = accomplish ? cell(accomplish, "Answer") : "";
+    const quote = has(sentence) ? sentence : has(goal) ? goal : "";
+    if (!quote) return null;
+    return {
+      ask:
+        `Sponsor's ${has(sentence) ? "real problem" : "goal"} is on file (sponsor-brief.md): "${quote}". ` +
+        "At G1 you must be able to say it in one sentence that is *not* the request. Say it now — " +
+        "if what comes out is the request reworded, discovery has not happened yet.",
+      location: "01-Organisation/sponsor-brief.md",
+    };
+  }
+
+  if (/stakeholder|five roles|decision rights|process owner|exception holder/.test(c)) {
+    const roles = rowsOf(tables, "stakeholder-map.five-roles")
+      .map((r) => ({ role: cleanRole(cell(r, "Role")), name: cell(r, "Name") }))
+      .filter((r) => has(r.role));
+    const named = roles.filter((r) => has(r.name));
+    const need = ["process owner", "exception holder"];
+    if (!need.every((n) => named.some((r) => r.role.toLowerCase() === n))) return null;
+    const missing = roles.filter((r) => !has(r.name)).map((r) => r.role.toLowerCase());
+    return {
+      ask:
+        `${named.length} of the five roles are named on file (stakeholder-map.md): ` +
+        `${named.map((r) => `${r.role.toLowerCase()} — ${r.name}`).join("; ")}` +
+        `${missing.length ? `; still unnamed: ${missing.join(", ")}` : ""}. ` +
+        "Decision rights are defensible when you could state them to the sponsor and they would agree — could you?",
+      location: "01-Organisation/stakeholder-map.md",
+    };
+  }
+
+  if (/systems|readiness|landmine|data/.test(c)) {
+    const systems = rowsOf(tables, "systems-inventory.applications")
+      .map((r) => cell(r, "System")).filter(has);
+    if (!systems.length) return null;
+    const scored = rowsOf(tables, "readiness-scorecard.rows").length;
+    return {
+      ask:
+        `${systems.length} system(s) on file (systems-inventory.md): ${systems.slice(0, 6).join(", ")}` +
+        `${systems.length > 6 ? ", …" : ""}. Readiness scorecard: ${scored} source(s) scored. ` +
+        "A landmine is a named blocker with a named owner — is each amber one there, or only the system?",
+      location: "03-Systems/readiness-scorecard.md",
+    };
+  }
+
+  return null;
+}
+
+/**
  * Gate criteria that are not met.
  *
  * These outrank everything else at the same stage: a gate criterion is the
  * client's own definition of ready, and each already carries an owner.
  */
-function gateQuestions(gates: readonly Gate[], names: Map<string, string>): CoachQuestion[] {
+function gateQuestions(
+  gates: readonly Gate[],
+  names: Map<string, string>,
+  tables: readonly ParsedTable[],
+): CoachQuestion[] {
   const out: CoachQuestion[] = [];
   // Only the gate you are actually working toward. Every criterion of G2 and
   // G3 is unmet on day one, and a queue that opens with "prove it with evals"
@@ -274,6 +441,8 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
         blocks: `${g.id} — ${g.between}`,
         location: gateMemo(g.id),
         why: `${g.id} cannot be assessed while its criteria have nobody to chase`,
+        means: "A gate criterion with no owner is one nobody is closing. A good answer is one name per criterion — a role is enough if the map names the person.",
+        goes: `${gateMemo(g.id)} — Owner column`,
         score: 110,
         work: "ask",
         source: "gate",
@@ -285,6 +454,27 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
       if (unowned.length > 1 && !has(c.owner)) continue;
       const who = cleanRole(c.owner) || "Unassigned";
       const label = cleanRole(c.name);
+      // Already on file? Then it is the FDE's to say, not the client's to
+      // answer — and the FDE is the one who has to say it at the gate.
+      const held = onFile(c.name, tables);
+      if (held) {
+        out.push({
+          key: `${g.id}:${c.name}`,
+          ask: held.ask,
+          who: "FDE",
+          whoName: null,
+          blocks: `${g.id} — ${g.between}`,
+          location: held.location,
+          why: `${g.id} criterion; the answer is on file, the bar is being able to say it`,
+          means: "You captured this already. A good answer is you saying it back without reading it — if you cannot, it is on file but not yet understood, and the gate will find that out.",
+          goes: `${gateMemo(g.id)} — Evidence column, citing the row in ${held.location}`,
+          score: 100,
+          work: "verify",
+          source: "gate",
+          id: null,
+        });
+        continue;
+      }
       out.push({
         key: `${g.id}:${c.name}`,
         ask: has(c.toClose)
@@ -295,6 +485,8 @@ function gateQuestions(gates: readonly Gate[], names: Map<string, string>): Coac
         blocks: `${g.id} — ${g.between}`,
         location: gateMemo(g.id),
         why: `${g.id} criterion owned by ${who}`,
+        means: "A gate criterion is the client's own definition of ready. A good answer is evidence — a row or a fact, not a filename — and, where it is not met, the specific thing that would close it.",
+        goes: `${gateMemo(g.id)} — Evidence and To close columns`,
         score: 100 + (has(c.toClose) ? 0 : 5),
         work: "ask",
         source: "gate",
@@ -362,6 +554,8 @@ function chainQuestions(
       why: b.why
         ? `${b.why}; ${f.kind.replace(/-/g, " ")}`
         : `${f.kind.replace(/-/g, " ")} — nothing in prioritisation names what it blocks`,
+      means: MEANS[f.kind] ?? f.detail,
+      goes: `${f.location} — ${GOES[f.kind] ?? "the row for " + f.id}`,
       score: perish + b.score,
       work,
       source: "chain",
@@ -394,6 +588,8 @@ function chainQuestions(
       why: bestWhy
         ? `${bestWhy}; ${group.length} ${kind.replace(/-/g, " ")} findings`
         : `${group.length} ${kind.replace(/-/g, " ")} findings, merged into one conversation`,
+      means: MEANS[kind] ?? `${group.length} findings of the same kind, best walked through in one sitting.`,
+      goes: `${group[0]!.location} — ${GOES[kind] ?? "one row per id"}`,
       score: (PERISHABILITY[kind] ?? 10) + bestScore,
       work: "ask",
       source: "chain",
@@ -418,9 +614,14 @@ function openQuestions(
     const who = cleanRole(cell(r, "Who can answer"));
     const blocks = cell(r, "Blocks");
     const b = blockScore(blocks, prio);
+    const whyMatters = cell(r, "Why it matters");
+    // A question the scaffolder raised for a TBD is a setup question. Say
+    // so, in plain words, and point at the fix rather than at an ontology.
+    const initField = /^([A-Z_]+) was left unresolved at init\./.exec(whyMatters)?.[1];
+    const setup = initField ? INIT_FIELDS[initField] : undefined;
     out.push({
       key: `open-question:${id}`,
-      ask: `${id}: ${cell(r, "Question")}`,
+      ask: `${id}: ${setup?.ask ?? cell(r, "Question")}`,
       who: has(who) ? who : "Unassigned",
       whoName: has(who) ? (names.get(who.toLowerCase()) ?? null) : null,
       blocks,
@@ -430,6 +631,14 @@ function openQuestions(
         : has(blocks)
           ? `blocks "${blocks}", which prioritisation does not rank`
           : "open question with nothing recorded as blocked — say what it blocks or close it",
+      means: setup
+        ? `${setup.means} Left as TBD at /init-engagement.`
+        : has(whyMatters)
+          ? `${whyMatters.replace(/\.?$/, ".")} A good answer is specific enough to become a register row.`
+          : "A question you wrote and have not answered. A good answer is specific enough to become a register row; if it cannot be, say what would make it so.",
+      goes: setup
+        ? setup.goes
+        : `02-Workflow/open-questions.md — Answer and Answered columns for ${id}; then the row it unblocks`,
       // An unanswered question nobody can answer is the worst kind: it will
       // sit there through the whole engagement unless someone is named.
       score: 20 + b.score + (has(who) ? 0 : 15),
@@ -461,6 +670,8 @@ function stakeholderQuestions(tables: readonly ParsedTable[]): CoachQuestion[] {
       blocks: `every question that needs the ${role.toLowerCase()}`,
       location: "01-Organisation/stakeholder-map.md",
       why: `one of the five roles, unnamed — ${role.toLowerCase()} questions cannot be asked until it is`,
+      means: "One of the five roles every engagement needs. Until there is a name, every question for that role has nobody to be asked of. A good answer is a person, not a team.",
+      goes: "01-Organisation/stakeholder-map.md — five roles table, Name column (a fill, via /capture)",
       score: 70,
       work: "ask",
       source: "stakeholder",
@@ -494,6 +705,8 @@ function contractQuestions(
       blocks: "the ontology compile",
       location: f.location ?? f.where,
       why: `the ontology compiler refuses on ${f.code.replace(/-/g, " ")}`,
+      means: "The build will not happen past this — it is a deadline, not advice. Every refusal a person can answer is a question about who owns or who asked; the rest is ours to repair.",
+      goes: `${f.location ?? f.where} — the row named above`,
       score: 90,
       // A missing owner is a person to ask. A dangling id or a renamed anchor
       // is ours to repair, and nobody at the client can help.
@@ -533,7 +746,7 @@ export function coach(input: CoachInput): CoachQuestion[] {
   }
 
   const all = [
-    ...gateQuestions(input.gates, names),
+    ...gateQuestions(input.gates, names, input.tables),
     ...contractQuestions(input.contract ?? [], names),
     ...stakeholderQuestions(input.tables),
     ...chainQuestions(input.findings, names, prio, blocksById, alreadyAsked),
@@ -582,4 +795,15 @@ export function nextConversations(
  */
 export function deskWork(questions: readonly CoachQuestion[]): CoachQuestion[] {
   return questions.filter((q) => q.work === "fix");
+}
+
+/**
+ * Gate criteria whose answer is already on file.
+ *
+ * Printed before the conversations, because they cost nothing to close —
+ * the FDE reads what they captured and says it back — and because a queue
+ * that opens by asking for something it is holding is one nobody trusts twice.
+ */
+export function verifyFirst(questions: readonly CoachQuestion[]): CoachQuestion[] {
+  return questions.filter((q) => q.work === "verify");
 }

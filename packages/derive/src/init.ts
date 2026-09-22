@@ -182,7 +182,7 @@ async function raiseTbdQuestions(
   if (tbd(vars.ONTOLOGY_REPO)) {
     gaps.push({
       field: "ONTOLOGY_REPO",
-      question: "Which repository holds the ontology for this client?",
+      question: "Where will the client's approved vocabulary and data model be published (the ontology repo)?",
       who: "Technical owner",
       blocks: "03-Systems/ontology/ promotion",
     });
@@ -206,7 +206,7 @@ async function raiseTbdQuestions(
     gaps.push({
       field: "TARGET_PLATFORM",
       question:
-        "Which platform does the assistant compile to — jena, databricks or fabric?",
+        "Which platform will the built solution run on (the compile target: jena, databricks or fabric)?",
       who: "Technical owner",
       blocks: "the ontology compile; choose from the competency questions, not precedent",
     });

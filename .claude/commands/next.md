@@ -52,9 +52,15 @@ Two things it deliberately does **not** do:
 
 ## Reading it back
 
-Report the groups as conversations, not as a list. An FDE gets one conversation
-with the exception holder, not four — walking in with everything at once is the
-difference between one interruption and four.
+**Start with "Verify first"**, if the output has one. Those are gate criteria
+whose answer is already on file — the sponsor's sentence in the brief, the
+five roles in the map. Read the quoted value back and ask the operator to say
+it in their own words. The bar has not moved; what has changed is that the
+queue is no longer asking for something it is holding.
+
+Then report the groups as conversations, not as a list. An FDE gets one
+conversation with the exception holder, not four — walking in with everything
+at once is the difference between one interruption and four.
 
 For each group, give the name, then the questions in the operator's own likely
 phrasing. Say what each one blocks. **Do not paraphrase away the specificity** —
@@ -64,9 +70,24 @@ Then say plainly what the queue does not know: if `prioritisation.rows` is
 empty, nothing is ranked by value and you are ordering by perishability alone.
 Say that rather than presenting the order as more considered than it is.
 
+**When the operator answers a question in chat, stop and write it down before
+moving on.** Offer the command with the text pre-filled — the question as the
+queue phrased it (or its `Q-` id), the answer verbatim, and `--from` set to
+whoever the operator said it came from:
+
+```bash
+node packages/derive/src/cli.ts answer engagements/<slug> "<Q-id or question>" "<answer, verbatim>" --from "<who said it>"
+```
+
+Do not continue to the next question until they have accepted or declined it.
+An answer that stays in chat is asked again tomorrow — that is the failure this
+step exists to prevent.
+
 ## After the conversation
 
-Answers go into the instrument, not into chat — a question answered in
-conversation and not written down is a question you will ask twice. Route the
-material through `/capture` and the answers land as proposed rows the FDE
-accepts.
+Answers go into the instrument, not into chat. The `answer` verb above writes
+each one into `02-Workflow/evidence/stated/<date>-answers.md` — `stated`
+because an answer someone gave you is something a person said, and it becomes
+primary evidence only by being watched. `intake` lists the file, `/capture`
+proposes rows from it, and the FDE accepts them. Nothing reaches a register
+until then.
