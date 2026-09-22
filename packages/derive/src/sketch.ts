@@ -174,10 +174,15 @@ export async function renderSketch(opts: SketchOptions): Promise<SketchResult> {
     cls: classOf(cell(r, "Source"), classById),
   })).filter((d) => has(d.output));
 
-  // 3. What we do not yet know — straight from the coach, grouped by who can answer.
+  // 3. What we do not yet know — straight from the coach, grouped by who can
+  // answer. Only questions about the client's work: their open questions,
+  // the roles still unnamed, the gaps in the chain. A gate criterion or a
+  // compiler refusal is about *our* process, and a client page that asks
+  // "who owns G1's criteria?" is the leak this page exists to prevent.
   const state = await deriveState({ engagementDir, slug, harnessRoot: opts.harnessRoot, deliverablesDir });
+  const CLIENT_FACING = new Set(["open-question", "stakeholder", "chain"]);
   const groups = nextConversations(state.coach, 50)
-    .map((g) => ({ who: g.who, questions: g.questions.filter((q) => q.source !== "gate" || q.work === "ask") }))
+    .map((g) => ({ who: g.who, questions: g.questions.filter((q) => CLIENT_FACING.has(q.source)) }))
     .filter((g) => g.questions.length);
   const questionCount = groups.reduce((n, g) => n + g.questions.length, 0);
 

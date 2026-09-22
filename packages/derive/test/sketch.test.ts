@@ -116,11 +116,32 @@ test("accepted rows appear with their evidence class; a pending proposal does no
   assert.equal((html.match(new RegExp(PROVISIONAL, "g")) ?? []).length, 2);
 });
 
+test("gate criteria and compiler refusals never reach the page — they are about our process", async () => {
+  const { writeFile } = await import("node:fs/promises");
+  // A G1 memo with five unowned criteria: the coach turns that into "who owns
+  // each?", which is a question for us, not for the client.
+  const memo = await readFile(join(dir, "engagement-management", "stage-gate-1-readiness.md"), "utf8");
+  await writeFile(
+    join(dir, "engagement-management", "stage-gate-1-readiness.md"),
+    memo.replace(/\| Recommendation \|\s*\|/, "| Recommendation | NOT READY |")
+      .replace(/(\| Operating map[^\n]*?\|)\s*\|/, "$1 unmet |"),
+    "utf8",
+  );
+  const res = await renderSketch({ engagementDir: dir, slug: "solara-foods", harnessRoot: HARNESS, deliverablesDir: deliverables, now: new Date("2026-09-24T10:00:00Z") });
+  const html = await readFile(res.absolutePath, "utf8");
+  // The banner says "pre-G1" on purpose; the gate's *criteria* must not appear.
+  assert.equal((html.match(/G1/g) ?? []).length, 2, "G1 appears only in the two banners");
+  assert.ok(!/criteria have no owner/.test(html));
+  assert.ok(!/G1 — 03→04/.test(html));
+  assert.match(html, /Who is the systems gatekeeper\? A name, not a team\./, "the client's unnamed roles still appear");
+});
+
 test("state.json lists sketches apart from deliverables", async () => {
   const state = await deriveState({ engagementDir: dir, slug: "solara-foods", harnessRoot: HARNESS, deliverablesDir: deliverables });
   assert.deepEqual(state.sketches, [
     { date: "2026-09-22", path: "solara-foods/sketch/2026-09-22.html" },
     { date: "2026-09-23", path: "solara-foods/sketch/2026-09-23.html" },
+    { date: "2026-09-24", path: "solara-foods/sketch/2026-09-24.html" },
   ]);
   assert.ok(!state.deliverables.some((d) => /sketch/.test(d.stage)), "a sketch is not a deliverable");
 });
