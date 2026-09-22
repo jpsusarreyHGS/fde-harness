@@ -147,7 +147,7 @@ Then stop, and tell the operator what to skim.
 ### Report
 
 ```
-CAPTURE PROPOSED — <source> (<evidence class>)
+ROWS PROPOSED — review, fix any cell, then accept — <source> (<evidence class>)
 
 Coverage — paste the block `propose` printed, unedited
   stakeholder-map      4 rows proposed   (source named 4 people)

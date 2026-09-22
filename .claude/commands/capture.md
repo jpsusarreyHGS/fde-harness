@@ -1,5 +1,5 @@
 ---
-description: Stages 01-03. Turn raw material into proposed instrument rows. Reads whatever is waiting in 02-Workflow/evidence/, extracts observations, exceptions, questions and map elements, and writes a proposal the FDE skims and accepts. Nothing reaches a register until it is accepted, and ids are minted by code at accept time.
+description: Stages 01-03. Turn raw material into proposed instrument rows. Reads whatever is waiting in 02-Workflow/evidence/, extracts observations, exceptions, questions and map elements, and writes them as proposed rows — a file the FDE reviews, then accepts. Nothing reaches a register until it is accepted, and ids are minted by code at accept time.
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
@@ -49,7 +49,8 @@ and gets back rows to check, rather than a form to fill.
    | `03` | `systems-inventory` · `readiness-scorecard` · `vocabulary-audit` · `ontology/backlog` (candidates only) |
 
    It never writes a register directly — it looks up the real columns and
-   keys, writes a spec, and lets code build the proposal:
+   keys, writes a spec, and lets code build the file of **proposed rows
+   (review, then `accept`)** — the harness calls that file a *proposal*:
 
    ```bash
    node packages/derive/src/cli.ts sweep   <engagement-dir> <source>        # the floor: who, what systems, which figures
@@ -77,8 +78,8 @@ and gets back rows to check, rather than a form to fill.
    node packages/derive/src/cli.ts reject engagements/<slug> <proposal.md> "<reason>"
    ```
 
-   The proposal is an ordinary markdown file. Fix a cell, delete a row that is
-   wrong, then accept. **Ids are blank on purpose** — code mints them at accept
+   The proposed rows are an ordinary markdown file. Fix a cell, delete a row
+   that is wrong, then accept. **Ids are blank on purpose** — code mints them at accept
    time, so the sequence stays contiguous even if another session wrote in
    between, and the FDE never types or sequences one.
 

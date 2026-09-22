@@ -177,7 +177,7 @@ Drop whatever already exists into the folder that says what it is:
 
 **The evidence class comes from the folder, never from the content.** That is the point: the discipline the whole judgment chain rests on becomes structural instead of something to remember at the end of a long day. A confident-sounding transcript in `stated/` can never silently become primary evidence, and a file dropped outside a class folder is reported rather than guessed.
 
-Then `/capture` extracts rows and writes a **proposal**. Nothing reaches a register until the FDE accepts it, and **ids are minted by code at accept time** — never by an agent, never typed by a human.
+Then `/capture` extracts rows and writes them as **proposed rows — a file the FDE reviews, then accepts** (a *proposal*, in the CLI's and the folder's name). Nothing reaches a register until the FDE accepts it, and **ids are minted by code at accept time** — never by an agent, never typed by a human. In anything a first-time user reads, say "proposed rows (review, then accept)" before you say "proposal" — the bare word was the first thing a trainee got stuck on.
 
 ```bash
 node packages/derive/src/cli.ts intake  <engagement-dir>              # what is waiting

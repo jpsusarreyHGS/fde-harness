@@ -360,9 +360,10 @@ if (sub === "intake") {
 if (sub === "pending") {
   const p = await pendingProposals(engagementDir);
   if (!p.length) {
-    console.log("No proposals awaiting a decision.");
+    console.log("No proposed rows awaiting accept.");
     process.exit(0);
   }
+  console.error(`${p.length} file(s) of proposed rows — review each, fix any cell, then accept or reject:`);
   for (const f of p) console.log(f);
   process.exit(0);
 }
@@ -488,7 +489,7 @@ if (sub === "propose") {
   try {
     const { name, rows } = await proposeFromSpec(engagementDir, spec);
     console.log(name);
-    console.error(`${rows} row(s) proposed. Nothing written to a register yet.`);
+    console.error(`${rows} row(s) proposed — review, fix any cell, then accept. Nothing written to a register yet.`);
     // Coverage, when the source can be found: under-extraction is visible at
     // the moment it happens, not at the gate.
     const src = await resolveSource(spec.source);

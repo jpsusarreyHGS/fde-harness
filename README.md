@@ -238,7 +238,7 @@ The agent reads what is waiting and extracts into **every instrument the materia
 | An access constraint, review timeline, missing API | `03-Systems/readiness-scorecard.md` |
 | A client-specific term or code | `03-Systems/vocabulary-audit.md` |
 
-It writes a **proposal** — an ordinary markdown file of rows for you to skim — and prints a **coverage block** underneath, so you can see at a glance whether it got everything:
+It writes the result as **proposed rows — a file you review, then `accept`** (the harness calls that file a *proposal*; nothing in it is real until you accept it) — and prints a **coverage block** underneath, so you can see at a glance whether it got everything:
 
 ```
   stakeholder-map      4 rows proposed   (source named 4 people)

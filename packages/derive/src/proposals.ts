@@ -83,7 +83,7 @@ export async function writeProposal(opts: WriteProposalOptions): Promise<string>
     "",
     `<!-- proposal source=${opts.source} agent=${opts.agent} at=${now.toISOString()} -->`,
     "",
-    `**${total} row(s) proposed. Nothing has been written yet.**`,
+    `**${total} row(s) proposed — review, fix any cell, then accept. Nothing has been written yet.**`,
     "",
     "Read them. Fix what is wrong, delete what should not exist, then accept:",
     "",
@@ -291,7 +291,7 @@ export async function acceptProposal(
 
   const marked =
     md.replace(
-      /(\*\*\d+ row\(s\) proposed\. Nothing has been written yet\.\*\*)/,
+      /(\*\*\d+ row\(s\) proposed(?: — review, fix any cell, then accept)?\. Nothing has been written yet\.\*\*)/,
       `<!-- accepted at=${new Date().toISOString()} -->\n\n**Accepted.** Rows are in the registers; ids are listed below.`,
     ) +
     "\n\n## Accepted\n\n" +
