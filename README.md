@@ -72,7 +72,22 @@ All of it lives in `engagements/<slug>/03-Systems/ontology/`, except the flows, 
 | | **G3 — Production gate** | `/gate 3` |
 | `09` | Run the loop again | `/harness-improver close` |
 
-Plus `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
+Plus `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/mockup` (what it could look like, synthetic, assumptions listed), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
+
+**Not sure which command comes next? `/commands`.** It is the harness's `git --help`: every command in stage order with what it is for — read from the command files themselves, so it cannot go stale — and, for your engagement, *where you are* and the next one to three commands to run, each with the reason:
+
+```
+WHERE YOU ARE — caldera-logistics
+  Discovery — 20 accepted row(s) across stages 01–03; G1 not yet assessed.
+
+NEXT, IN ORDER
+  /capture
+      why: 5 file(s) in evidence/ no register has seen
+  /next
+      why: the conversations to have tomorrow, with names — and what is already on file to verify
+```
+
+(`/help` is Claude Code's own command and cannot be overridden, which is why this one is `/commands`.)
 
 ### What each stage needs before you can leave it
 
@@ -111,7 +126,7 @@ If you have one day of discovery — a training simulation, a two-hour call, a c
 | | |
 |---|---|
 | **9 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, concept-mockup, chronicle, harness-improver |
-| **17 slash commands** | the stage pipeline plus sketch, mockup, dashboard, render and the improvement loop |
+| **18 slash commands** | the stage pipeline plus sketch, mockup, dashboard, render, the improvement loop — and `/commands`, which lists them all in stage order and says what to run next |
 | **A house UI** | `hgs-app-ui` — the HGS app design system (navy chrome, Geist, tokens, page patterns) behind every concept mockup and every MVP surface |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
@@ -454,6 +469,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | Symptom | What it means |
 |---|---|
 | A command fails with a TypeScript syntax error | You are on Node 22. This needs 24 — check with `node -v` |
+| I don't know which command to run next, and `/help` shows Claude Code's own help | `/commands` — the harness's own list, in stage order, plus where your engagement is and what to run next. Outside Claude Code: `node packages/derive/src/cli.ts commands engagements/<slug>` |
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
 | `intake` says my notes "look like an interview" | They are in `observed/` and read as something someone told you. If a person told you, move the file to `stated/`. If you genuinely watched it, leave it — the warning never moves anything, and the folder decides |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |

@@ -17,6 +17,7 @@
  *   cli.ts answer  <engagement-dir> "<Q-id or question>" "<answer>" --from "<who>" [--class stated|documented]
  *                                              write a chat answer into evidence/ so /capture can propose it
  *   cli.ts sketch  <engagement-dir>             the pre-G1 alignment sketch, from accepted rows only
+ *   cli.ts commands [<engagement-dir>]          every slash command in stage order; with an engagement, where you are and what to run next
  *   cli.ts mockup  <engagement-dir> next        the next concept mockup: version, file, what it rests on, what it must assume
  *   cli.ts mockup  <engagement-dir> log <file> [--assumptions ..] [--shown-to ..] [--reaction ..] [--evidence ..]
  *                                              record it in 05-Build/mockup-ledger.md; refuses without the watermark
@@ -58,18 +59,28 @@ import { coverage, formatCoverage, formatSweep, sweepText } from "./sweep.ts";
 import { recordAnswer, type AnswerClass } from "./answer.ts";
 import { renderSketch } from "./sketch.ts";
 import { logMockup, planMockup, WATERMARK } from "./mockup.ts";
+import { formatCommands, readCommands, suggestNext } from "./commands.ts";
+import { dirname, fileURLToPath as toPath } from "./cli-paths.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check", "roi", "sweep", "answer", "sketch", "mockup",
+  "scaffold", "contract-check", "roi", "sweep", "answer", "sketch", "mockup", "commands",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
 
+// `commands` works with no engagement: it lists what is available. With one,
+// it also says where you are and what to run next.
+if (sub === "commands" && !args.find((a) => !a.startsWith("--"))) {
+  const root = resolve(dirname(toPath(import.meta.url)), "..", "..", "..");
+  console.log(formatCommands(await readCommands(root)));
+  process.exit(0);
+}
+
 const dirArg = args.find((a) => !a.startsWith("--"));
 if (!dirArg) {
-  console.error("usage: cli.ts [intake|pending|accept|mint] <engagement-dir> [...]");
+  console.error("usage: cli.ts [intake|pending|accept|mint|…|commands] <engagement-dir> [...]");
   process.exit(2);
 }
 const engagementDir = resolve(dirArg);
@@ -642,6 +653,14 @@ if (fatal.length > 0) {
   process.exit(3);
 }
 for (const v of violations) console.error(`warn  ${v.rule}  ${v.detail}`);
+
+if (sub === "commands") {
+  const { where, next } = suggestNext(state);
+  // The command files live with this script, not with the engagement.
+  const root = resolve(dirname(toPath(import.meta.url)), "..", "..", "..");
+  console.log(formatCommands(await readCommands(root), { slug: basename(engagementDir), where, next }));
+  process.exit(0);
+}
 
 if (sub === "next") {
   const n = Number(args.filter((a) => !a.startsWith("--"))[1] ?? "3");
