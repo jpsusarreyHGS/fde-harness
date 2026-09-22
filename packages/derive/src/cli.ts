@@ -9,9 +9,11 @@
  *   cli.ts pending <engagement-dir>             proposals awaiting a decision
  *   cli.ts accept  <engagement-dir> <proposal>  mint ids and write the rows
  *   cli.ts mint    <engagement-dir> <PREFIX> [n]  next ids, without writing
- *   cli.ts anchors <engagement-dir> [filter]    register tables and their columns
+ *   cli.ts anchors <engagement-dir> [filter]    writable tables and their columns
  *   cli.ts propose <engagement-dir> <spec.json> validate and write a proposal
  *   cli.ts reject  <engagement-dir> <proposal> <reason>  decline it
+ *   cli.ts sweep   <engagement-dir> <source> [--against <proposal>]
+ *                                              what a source names — a floor under /capture
  *   cli.ts next    <engagement-dir> [n]         the ranked question queue
  *   cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]
  *                                              create it, or bring it forward
@@ -25,30 +27,33 @@
  *   3  the engagement files claim something untrue (tampered)
  */
 
-import { readFile, writeFile } from "node:fs/promises";
-import { basename, resolve } from "node:path";
+import { readFile, stat, writeFile } from "node:fs/promises";
+import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
 import { ID_ALTERNATION, mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
-import { scanIntake, CLASS_MEANING } from "./intake.ts";
+import { scanIntake, CLASS_MEANING, EVIDENCE_CLASSES, EVIDENCE_ROOT, handlingFor } from "./intake.ts";
 import {
   acceptProposal,
+  parseProposalBlocks,
   pendingProposals,
   proposeFromSpec,
+  PROPOSALS_DIR,
   rejectProposal,
   type ProposalSpec,
 } from "./proposals.ts";
 import { INSTRUMENTS } from "./instruments.ts";
-import { dataRows, parseAnchoredTables } from "./anchors.ts";
+import { dataRows, findTable, parseAnchoredTables } from "./anchors.ts";
 import { deskWork, nextConversations } from "./coach.ts";
 import { initEngagement, InitRefused, validateVars } from "./init.ts";
 import { checkContract, readContract } from "./contract.ts";
 import { WriteRefused } from "./writer.ts";
+import { coverage, formatCoverage, formatSweep, sweepText } from "./sweep.ts";
 
 const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
-  "scaffold", "contract-check", "roi",
+  "scaffold", "contract-check", "roi", "sweep",
 ]);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
 const args = sub ? argv.slice(1) : argv;
@@ -61,7 +66,93 @@ if (!dirArg) {
 const engagementDir = resolve(dirArg);
 const harnessRoot = resolve(engagementDir, "..", "..");
 
+// ------------------------------------------------------------------ helpers
+
+async function isFile(p: string): Promise<boolean> {
+  try { return (await stat(p)).isFile(); } catch { return false; }
+}
+
+/**
+ * Find a source file the way an agent names it: as given, relative to the
+ * engagement, or by bare filename inside one of the evidence class folders.
+ * Returns the readable text — the sibling `.md` for a converted binary — and
+ * the class the folder decided, when it was dropped in one.
+ */
+async function resolveSource(name: string): Promise<{
+  path: string; text: string; evidenceClass: string | null;
+} | null> {
+  const candidates = [
+    isAbsolute(name) ? name : resolve(name),
+    resolve(engagementDir, name),
+    ...EVIDENCE_CLASSES.map((c) => resolve(engagementDir, ...EVIDENCE_ROOT.split("/"), c, basename(name))),
+  ];
+  for (const p of candidates) {
+    if (!(await isFile(p))) continue;
+    const rel = relative(engagementDir, p).split(sep).join("/");
+    const cls = new RegExp(`^${EVIDENCE_ROOT}/(${EVIDENCE_CLASSES.join("|")})/`).exec(rel)?.[1] ?? null;
+    if (handlingFor(p) === "convert") {
+      for (const c of [`${p}.md`, p.replace(/\.[^.]+$/, ".md")]) {
+        if (await isFile(c)) return { path: rel, text: await readFile(c, "utf8"), evidenceClass: cls };
+      }
+      return null;
+    }
+    if (handlingFor(p) === "needs-service") return null;
+    return { path: rel, text: await readFile(p, "utf8"), evidenceClass: cls };
+  }
+  return null;
+}
+
+/** The sponsor's name from the stakeholder map, so the sweep can spot them. */
+async function sponsorName(): Promise<string | undefined> {
+  try {
+    const md = await readFile(resolve(engagementDir, "01-Organisation", "stakeholder-map.md"), "utf8");
+    const t = findTable(parseAnchoredTables(md), "stakeholder-map.five-roles");
+    const row = t?.rows.find((r) => /sponsor/i.test(r["Role"] ?? ""));
+    const name = row?.["Name"]?.trim();
+    return name && !/\{\{/.test(name) ? name : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // --------------------------------------------------------------- subcommands
+
+if (sub === "sweep") {
+  const rest = args.filter((a) => !a.startsWith("--"));
+  const sourceArg = rest[1];
+  const againstAt = args.indexOf("--against");
+  const against = againstAt >= 0 ? args[againstAt + 1] : undefined;
+  if (!sourceArg) {
+    console.error("usage: cli.ts sweep <engagement-dir> <source-file> [--against <proposal.md>]");
+    console.error("");
+    console.error("Prints what a source names — people with roles, systems, acronyms,");
+    console.error("figures — so a capture can be checked against a floor. Writes nothing.");
+    console.error("With --against, prints rows proposed per instrument beside what the");
+    console.error("sweep found, and flags an instrument the source supported that got none.");
+    process.exit(2);
+  }
+  const src = await resolveSource(sourceArg);
+  if (!src) {
+    console.error(`Cannot read ${sourceArg} — not found, not converted yet, or a format that needs a transcription/description pass first.`);
+    process.exit(2);
+  }
+  const result = sweepText(src.text, { sponsorName: await sponsorName() });
+  if (!against) {
+    console.log(formatSweep(result, src.path, src.evidenceClass ?? undefined));
+    process.exit(0);
+  }
+  let proposalMd: string;
+  try {
+    proposalMd = await readFile(resolve(engagementDir, ...PROPOSALS_DIR.split("/"), against), "utf8");
+  } catch {
+    console.error(`no proposal ${against} in ${PROPOSALS_DIR}`);
+    process.exit(2);
+  }
+  const blocks = parseProposalBlocks(proposalMd).map((b) => ({ instrument: b.target.instrument, rows: b.rows.length }));
+  const lines = coverage(blocks, result);
+  console.log(formatCoverage(lines, against, src.path));
+  process.exit(lines.some((l) => l.check) ? 1 : 0);
+}
 
 if (sub === "scaffold") {
   const jsonAt = args.indexOf("--json");
@@ -255,9 +346,25 @@ if (sub === "anchors") {
       continue;
     }
     for (const t of parseAnchoredTables(md)) {
-      if (t.anchor.role !== "register") continue;
       if (filter && !t.anchor.name.toLowerCase().includes(filter) &&
           !inst.path.toLowerCase().includes(filter)) continue;
+      // Labels and kv tables are writable by fill, not by row. The five roles
+      // and the sponsor's seven questions live there, and an agent that only
+      // ever saw registers had nowhere to put a name it had just read.
+      if (t.anchor.role !== "register") {
+        const keyCol = t.anchor.keyColumn ?? t.headers[0] ?? "";
+        const ansCol = t.anchor.answerColumn ?? (t.anchor.role === "kv" ? t.headers[1] : undefined);
+        const keys = t.rows.map((r) => (r[keyCol] ?? "").replace(/[*_`]/g, "").trim()).filter(Boolean);
+        if (!keys.length) continue;
+        console.log(t.anchor.name);
+        console.log(`  ${inst.path}`);
+        console.log(`  ${t.headers.join(" | ")}`);
+        console.log(`  mode=fill — key column=${keyCol}${ansCol ? `, answer column=${ansCol}` : ""}; sets cells on an existing row, never adds one`);
+        console.log(`  keys: ${keys.join(" | ")}`);
+        console.log("");
+        shown++;
+        continue;
+      }
       console.log(t.anchor.name);
       console.log(`  ${inst.path}`);
       console.log(`  ${t.headers.join(" | ")}`);
@@ -285,7 +392,7 @@ if (sub === "anchors") {
     }
   }
   if (!shown) {
-    console.error(filter ? `No register table matches "${filter}".` : "No register tables found.");
+    console.error(filter ? `No writable table matches "${filter}".` : "No writable tables found.");
     process.exit(1);
   }
   process.exit(0);
@@ -301,7 +408,8 @@ if (sub === "propose") {
     console.error('    "anchor": "observation-log.rows", "prefix": "EV", "idColumn": "Id",');
     console.error('    "columns": [...], "rows": [ { "Column": "value" } ] } ] }');
     console.error("");
-    console.error("Run `anchors` first for the real column names.");
+    console.error('A labels or kv table takes { ..., "mode": "fill", "rows": [ { "<key column>": "<existing key>", "<answer column>": "..." } ] }.');
+    console.error("Run `anchors` first for the real column names and keys.");
     process.exit(2);
   }
   let spec: ProposalSpec;
@@ -315,6 +423,16 @@ if (sub === "propose") {
     const { name, rows } = await proposeFromSpec(engagementDir, spec);
     console.log(name);
     console.error(`${rows} row(s) proposed. Nothing written to a register yet.`);
+    // Coverage, when the source can be found: under-extraction is visible at
+    // the moment it happens, not at the gate.
+    const src = await resolveSource(spec.source);
+    if (src) {
+      const result = sweepText(src.text, { sponsorName: await sponsorName() });
+      const blocks = spec.blocks.map((b) => ({ instrument: b.instrument, rows: b.rows?.length ?? 0 }));
+      console.error("");
+      console.error(formatCoverage(coverage(blocks, result), name, src.path));
+      console.error("");
+    }
     console.error(`Accept with: cli.ts accept ${dirArg} ${name}`);
     process.exit(0);
   } catch (err) {

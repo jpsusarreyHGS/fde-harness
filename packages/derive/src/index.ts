@@ -20,8 +20,10 @@ export { validateState, tampered } from "./validate.ts";
 export type { Violation } from "./validate.ts";
 export { mintIds, scanIds, knownIds, homeOf } from "./ids.ts";
 export type { IdPrefix, MintResult } from "./ids.ts";
-export { appendRows, retireRow, tableColumns, escapeCell, WriteRefused } from "./writer.ts";
-export type { AppendResult } from "./writer.ts";
+export { appendRows, fillCells, retireRow, tableColumns, tableInfo, cleanKey, escapeCell, WriteRefused } from "./writer.ts";
+export type { AppendResult, TableInfo } from "./writer.ts";
+export { sweepText, coverage, formatSweep, formatCoverage, TRANSCRIBE_TARGETS } from "./sweep.ts";
+export type { SweepResult, SweptPerson, CoverageLine } from "./sweep.ts";
 export {
   scanIntake, readIntake, transcriptToText, intakeBrief, handlingFor,
   EVIDENCE_CLASSES, EVIDENCE_ROOT, CLASS_MEANING,
@@ -29,6 +31,8 @@ export {
 export type { EvidenceClass, IntakeItem, Handling } from "./intake.ts";
 export {
   writeProposal, acceptProposal, pendingProposals, previewProposal, PROPOSALS_DIR,
-  proposeFromSpec, rejectProposal,
+  proposeFromSpec, rejectProposal, parseProposalBlocks,
 } from "./proposals.ts";
-export type { ProposalBlock, ProposalTarget, AcceptResult, ProposalSpec } from "./proposals.ts";
+export type {
+  ProposalBlock, ProposalTarget, AcceptResult, ProposalSpec, ParsedProposalBlock,
+} from "./proposals.ts";

@@ -18,19 +18,28 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parseAnchoredTables, splitRow } from "./anchors.ts";
 import { idPattern, knownIds, mintIds, type IdPrefix } from "./ids.ts";
-import { appendRows, escapeCell, tableColumns, WriteRefused } from "./writer.ts";
+import {
+  appendRows, cleanKey, escapeCell, fillCells, tableInfo, WriteRefused,
+} from "./writer.ts";
 
 export const PROPOSALS_DIR = "02-Workflow/proposals";
 
 export interface ProposalTarget {
   /** Instrument path relative to the engagement root. */
   instrument: string;
-  /** Anchored register table to append to. */
+  /** Anchored table to write to. */
   anchor: string;
   /** Prefix whose sequence supplies the id column, when the table has one. */
   prefix?: IdPrefix;
   /** Column the minted id goes in. */
   idColumn?: string;
+  /**
+   * `append` (default) adds rows to a register. `fill` sets cells on a row a
+   * labels or kv table already has — the five roles, the sponsor's seven
+   * questions — keyed on that table's key column. A fill never adds a row and
+   * never overwrites a filled cell.
+   */
+  mode?: "append" | "fill";
 }
 
 export interface ProposalBlock extends ProposalTarget {
@@ -89,9 +98,14 @@ export async function writeProposal(opts: WriteProposalOptions): Promise<string>
   ];
 
   for (const b of opts.blocks) {
-    out.push(`<!-- propose target=${b.instrument} anchor=${b.anchor}${b.prefix ? ` prefix=${b.prefix}` : ""}${b.idColumn ? ` idColumn=${b.idColumn}` : ""} -->`);
+    const fill = b.mode === "fill";
+    out.push(
+      `<!-- propose target=${b.instrument} anchor=${b.anchor}` +
+        `${b.prefix ? ` prefix=${b.prefix}` : ""}${b.idColumn ? ` idColumn=${b.idColumn}` : ""}` +
+        `${fill ? " mode=fill" : ""} -->`,
+    );
     out.push("");
-    out.push(`## ${b.anchor} — ${b.rows.length} row(s)`);
+    out.push(`## ${b.anchor} — ${b.rows.length} ${fill ? "fill(s) — sets cells on rows the table already has" : "row(s)"}`);
     out.push("");
     out.push(`| ${b.columns.join(" | ")} |`);
     out.push(`|${b.columns.map(() => "---").join("|")}|`);
@@ -115,7 +129,51 @@ export interface AcceptResult {
 }
 
 const PROPOSE_RE =
-  /<!--\s*propose\s+target=(\S+)\s+anchor=(\S+)(?:\s+prefix=(\S+))?(?:\s+idColumn=(\S+))?\s*-->/;
+  /<!--\s*propose\s+target=(\S+)\s+anchor=(\S+)(?:\s+prefix=(\S+))?(?:\s+idColumn=(\S+))?(?:\s+mode=(\S+))?\s*-->/;
+
+export interface ParsedProposalBlock {
+  target: ProposalTarget;
+  columns: string[];
+  /** Cells per row, in column order. Blank rows are already dropped. */
+  rows: string[][];
+}
+
+/**
+ * The propose blocks in a proposal file, as written.
+ *
+ * One parser for accept, preview and coverage — the three used to disagree
+ * about what counted as a row, and a coverage line that counts differently
+ * from the accept it describes is a lie with a number on it.
+ */
+export function parseProposalBlocks(md: string): ParsedProposalBlock[] {
+  const lines = md.split(/\r?\n/);
+  const blocks: ParsedProposalBlock[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const m = PROPOSE_RE.exec(lines[i]!);
+    if (!m) continue;
+    const target: ProposalTarget = {
+      instrument: m[1]!,
+      anchor: m[2]!,
+      ...(m[3] ? { prefix: m[3] as IdPrefix } : {}),
+      ...(m[4] ? { idColumn: m[4] } : {}),
+      ...(m[5] === "fill" ? { mode: "fill" as const } : {}),
+    };
+    let j = i + 1;
+    while (j < lines.length && !lines[j]!.trim().startsWith("|")) j++;
+    if (j >= lines.length) continue;
+    const columns = splitRow(lines[j]!);
+    const rows: string[][] = [];
+    for (let k = j + 2; k < lines.length && lines[k]!.trim().startsWith("|"); k++) {
+      const cells = splitRow(lines[k]!);
+      if (cells.every((c) => c.trim() === "")) continue;
+      rows.push(cells);
+    }
+    blocks.push({ target, columns, rows });
+    i = j;
+  }
+  return blocks;
+}
 
 /**
  * Accept a proposal: mint ids, validate citations, append rows.
@@ -151,31 +209,7 @@ export async function acceptProposal(
     );
   }
 
-  const lines = md.split(/\r?\n/);
-  const blocks: { target: ProposalTarget; columns: string[]; rows: string[][] }[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const m = PROPOSE_RE.exec(lines[i]!);
-    if (!m) continue;
-    const target: ProposalTarget = {
-      instrument: m[1]!,
-      anchor: m[2]!,
-      ...(m[3] ? { prefix: m[3] as IdPrefix } : {}),
-      ...(m[4] ? { idColumn: m[4] } : {}),
-    };
-    let j = i + 1;
-    while (j < lines.length && !lines[j]!.trim().startsWith("|")) j++;
-    if (j >= lines.length) continue;
-    const columns = splitRow(lines[j]!);
-    const rows: string[][] = [];
-    for (let k = j + 2; k < lines.length && lines[k]!.trim().startsWith("|"); k++) {
-      const cells = splitRow(lines[k]!);
-      if (cells.every((c) => c.trim() === "")) continue;
-      rows.push(cells);
-    }
-    blocks.push({ target, columns, rows });
-    i = j;
-  }
+  const blocks = parseProposalBlocks(md);
 
   if (blocks.length === 0) {
     throw new WriteRefused(`${proposalName} contains no propose blocks`);
@@ -215,11 +249,25 @@ export async function acceptProposal(
   for (const b of blocks) {
     if (b.rows.length === 0) continue;
 
-    const realColumns = await tableColumns(
+    const realColumns = (await tableInfo(
       engagementDir,
       b.target.instrument,
       b.target.anchor,
-    );
+    )).headers;
+
+    if (b.target.mode === "fill") {
+      const fills: Record<string, string>[] = b.rows.map((cells) => {
+        const row: Record<string, string> = {};
+        b.columns.forEach((c, ci) => {
+          if (!realColumns.includes(c)) return;
+          row[c] = cells[ci] ?? "";
+        });
+        return row;
+      });
+      const res = await fillCells(engagementDir, b.target.instrument, b.target.anchor, fills);
+      written.push({ anchor: b.target.anchor, rows: res.written, ids: [] });
+      continue;
+    }
 
     let ids: string[] = [];
     if (b.target.prefix) {
@@ -290,16 +338,7 @@ export async function previewProposal(
   );
   const out: { anchor: string; rows: number }[] = [];
   for (const t of parseAnchoredTables(md)) out.push({ anchor: t.anchor.name, rows: t.rows.length });
-  const lines = md.split(/\r?\n/);
-  for (let i = 0; i < lines.length; i++) {
-    const m = PROPOSE_RE.exec(lines[i]!);
-    if (!m) continue;
-    let j = i + 1;
-    while (j < lines.length && !lines[j]!.trim().startsWith("|")) j++;
-    let n = 0;
-    for (let k = j + 2; k < lines.length && lines[k]!.trim().startsWith("|"); k++) n++;
-    out.push({ anchor: m[2]!, rows: n });
-  }
+  for (const b of parseProposalBlocks(md)) out.push({ anchor: b.target.anchor, rows: b.rows.length });
   return out;
 }
 
@@ -344,7 +383,8 @@ export async function proposeFromSpec(
   const resolved: ProposalBlock[] = [];
 
   for (const b of spec.blocks) {
-    const real = await tableColumns(engagementDir, b.instrument, b.anchor);
+    const info = await tableInfo(engagementDir, b.instrument, b.anchor);
+    const real = info.headers;
     const stray = (b.columns ?? []).filter((c) => !real.includes(c));
     if (stray.length) {
       throw new WriteRefused(
@@ -354,6 +394,38 @@ export async function proposeFromSpec(
       );
     }
     if (!b.rows?.length) continue;
+
+    // A labels or kv table takes fills, not rows, and a register takes rows,
+    // not fills. Saying which at propose time — with the keys that exist —
+    // beats an accept that refuses after the FDE has read forty rows.
+    if (b.mode === "fill") {
+      if (info.role === "register") {
+        throw new WriteRefused(
+          `${b.anchor} is a register. Append rows to it; mode=fill is for labels and kv tables.`,
+          { instrument: b.instrument, anchor: b.anchor },
+        );
+      }
+      const known = new Set(info.keys);
+      const unknown = b.rows
+        .map((r) => r[info.keyColumn] ?? "")
+        .filter((k) => !known.has(cleanKey(k)));
+      if (unknown.length) {
+        throw new WriteRefused(
+          `${b.anchor} has no row ${unknown.map((k) => JSON.stringify(k)).join(", ")}. ` +
+            `A fill never adds a row. Its keys are: ${info.keys.join(" | ")}`,
+          { instrument: b.instrument, anchor: b.anchor },
+        );
+      }
+      resolved.push({ ...b, columns: real, rows: b.rows });
+      continue;
+    }
+    if (info.role !== "register") {
+      throw new WriteRefused(
+        `${b.anchor} is role=${info.role}. Its rows are the schema — use mode=fill ` +
+          `to set cells on one of: ${info.keys.join(" | ")}`,
+        { instrument: b.instrument, anchor: b.anchor },
+      );
+    }
 
     // The id column is minted at accept. An agent filling it is the
     // read-then-write race the allocator exists to remove, so it is refused

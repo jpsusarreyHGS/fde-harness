@@ -215,7 +215,30 @@ Audio and images need a transcript or a description written first — the harnes
 /capture
 ```
 
-The agent reads what is waiting, extracts observations, exceptions, requirements, map elements and questions, and writes a **proposal** — an ordinary markdown file of rows for you to skim.
+The agent reads what is waiting and extracts into **every instrument the material supports** — not just the workflow registers. One interview typically names the sponsor, three of the five roles, four systems and a dozen client terms, and all of that lands:
+
+| From the source | Lands in |
+|---|---|
+| A named person with a role | `01-Organisation/stakeholder-map.md` — the five roles, or the "other stakeholders" table |
+| What the sponsor said success looks like, verbatim | `01-Organisation/sponsor-brief.md` |
+| Actions, steps, exceptions, questions | `02-Workflow/` — observation log, operating map, exception register, requirements, open questions |
+| A system, portal, mailbox or spreadsheet where work happens | `03-Systems/systems-inventory.md` |
+| An access constraint, review timeline, missing API | `03-Systems/readiness-scorecard.md` |
+| A client-specific term or code | `03-Systems/vocabulary-audit.md` |
+
+It writes a **proposal** — an ordinary markdown file of rows for you to skim — and prints a **coverage block** underneath, so you can see at a glance whether it got everything:
+
+```
+  stakeholder-map      4 rows proposed   (source named 4 people)
+  systems-inventory    6 rows proposed   (source named 5 systems)
+  sponsor-brief        0 fields          ← source contains a sponsor; nothing extracted. Check.
+```
+
+The right-hand column is a cheap, deterministic scan of the source — who it names, what systems, which figures. A `← Check.` line means the source plausibly supported that instrument and the agent proposed nothing for it: ask it why, or run the scan yourself and compare:
+
+```bash
+node packages/derive/src/cli.ts sweep engagements/<slug> <source-file>
+```
 
 **Nothing reaches a register until you accept it.** Fix a cell, delete a row that is wrong, then:
 
@@ -230,6 +253,8 @@ node packages/derive/src/cli.ts accept engagements/<slug> <proposal.md>
 Decided against it? `reject` it with a reason, so the queue stops showing work nobody will do.
 
 **Ids are blank on purpose.** Code mints `EV-`, `EX-`, `REQ-` and `Q-` at accept time, so the sequence stays contiguous even if another session wrote in between — and you never type or sequence one. An accept that cites an id which does not exist is refused whole, because a partial accept leaves the register in a state nobody chose.
+
+Two kinds of block appear in a proposal. Most **add rows** to a register. A few **fill cells** on rows that already exist — the five roles in the stakeholder map, the sponsor's seven questions — because those tables are fixed and only their answers change. A fill never adds a row and never overwrites something already written; if a name is wrong, change it in the file yourself.
 
 ### Step 5 — Ask what to ask
 
@@ -317,6 +342,8 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
 | An accept is refused | It cites an id that does not exist. The message names it |
+| `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
+| An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
 
 Anything the harness gets wrong is worth logging: `/harness-improver`. **Nothing enters the shared library without a named engagement that needed it.**
