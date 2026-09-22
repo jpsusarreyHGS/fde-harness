@@ -3,6 +3,12 @@ description: Gates G1 (03 to 04), G2 (06 to 07) and G3 (08 to 09). Invoke the en
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `engagement-manager` agent in **`gate` mode**. Pass the gate number (`/gate 1`, `/gate 2`, `/gate 3`).
 
 The agent loads `skills-practice/stage-gates` and writes to `engagement-management/stage-gate-<N>-readiness.md`.

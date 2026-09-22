@@ -3,6 +3,12 @@ description: Stage 08. Invoke the engagement-manager in roi mode to populate the
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `engagement-manager` agent in **`roi` mode**. It loads `skills-practice/roi-and-readout`.
 
 1. **Populates the nine inputs** from the operating map and eval results, labelling each as **measured, modelled or assumed**. An unlabelled figure will be read as measured.

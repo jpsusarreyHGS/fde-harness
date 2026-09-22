@@ -175,6 +175,18 @@ Neither is optional, and the harness will stop you.
 1. **Sign the evidence-handling terms** — `00-Setup/evidence-handling-terms.md`. Residency, retention, redaction, access, deletion, onward use. `discovery-analyst` hard-stops without them, because evidence captured under unresolved terms may have to be destroyed, and destroying discovery evidence means redoing discovery.
 2. **Check the monitoring constraint.** Desktop task mining and session replay are employee monitoring. In works-council jurisdictions and unionised environments they need **consultation, not notice** — a process with a counterparty who can say no. Getting this wrong ends an engagement rather than delaying it.
 
+### Where the engagement lives — and why an isolated worktree cannot see it
+
+`engagements/<slug>/` is **client data, and it is never committed** — `.gitignore` excludes it on purpose, and this repository is public. The folder exists only in the checkout where you created it; back it up to the client's SharePoint, not to git.
+
+That has one consequence worth knowing before you dispatch anything. Some host tools isolate a subagent in a fresh git worktree — a copy of the repo checked out from `origin/main`. That copy contains no engagements at all, so an agent started there fails with a confusing refusal three steps in. Every agent command now runs a pre-flight first and stops with a plain message if the engagement is not visible:
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
+If it fails: run agent commands from the main checkout, or turn off worktree isolation in your host tool. Do not work around it by committing the engagement.
+
 ### Step 3 — Go and watch. Come back with material.
 
 This is the part only you can do, and the reason the rest exists: **eight hours beside the operator gets you the job.** Spend them watching, not typing.
@@ -358,6 +370,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` filled the observation log but the stakeholder map is still empty | Look at the coverage block under the proposal. A `← Check.` line names the instrument the source supported and the agent skipped — ask it to re-read for that, or run `cli.ts sweep` to see what the source names |
 | An accept says a cell "already holds" a value | A fill never overwrites. Someone already wrote that name or answer; edit the file deliberately if it is wrong |
 | `/next` has nothing to say | Either nothing is genuinely blocked, or the gate memo has not been started |
+| `/allocate` (or any agent command) stops with "`engagements/<slug>` is not visible from this session" | The session is in an isolated git worktree, which holds no engagement folders because they are never committed — or the engagement was created in a different checkout. Run from the main checkout or turn off worktree isolation; `git worktree list` shows which you are in |
 | `/next` keeps asking something I already answered | Answers given in chat are not evidence until written down. Run `cli.ts answer …` with the answer and who said it, then `/capture` and accept. If the answer is already in an instrument — the sponsor brief, the stakeholder map — it should appear under "Verify first", not as a question; if it does not, report it |
 
 Anything the harness gets wrong is worth logging: `/harness-improver`. **Nothing enters the shared library without a named engagement that needed it.**

@@ -3,6 +3,12 @@ description: Stage 05. Invoke the solution-architect in build-plan mode to decom
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `solution-architect` agent in **`build-plan` mode**. Follow its instructions exactly. Per `solution-architect.md`:
 
 1. **Step 0** confirms upstream readiness and emits the status dashboard, then stops. Upstream of stage `05` is **G1** (`03`→`04`) plus a completed stage `04`: the allocation grid and the ranked matrix must exist, because what was allocated to `human-gate` is not to be automated and `leave-alone` is not to be built. **G2 comes after evals, not before build.**

@@ -3,6 +3,12 @@ description: Stage 05. Invoke the solution-architect in architect mode to produc
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `solution-architect` agent in **`architect` mode**. Follow its instructions exactly. Per `solution-architect.md`:
 
 0. **Step 0 orientation and gate (always first)** — emits the ARCHITECT STATUS dashboard with upstream readiness, detected conflicts and per-chunk status, then stops. Does not draft while a conflict is unresolved. If G1 has not passed it asks before proceeding, and logs any operator override as a decision.

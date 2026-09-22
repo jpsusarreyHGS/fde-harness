@@ -3,6 +3,12 @@ description: Stages 01-03. Invoke the discovery-analyst to structure field obser
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `discovery-analyst` agent. Per `discovery-analyst.md`:
 
 1. **Loads its skills first** — `observation-protocol` in full (including `operating-map.md`, `the-five-roles.md`, `the-four-tells.md`), `requirements-elicitation`, `evidence-handling`, plus any superseding skill in `engagements/<slug>/skills-engagement/`.

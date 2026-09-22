@@ -104,6 +104,12 @@ The harness is a **team of specialist subagents**. The session you are in is the
 
 Read these **in order**, before any exploration:
 
+0. **Confirm you can see the engagement.** `git rev-parse --show-toplevel` must
+   be the harness root, and `engagements/<slug>/` must exist there. Engagement
+   folders are gitignored — client data never enters the repo — so a session
+   isolated in a fresh git worktree holds none of them, and every agent command
+   runs `node scripts/preflight.mjs engagements/<slug>` before it dispatches.
+   If that fails, stop and say so; do not explore, and do not dispatch.
 1. `engagements/<slug>/state.json` — machine-readable state; also what the dashboard renders
 2. `engagements/<slug>/chronicle/memory/MEMORY.md` — the index; follow its links
 3. `engagements/<slug>/chronicle/CHRONICLE.md`, then the latest `chronicle/sessions/YYYY-MM-DD-NNN.md`

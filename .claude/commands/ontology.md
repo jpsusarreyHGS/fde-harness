@@ -3,6 +3,12 @@ description: Stage 03. Invoke the ontology-engineer to promote discovery output 
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `ontology-engineer` agent. Follow its instructions exactly. Per `ontology-engineer.md`:
 
 1. **Loads `ontology-first-delivery` and `requirements-elicitation` first**, plus the target ontology repo's own `CLAUDE.md` and `docs/00-business/` — repo conventions are authoritative and are never inferred from filenames.

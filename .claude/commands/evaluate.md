@@ -3,6 +3,12 @@ description: Stage 06. Invoke the evaluator to score the system against the four
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `evaluator` agent. Per `evaluator.md`:
 
 1. **Loads `skills-practice/four-tests`** and `skills-practice/autonomy-ladder` in full, plus `observation-protocol` — it needs to know how the exception register was built to build cases from it.

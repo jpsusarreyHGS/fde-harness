@@ -3,6 +3,12 @@ description: Stage 04. Invoke the solution-architect in allocate mode to place t
 allowed-tools: Read Write Glob Grep Bash Agent
 ---
 
+**Before dispatching, run the pre-flight.** If it exits non-zero, show its message and stop — do not dispatch. An agent isolated in a fresh worktree cannot see an engagement folder, and it should learn that here rather than three steps in.
+
+```bash
+node scripts/preflight.mjs engagements/<slug>
+```
+
 Use the Agent tool to dispatch the `solution-architect` agent in **`allocate` mode**. Per `solution-architect.md`:
 
 1. **Step 0 orientation and gate** — reads `state.json`, memory, decisions and the G1 memo, emits a status dashboard, stops. Does not draft while a conflict between an artefact and a logged decision is unresolved.
