@@ -9,7 +9,7 @@ This is the parser `render-dashboard/SKILL.md` promised as "one parser, in one p
 ## Use
 
 ```bash
-npm test          # 33 tests
+npm test          # 187 tests
 npm run typecheck # tsc --noEmit, strict + noUncheckedIndexedAccess
 
 node src/cli.ts <engagement-dir>                      # print state.json
@@ -35,8 +35,14 @@ Exit codes are for a runner and for CI:
 
 ## API
 
+There is no workspace root, so the package name resolves nowhere — import the
+modules by relative path. Anything an agent runs should be a `cli.ts`
+subcommand instead: agents have a shell, not a TypeScript evaluator.
+
 ```ts
-import { deriveState, scaffoldEngagement, validateState } from "@hgs-fde/derive";
+import { deriveState } from "../packages/derive/src/state.ts";
+import { scaffoldEngagement } from "../packages/derive/src/scaffold.ts";
+import { validateState } from "../packages/derive/src/validate.ts";
 
 // create an engagement from the templates — no interactive prompts
 await scaffoldEngagement({ engagementsRoot, templatesDir, vars });
@@ -74,7 +80,7 @@ Three further safeguards, each of which exists because the alternative silently 
 
 ## The chain audit
 
-The reason this package exists. Seven finding kinds, each with an id and a location — a count with no location is not actionable:
+The reason this package exists. Nine finding kinds, each with an id and a location — a count with no location is not actionable. `AUDIT_COUNTS` in `chain.ts` maps each to its count in `state.json`, and `KINDS` in `coach.ts` says how each becomes a question:
 
 | Finding | Catches |
 |---|---|
@@ -82,9 +88,11 @@ The reason this package exists. Seven finding kinds, each with an id and a locat
 | `unsourced-requirement` | A requirement with no `Source` and no `ASSUMPTION` tag |
 | `orphan-evidence` | Evidence captured and cited nowhere — a gap in the analysis, or an observation that was not needed |
 | `unowned-assumption` | An assumption with no owner or no confirm-by date: a guess with a permanent home |
-| `stale-unverified` | Stated-only evidence that has survived into placement. The class that surfaces at UAT |
+| `unverified-in-placement` | Stated-only evidence whose step has been allocated. The class that surfaces at UAT |
 | `allocation-without-reason` | The reason is the artefact. `"ok"` is rejected — at G2 the grid must survive challenge |
 | `exception-without-rule-holder` | The ceiling on eval quality: an exception nobody can adjudicate |
+| `gap-without-question` | A gap the harness says to raise a `Q-` for — no rule holder, unquantified frequency — with no open question citing it |
+| `hypothesis-never-revisited` | An entry hypothesis still `open`: discovery either supported it or disproved it |
 
 ## Invariants `validateState` enforces
 
