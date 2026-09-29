@@ -13,7 +13,7 @@
  * detect and a reviewer will not reliably catch by eye.
  */
 
-import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
+import { cell as col, rowsOf as tableRows, type ParsedTable } from "./anchors.ts";
 import { ID_ALTERNATION, idPattern } from "./ids.ts";
 
 export interface ChainCounts {
@@ -104,6 +104,19 @@ export interface AuditFinding {
   location: string;
   detail: string;
 }
+
+/** The `ChainAudit` count that summarises each finding kind. */
+export const AUDIT_COUNTS = {
+  "unsourced-requirement": "unsourcedRequirements",
+  "orphan-evidence": "orphanEvidence",
+  "dangling-citation": "danglingCitations",
+  "unverified-in-placement": "unverifiedInPlacement",
+  "gap-without-question": "gapsWithoutQuestion",
+  "unowned-assumption": "unownedAssumptions",
+  "allocation-without-reason": "allocationsWithoutReason",
+  "exception-without-rule-holder": "exceptionsWithoutRuleHolder",
+  "hypothesis-never-revisited": "hypothesesNeverRevisited",
+} as const satisfies Record<AuditFinding["kind"], string>;
 
 export interface ChainAudit {
   unsourcedRequirements: number;
@@ -218,15 +231,6 @@ export function filled(cell: string | undefined): boolean {
   return true;
 }
 
-/** Pick the first present column from a list of candidate headers. */
-function col(row: Record<string, string>, ...names: string[]): string {
-  for (const n of names) {
-    const v = row[n];
-    if (v !== undefined) return v;
-  }
-  return "";
-}
-
 function norm(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, "-");
 }
@@ -242,12 +246,7 @@ export function deriveChain(input: ChainInput): ChainCounts {
   const { tables } = input;
   const findings: AuditFinding[] = [];
 
-  const rowsOf = (instrument: string, table: string) => {
-    const ts = tables.get(instrument);
-    if (!ts) return [];
-    const t = findTable(ts, table);
-    return t ? dataRows(t) : [];
-  };
+  const rowsOf = (instrument: string, table: string) => tableRows(tables.get(instrument) ?? [], table);
 
   // ---- evidence -----------------------------------------------------------
   const evRows = rowsOf("observation-log", "observation-log.rows");
@@ -595,7 +594,9 @@ export function deriveChain(input: ChainInput): ChainCounts {
     });
   }
 
-  const count = (k: AuditFinding["kind"]) => findings.filter((f) => f.kind === k).length;
+  const counts = Object.fromEntries(
+    Object.entries(AUDIT_COUNTS).map(([kind, field]) => [field, findings.filter((f) => f.kind === kind).length]),
+  ) as Record<(typeof AUDIT_COUNTS)[AuditFinding["kind"]], number>;
 
   return {
     evidence,
@@ -607,17 +608,6 @@ export function deriveChain(input: ChainInput): ChainCounts {
     ontologyObjects,
     competencyQuestions,
     evalCases: input.evalCases ?? { total: 0, passing: 0, failing: 0, p0: 0 },
-    audit: {
-      unsourcedRequirements: count("unsourced-requirement"),
-      orphanEvidence: count("orphan-evidence"),
-      danglingCitations: count("dangling-citation"),
-      unverifiedInPlacement: count("unverified-in-placement"),
-      gapsWithoutQuestion: count("gap-without-question"),
-      unownedAssumptions: count("unowned-assumption"),
-      allocationsWithoutReason: count("allocation-without-reason"),
-      exceptionsWithoutRuleHolder: count("exception-without-rule-holder"),
-      hypothesesNeverRevisited: count("hypothesis-never-revisited"),
-      findings,
-    },
+    audit: { ...counts, findings },
   };
 }

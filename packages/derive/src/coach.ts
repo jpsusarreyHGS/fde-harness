@@ -28,7 +28,7 @@
  * is one nobody will trust twice.
  */
 
-import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
+import { cell, hasValue, rowsOf, type ParsedTable } from "./anchors.ts";
 import type { AuditFinding } from "./chain.ts";
 import type { Gate } from "./state.ts";
 import type { ContractFinding } from "./contract.ts";
@@ -95,83 +95,116 @@ export interface CoachInput {
 }
 
 /**
- * How much harder each kind gets to answer once the moment passes.
+ * Everything the coach knows about one finding kind, in one place.
  *
- * These are not severities. A dangling citation is a worse *defect* than a
- * missing rule holder, but it can be fixed from a desk in November. The rule
- * holder cannot.
+ * `perish` is how much harder the kind gets to answer once the moment passes.
+ * It is not a severity: a dangling citation is a worse *defect* than a missing
+ * rule holder, but it can be fixed from a desk in November. The rule holder
+ * cannot.
+ *
+ * `desk` kinds are ones nobody at the client can answer — the FDE repairs
+ * them. `merged` kinds share one answer across ids: eight separate "EV-004 was
+ * observed and nothing was built on it" lines is the loud-complaint failure
+ * mode, firing hardest exactly when the FDE did the most valuable work.
+ *
+ * Keyed by the finding kind itself, so a new kind will not compile until it
+ * has all of these.
  */
-const PERISHABILITY: Record<string, number> = {
-  "exception-without-rule-holder": 40,
-  "gap-without-question": 30,
-  "unsourced-requirement": 25,
-  "unowned-assumption": 25,
-  "orphan-evidence": 15,
-  "unverified-in-placement": 20,
-  "allocation-without-reason": 15,
-  "dangling-citation": 10,
-  // Low, deliberately. A hypothesis does not get harder to close over time —
-  // it gets harder to *remember why you believed it*, which is what the
-  // written disconfirming evidence is for.
-  "hypothesis-never-revisited": 20,
+const KINDS: Record<AuditFinding["kind"], {
+  perish: number;
+  /** The role most likely to hold the answer. */
+  owner: string;
+  desk?: true;
+  /** Phrasing that makes the finding sayable out loud. */
+  ask: (id: string, detail: string) => string;
+  merged?: (ids: string[]) => string;
+  /** What a good answer looks like, in words a client would follow. */
+  means: string;
+  /** The column the answer lands in. */
+  goes: string;
+}> = {
+  "exception-without-rule-holder": {
+    perish: 40,
+    owner: "Exception holder",
+    ask: (id) => `${id}: who actually decides this one? Not the team — the person you go to when it is not obvious.`,
+    means: "The rule holder is the person the eval golden set is built from. A good answer is one name and the rule in their own words — \"the team\" means nobody.",
+    goes: "Rule holder (role) column",
+  },
+  "gap-without-question": {
+    perish: 30,
+    owner: "Process owner",
+    ask: (id) => `${id} is a gap that never became an open question. Who would we have to ask?`,
+    means: "A known gap with no question attached is one nobody is chasing. A good answer names who could answer it and what it blocks.",
+    goes: "02-Workflow/open-questions.md — a new Q- row",
+  },
+  "unsourced-requirement": {
+    perish: 25,
+    owner: "Process owner",
+    ask: (id) => `${id} has no evidence behind it. What did we see that made us write it, or should it be an open question?`,
+    means: "A requirement with nothing seen behind it is a guess with a number on it. A good answer is the EV- or EX- id that produced it; the honest alternative is to make it a Q- or label it ASSUMPTION with an owner.",
+    goes: "Source column",
+  },
+  "unowned-assumption": {
+    perish: 25,
+    owner: "Process owner",
+    ask: (id) => `${id} is an assumption with nobody's name on it. Who is willing to confirm it?`,
+    means: "An assumption nobody will confirm is a permanent guess. A good answer is a name and a date to confirm by.",
+    goes: "Owner and Confirm-by columns",
+  },
+  "unverified-in-placement": {
+    perish: 20,
+    owner: "Operator",
+    ask: (id) => `${id} rests on what someone said, and we are about to place intelligence on it. Can we watch it happen once?`,
+    merged: (ids) =>
+      `${ids.length} requirements resting on what someone said are heading into placement ` +
+      `(${sample(ids)}). Can we watch any of them happen once?`,
+    means: "Intelligence is about to be placed on what someone said, not on what was watched. A good answer is one observed instance — or the row goes into the grid still marked UNVERIFIED, on purpose.",
+    goes: "Confidence column, once an observation-log row backs it",
+  },
+  // A hypothesis does not get harder to close over time — it gets harder to
+  // remember why you believed it, which is what the written disconfirming
+  // evidence is for. And it is ours: nobody at the client can tell us whether
+  // we were right about what we believed before we arrived.
+  "hypothesis-never-revisited": {
+    perish: 20,
+    owner: "FDE",
+    desk: true,
+    ask: (id) => `${id} was written before we watched anything and is still open. Did discovery support it or disprove it?`,
+    means: "Written before anything was watched, and expected to be wrong. A good answer is \"supported\" or \"disproved\" with the evidence named — G1 asks which.",
+    goes: "Status and Evidence columns",
+  },
+  "orphan-evidence": {
+    perish: 15,
+    owner: "Operator",
+    ask: (id) => `${id} was observed and nothing was built on it. Does it matter, or was it noise?`,
+    merged: (ids) =>
+      `${ids.length} observations nothing was built on (${sample(ids)}). ` +
+      "Walk them back: which mattered, and which were noise?",
+    means: "Observed and never used. Either it should have produced an exception or a requirement, or it was noise — both are fine answers; silence is not.",
+    goes: "cite it from an exception or requirement row, or retire it with a reason",
+  },
+  "allocation-without-reason": {
+    perish: 15,
+    owner: "FDE",
+    desk: true,
+    ask: (id) => `${id} was allocated with no reason recorded. Why this quadrant and not the next one over?`,
+    means: "The reason is the artefact; at G2 the grid has to survive challenge. A good answer says why this quadrant and not the next one over.",
+    goes: "Reason column",
+  },
+  "dangling-citation": {
+    perish: 10,
+    owner: "FDE",
+    desk: true,
+    ask: (id, detail) => `${id} cites evidence that does not exist — ${detail.replace(/\.\s*Usually.*$/, "")}. Which row was meant?`,
+    means: "Something cites an id that does not exist — usually a renumbering that should never have happened. A good answer is the row that was meant.",
+    goes: "Source column — the cited id",
+  },
 };
 
-/** Phrasing that makes a finding sayable out loud. */
-const PHRASING: Record<string, (id: string, detail: string) => string> = {
-  "exception-without-rule-holder": (id) =>
-    `${id}: who actually decides this one? Not the team — the person you go to when it is not obvious.`,
-  "unsourced-requirement": (id) =>
-    `${id} has no evidence behind it. What did we see that made us write it, or should it be an open question?`,
-  "dangling-citation": (id, detail) =>
-    `${id} cites evidence that does not exist — ${detail.replace(/\.\s*Usually.*$/, "")}. Which row was meant?`,
-  "orphan-evidence": (id) =>
-    `${id} was observed and nothing was built on it. Does it matter, or was it noise?`,
-  "unowned-assumption": (id) =>
-    `${id} is an assumption with nobody's name on it. Who is willing to confirm it?`,
-  "unverified-in-placement": (id) =>
-    `${id} rests on what someone said, and we are about to place intelligence on it. Can we watch it happen once?`,
-  "allocation-without-reason": (id) =>
-    `${id} was allocated with no reason recorded. Why this quadrant and not the next one over?`,
-  "gap-without-question": (id) =>
-    `${id} is a gap that never became an open question. Who would we have to ask?`,
-  "hypothesis-never-revisited": (id) =>
-    `${id} was written before we watched anything and is still open. Did discovery support it or disprove it?`,
-};
-
-/** What a good answer looks like, per finding kind, in words a client would follow. */
-const MEANS: Record<string, string> = {
-  "exception-without-rule-holder":
-    "The rule holder is the person the eval golden set is built from. A good answer is one name and the rule in their own words — \"the team\" means nobody.",
-  "unsourced-requirement":
-    "A requirement with nothing seen behind it is a guess with a number on it. A good answer is the EV- or EX- id that produced it; the honest alternative is to make it a Q- or label it ASSUMPTION with an owner.",
-  "dangling-citation":
-    "Something cites an id that does not exist — usually a renumbering that should never have happened. A good answer is the row that was meant.",
-  "orphan-evidence":
-    "Observed and never used. Either it should have produced an exception or a requirement, or it was noise — both are fine answers; silence is not.",
-  "unowned-assumption":
-    "An assumption nobody will confirm is a permanent guess. A good answer is a name and a date to confirm by.",
-  "unverified-in-placement":
-    "Intelligence is about to be placed on what someone said, not on what was watched. A good answer is one observed instance — or the row goes into the grid still marked UNVERIFIED, on purpose.",
-  "allocation-without-reason":
-    "The reason is the artefact; at G2 the grid has to survive challenge. A good answer says why this quadrant and not the next one over.",
-  "gap-without-question":
-    "A known gap with no question attached is one nobody is chasing. A good answer names who could answer it and what it blocks.",
-  "hypothesis-never-revisited":
-    "Written before anything was watched, and expected to be wrong. A good answer is \"supported\" or \"disproved\" with the evidence named — G1 asks which.",
-};
-
-/** The column the answer lands in, per finding kind. */
-const GOES: Record<string, string> = {
-  "exception-without-rule-holder": "Rule holder (role) column",
-  "unsourced-requirement": "Source column",
-  "dangling-citation": "Source column — the cited id",
-  "orphan-evidence": "cite it from an exception or requirement row, or retire it with a reason",
-  "unowned-assumption": "Owner and Confirm-by columns",
-  "unverified-in-placement": "Confidence column, once an observation-log row backs it",
-  "allocation-without-reason": "Reason column",
-  "gap-without-question": "02-Workflow/open-questions.md — a new Q- row",
-  "hypothesis-never-revisited": "Status and Evidence columns",
-};
+/** The first four ids, then an ellipsis. */
+function sample(ids: readonly string[]): string {
+  return `${ids.slice(0, 4).join(", ")}${ids.length > 4 ? ", …" : ""}`;
+}
 
 /**
  * Questions `/init-engagement` raised for a value left TBD.
@@ -215,24 +248,6 @@ const INIT_FIELDS: Record<string, { ask?: string; means: string; goes: string }>
   },
 };
 
-/** Kinds nobody at the client can answer — the FDE repairs these. */
-// A hypothesis is ours. Nobody at the client can tell us whether we were
-// right about what we believed before we arrived.
-const DESK_WORK = new Set(["dangling-citation", "allocation-without-reason", "hypothesis-never-revisited"]);
-
-/** Role most likely to hold the answer, by finding kind. */
-const OWNER_ROLE: Record<string, string> = {
-  "exception-without-rule-holder": "Exception holder",
-  "unsourced-requirement": "Process owner",
-  "dangling-citation": "FDE",
-  "orphan-evidence": "Operator",
-  "unowned-assumption": "Process owner",
-  "unverified-in-placement": "Operator",
-  "allocation-without-reason": "FDE",
-  "gap-without-question": "Process owner",
-  "hypothesis-never-revisited": "FDE",
-};
-
 /**
  * Where a gate's memo actually lives.
  *
@@ -244,18 +259,6 @@ function gateMemo(id: string): string {
   return `engagement-management/stage-gate-${id.replace(/^G/i, "")}-readiness.md`;
 }
 
-function cell(r: Record<string, string>, ...names: string[]): string {
-  for (const n of names) {
-    const v = r[n];
-    if (v !== undefined) return v.trim();
-  }
-  return "";
-}
-
-function has(v: string): boolean {
-  return v !== "" && v !== "—" && v !== "-" && v !== "TBD" && v !== "tbd";
-}
-
 /**
  * Templates write roles as `**The exception holder**`. Left alone that reaches
  * the operator as "the the exception holder" in bold asterisks, which is the
@@ -264,11 +267,6 @@ function has(v: string): boolean {
 function cleanRole(raw: string): string {
   const s = raw.replace(/[*_`]/g, "").trim().replace(/^the\s+/i, "");
   return s ? s[0]!.toUpperCase() + s.slice(1) : s;
-}
-
-function rowsOf(tables: readonly ParsedTable[], anchor: string): Record<string, string>[] {
-  const t = findTable(tables as ParsedTable[], anchor);
-  return t ? dataRows(t) : [];
 }
 
 /**
@@ -285,7 +283,7 @@ function nameIndex(tables: readonly ParsedTable[]): Map<string, string> {
       const name = cell(r, "Name");
       // Keyed on the cleaned role, because every lookup uses the cleaned form.
       // Keying on the raw `**The executive sponsor**` made every lookup miss.
-      if (has(role) && has(name)) idx.set(role.toLowerCase(), name);
+      if (hasValue(role) && hasValue(name)) idx.set(role.toLowerCase(), name);
     }
   }
   return idx;
@@ -303,7 +301,7 @@ function priorityIndex(tables: readonly ParsedTable[]): { byWorkflow: Map<string
   for (const r of rowsOf(tables, "prioritisation.rows")) {
     const wf = cell(r, "Workflow");
     const rank = Number.parseInt(cell(r, "Rank"), 10);
-    if (!has(wf) || !Number.isFinite(rank)) continue;
+    if (!hasValue(wf) || !Number.isFinite(rank)) continue;
     byWorkflow.set(wf.toLowerCase(), rank);
     if (rank > max) max = rank;
   }
@@ -322,7 +320,7 @@ function blockScore(
   blocks: string,
   prio: { byWorkflow: Map<string, number>; max: number },
 ): { score: number; why: string | null } {
-  if (!has(blocks) || prio.byWorkflow.size === 0) return { score: 0, why: null };
+  if (!hasValue(blocks) || prio.byWorkflow.size === 0) return { score: 0, why: null };
   const hay = blocks.toLowerCase();
   let best: { wf: string; rank: number } | null = null;
   for (const [wf, rank] of prio.byWorkflow) {
@@ -365,11 +363,11 @@ function onFile(
       .find((r) => /trying to accomplish/i.test(cell(r, "Question")));
     const goal = accomplish ? cell(accomplish, "Answer") : "";
     // The cell may already carry the sponsor's quotation marks; do not double them.
-    const quote = (has(sentence) ? sentence : has(goal) ? goal : "").replace(/^["“]\s*|\s*["”]$/g, "").trim();
+    const quote = (hasValue(sentence) ? sentence : hasValue(goal) ? goal : "").replace(/^["“]\s*|\s*["”]$/g, "").trim();
     if (!quote) return null;
     return {
       ask:
-        `Sponsor's ${has(sentence) ? "real problem" : "goal"} is on file (sponsor-brief.md): "${quote}". ` +
+        `Sponsor's ${hasValue(sentence) ? "real problem" : "goal"} is on file (sponsor-brief.md): "${quote}". ` +
         "At G1 you must be able to say it in one sentence that is *not* the request. Say it now — " +
         "if what comes out is the request reworded, discovery has not happened yet.",
       location: "01-Organisation/sponsor-brief.md",
@@ -379,11 +377,11 @@ function onFile(
   if (/stakeholder|five roles|decision rights|process owner|exception holder/.test(c)) {
     const roles = rowsOf(tables, "stakeholder-map.five-roles")
       .map((r) => ({ role: cleanRole(cell(r, "Role")), name: cell(r, "Name") }))
-      .filter((r) => has(r.role));
-    const named = roles.filter((r) => has(r.name));
+      .filter((r) => hasValue(r.role));
+    const named = roles.filter((r) => hasValue(r.name));
     const need = ["process owner", "exception holder"];
     if (!need.every((n) => named.some((r) => r.role.toLowerCase() === n))) return null;
-    const missing = roles.filter((r) => !has(r.name)).map((r) => r.role.toLowerCase());
+    const missing = roles.filter((r) => !hasValue(r.name)).map((r) => r.role.toLowerCase());
     return {
       ask:
         `${named.length} of the five roles are named on file (stakeholder-map.md): ` +
@@ -396,7 +394,7 @@ function onFile(
 
   if (/systems|readiness|landmine|data/.test(c)) {
     const systems = rowsOf(tables, "systems-inventory.applications")
-      .map((r) => cell(r, "System")).filter(has);
+      .map((r) => cell(r, "System")).filter(hasValue);
     if (!systems.length) return null;
     const scored = rowsOf(tables, "readiness-scorecard.rows").length;
     return {
@@ -422,151 +420,122 @@ function gateQuestions(
   names: Map<string, string>,
   tables: readonly ParsedTable[],
 ): CoachQuestion[] {
-  const out: CoachQuestion[] = [];
   // Only the gate you are actually working toward. Every criterion of G2 and
   // G3 is unmet on day one, and a queue that opens with "prove it with evals"
   // on a stage-01 engagement is a queue nobody reads twice.
-  const open = gates.filter((g) => g.status !== "passed");
-  const current = open.length ? [open[0]!] : [];
-  for (const g of current) {
-    // A memo nobody has run is the template: every criterion blank, every
-    // owner blank. Turning that into "six criteria have no owner — who owns
-    // each?" on day one asks the sponsor about a document we have not
-    // written. The criteria become questions once /gate has assessed them;
-    // the behaviour check below is useful from the first day and stays.
-    const assessed = g.status !== "not-run";
-    const unmet = assessed ? g.criteria.filter((c) => c.status !== "met") : [];
-    const unowned = unmet.filter((c) => !has(c.owner));
+  const g = gates.find((x) => x.status !== "passed");
+  if (!g) return [];
 
-    // Five unowned criteria are not five conversations — they are one
-    // conversation about who owns the gate. Listing them separately buries
-    // everything an FDE could actually act on tomorrow.
-    if (unowned.length > 1) {
+  const out: CoachQuestion[] = [];
+  const gate = { blocks: `${g.id} — ${g.between}`, source: "gate", id: null } as const;
+  const sponsorName = names.get("executive sponsor") ?? null;
+
+  // A memo nobody has run is the template: every criterion blank, every
+  // owner blank. Turning that into "six criteria have no owner — who owns
+  // each?" on day one asks the sponsor about a document we have not
+  // written. The criteria become questions once /gate has assessed them;
+  // the behaviour check below is useful from the first day and stays.
+  const unmet = g.status !== "not-run" ? g.criteria.filter((c) => c.status !== "met") : [];
+  const unowned = unmet.filter((c) => !hasValue(c.owner));
+
+  // Five unowned criteria are not five conversations — they are one
+  // conversation about who owns the gate. Listing them separately buries
+  // everything an FDE could actually act on tomorrow.
+  if (unowned.length > 1) {
+    out.push({
+      ...gate,
+      key: `${g.id}:unowned`,
+      ask:
+        `${unowned.length} of ${g.id}'s criteria have no owner: ` +
+        `${unowned.map((c) => cleanRole(c.name).split(" — ")[0]).join("; ")}. Who owns each?`,
+      who: "Executive sponsor",
+      whoName: sponsorName,
+      location: gateMemo(g.id),
+      why: `${g.id} cannot be assessed while its criteria have nobody to chase`,
+      means: "A gate criterion with no owner is one nobody is closing. A good answer is one name per criterion — a role is enough if the map names the person.",
+      goes: `${gateMemo(g.id)} — Owner column`,
+      score: 110,
+      work: "ask",
+    });
+  }
+
+  // The sharpest test in G1 is a *behaviour*, not a criterion: can the team
+  // state the sponsor's real problem in one sentence that is not the
+  // request. The memo's criteria table, written from the template, never
+  // mentions the sponsor at all — so the behaviour is read directly.
+  for (const b of g.behaviours.filter((x) => !x.observed && /sponsor.*(real problem|one sentence)/i.test(x.name))) {
+    const held = onFile(b.name, tables);
+    out.push(held ? {
+      ...gate,
+      key: `${g.id}:behaviour:${b.name}`,
+      ask: held.ask,
+      who: "FDE",
+      whoName: null,
+      location: held.location,
+      why: `${g.id} behaviour; the sponsor's words are on file, the bar is saying the problem back in one sentence`,
+      means: "You captured this already. A good answer is you saying it back without reading it — if what comes out is the request reworded, discovery has not happened yet.",
+      goes: `${gateMemo(g.id)} — Behaviours table, Where column`,
+      score: 100,
+      work: "verify",
+    } : {
+      ...gate,
+      key: `${g.id}:behaviour:${b.name}`,
+      ask: `What is ${sponsorName ? sponsorName.split(",")[0]!.trim() : "the sponsor"} actually trying to accomplish — in their own words, not the request? Get the sentence verbatim.`,
+      who: "Executive sponsor",
+      whoName: sponsorName,
+      location: "01-Organisation/sponsor-brief.md",
+      why: `${g.id} behaviour: the sponsor's real problem in one sentence that is not what they asked for — nothing is on file yet`,
+      means: "The sharpest test in the gate. Customers describe solutions, not problems; the request you were handed is a solution somebody chose. A good answer is what happens if nothing changes, and what they are measured on.",
+      goes: "01-Organisation/sponsor-brief.md — the seven questions, Answer column (a fill, via /capture or `answer`)",
+      score: 100,
+      work: "ask",
+    });
+  }
+
+  for (const c of unmet) {
+    if (unowned.length > 1 && !hasValue(c.owner)) continue;
+    // Already on file? Then it is the FDE's to say, not the client's to
+    // answer — and the FDE is the one who has to say it at the gate.
+    const held = onFile(c.name, tables);
+    if (held) {
       out.push({
-        key: `${g.id}:unowned`,
-        ask:
-          `${unowned.length} of ${g.id}'s criteria have no owner: ` +
-          `${unowned.map((c) => cleanRole(c.name).split(" — ")[0]).join("; ")}. Who owns each?`,
-        who: "Executive sponsor",
-        whoName: names.get("executive sponsor") ?? null,
-        blocks: `${g.id} — ${g.between}`,
-        location: gateMemo(g.id),
-        why: `${g.id} cannot be assessed while its criteria have nobody to chase`,
-        means: "A gate criterion with no owner is one nobody is closing. A good answer is one name per criterion — a role is enough if the map names the person.",
-        goes: `${gateMemo(g.id)} — Owner column`,
-        score: 110,
-        work: "ask",
-        source: "gate",
-        id: null,
-      });
-    }
-
-    // The sharpest test in G1 is a *behaviour*, not a criterion: can the team
-    // state the sponsor's real problem in one sentence that is not the
-    // request. The coach used to read only criteria, so on an engagement
-    // whose brief already held the sentence it neither verified nor asked —
-    // and the memo's criteria table, written from the template, never
-    // mentions the sponsor at all.
-    for (const b of g.behaviours.filter((x) => !x.observed && /sponsor.*(real problem|one sentence)/i.test(x.name))) {
-      const held = onFile(b.name, tables);
-      const sponsorName = names.get("executive sponsor") ?? null;
-      out.push(held ? {
-        key: `${g.id}:behaviour:${b.name}`,
+        ...gate,
+        key: `${g.id}:${c.name}`,
         ask: held.ask,
         who: "FDE",
         whoName: null,
-        blocks: `${g.id} — ${g.between}`,
         location: held.location,
-        why: `${g.id} behaviour; the sponsor's words are on file, the bar is saying the problem back in one sentence`,
-        means: "You captured this already. A good answer is you saying it back without reading it — if what comes out is the request reworded, discovery has not happened yet.",
-        goes: `${gateMemo(g.id)} — Behaviours table, Where column`,
+        why: `${g.id} criterion; the answer is on file, the bar is being able to say it`,
+        means: "You captured this already. A good answer is you saying it back without reading it — if you cannot, it is on file but not yet understood, and the gate will find that out.",
+        goes: `${gateMemo(g.id)} — Evidence column, citing the row in ${held.location}`,
         score: 100,
         work: "verify",
-        source: "gate",
-        id: null,
-      } : {
-        key: `${g.id}:behaviour:${b.name}`,
-        ask: `What is ${sponsorName ? sponsorName.split(",")[0]!.trim() : "the sponsor"} actually trying to accomplish — in their own words, not the request? Get the sentence verbatim.`,
-        who: "Executive sponsor",
-        whoName: sponsorName,
-        blocks: `${g.id} — ${g.between}`,
-        location: "01-Organisation/sponsor-brief.md",
-        why: `${g.id} behaviour: the sponsor's real problem in one sentence that is not what they asked for — nothing is on file yet`,
-        means: "The sharpest test in the gate. Customers describe solutions, not problems; the request you were handed is a solution somebody chose. A good answer is what happens if nothing changes, and what they are measured on.",
-        goes: "01-Organisation/sponsor-brief.md — the seven questions, Answer column (a fill, via /capture or `answer`)",
-        score: 100,
-        work: "ask",
-        source: "gate",
-        id: null,
       });
+      continue;
     }
-
-    for (const c of unmet) {
-      if (unowned.length > 1 && !has(c.owner)) continue;
-      const who = cleanRole(c.owner) || "Unassigned";
-      const label = cleanRole(c.name);
-      // Already on file? Then it is the FDE's to say, not the client's to
-      // answer — and the FDE is the one who has to say it at the gate.
-      const held = onFile(c.name, tables);
-      if (held) {
-        out.push({
-          key: `${g.id}:${c.name}`,
-          ask: held.ask,
-          who: "FDE",
-          whoName: null,
-          blocks: `${g.id} — ${g.between}`,
-          location: held.location,
-          why: `${g.id} criterion; the answer is on file, the bar is being able to say it`,
-          means: "You captured this already. A good answer is you saying it back without reading it — if you cannot, it is on file but not yet understood, and the gate will find that out.",
-          goes: `${gateMemo(g.id)} — Evidence column, citing the row in ${held.location}`,
-          score: 100,
-          work: "verify",
-          source: "gate",
-          id: null,
-        });
-        continue;
-      }
-      out.push({
-        key: `${g.id}:${c.name}`,
-        ask: has(c.toClose)
-          ? `${label} — ${c.toClose}`
-          : `${label}: what would close this?`,
-        who,
-        whoName: names.get(who.toLowerCase()) ?? null,
-        blocks: `${g.id} — ${g.between}`,
-        location: gateMemo(g.id),
-        why: `${g.id} criterion owned by ${who}`,
-        means: "A gate criterion is the client's own definition of ready. A good answer is evidence — a row or a fact, not a filename — and, where it is not met, the specific thing that would close it.",
-        goes: `${gateMemo(g.id)} — Evidence and To close columns`,
-        score: 100 + (has(c.toClose) ? 0 : 5),
-        work: "ask",
-        source: "gate",
-        id: null,
-      });
-    }
+    const who = cleanRole(c.owner) || "Unassigned";
+    const label = cleanRole(c.name);
+    out.push({
+      ...gate,
+      key: `${g.id}:${c.name}`,
+      ask: hasValue(c.toClose) ? `${label} — ${c.toClose}` : `${label}: what would close this?`,
+      who,
+      whoName: names.get(who.toLowerCase()) ?? null,
+      location: gateMemo(g.id),
+      why: `${g.id} criterion owned by ${who}`,
+      means: "A gate criterion is the client's own definition of ready. A good answer is evidence — a row or a fact, not a filename — and, where it is not met, the specific thing that would close it.",
+      goes: `${gateMemo(g.id)} — Evidence and To close columns`,
+      score: 100 + (hasValue(c.toClose) ? 0 : 5),
+      work: "ask",
+    });
   }
   return out;
 }
 
 /**
- * Audit findings, phrased and ranked.
- *
- * Findings of the same kind that share an answer are merged. Eight separate
- * "EV-004 was observed and nothing was built on it" lines is the loud-complaint
- * failure mode: it fires hardest exactly when the FDE did the most valuable
- * work, and it drowns the two questions that matter.
+ * Audit findings, phrased and ranked. Findings of a `merged` kind become one
+ * question per kind — see `KINDS`.
  */
-const MERGEABLE = new Set(["orphan-evidence", "unverified-in-placement"]);
-
-const MERGED_PHRASING: Record<string, (ids: string[]) => string> = {
-  "orphan-evidence": (ids) =>
-    `${ids.length} observations nothing was built on (${ids.slice(0, 4).join(", ")}` +
-    `${ids.length > 4 ? ", …" : ""}). Walk them back: which mattered, and which were noise?`,
-  "unverified-in-placement": (ids) =>
-    `${ids.length} requirements resting on what someone said are heading into placement ` +
-    `(${ids.slice(0, 4).join(", ")}${ids.length > 4 ? ", …" : ""}). Can we watch any of them happen once?`,
-};
-
 function chainQuestions(
   findings: readonly AuditFinding[],
   names: Map<string, string>,
@@ -575,73 +544,64 @@ function chainQuestions(
   alreadyAsked: ReadonlySet<string>,
 ): CoachQuestion[] {
   const out: CoachQuestion[] = [];
-  const merged = new Map<string, AuditFinding[]>();
+  const merged = new Map<AuditFinding["kind"], AuditFinding[]>();
 
   for (const f of findings) {
+    const k = KINDS[f.kind];
     // The FDE already raised this one. Their wording is better than ours —
     // it carries the client's own vocabulary, and the open question already
     // names who can answer. A desk repair is not covered by asking, so those
     // still stand.
-    if (!DESK_WORK.has(f.kind) && alreadyAsked.has(f.id)) continue;
-    if (MERGEABLE.has(f.kind)) {
-      const list = merged.get(f.kind);
-      if (list) list.push(f);
-      else merged.set(f.kind, [f]);
+    if (!k.desk && alreadyAsked.has(f.id)) continue;
+    if (k.merged) {
+      merged.set(f.kind, [...(merged.get(f.kind) ?? []), f]);
       continue;
     }
-    const phrase = PHRASING[f.kind];
-    const who = cleanRole(OWNER_ROLE[f.kind] ?? "Process owner");
     const blocks = blocksById.get(f.id) ?? "";
     const b = blockScore(blocks, prio);
-    const perish = PERISHABILITY[f.kind] ?? 10;
-    const work = DESK_WORK.has(f.kind) ? "fix" : "ask";
+    const kind = f.kind.replace(/-/g, " ");
     out.push({
       key: `${f.kind}:${f.id}`,
-      ask: phrase ? phrase(f.id, f.detail) : `${f.id}: ${f.detail}`,
-      who: work === "fix" ? "FDE" : who,
-      whoName: work === "fix" ? null : (names.get(who.toLowerCase()) ?? null),
+      ask: k.ask(f.id, f.detail),
+      who: k.owner,
+      whoName: k.desk ? null : (names.get(k.owner.toLowerCase()) ?? null),
       blocks,
       location: f.location,
-      why: b.why
-        ? `${b.why}; ${f.kind.replace(/-/g, " ")}`
-        : `${f.kind.replace(/-/g, " ")} — nothing in prioritisation names what it blocks`,
-      means: MEANS[f.kind] ?? f.detail,
-      goes: `${f.location} — ${GOES[f.kind] ?? "the row for " + f.id}`,
-      score: perish + b.score,
-      work,
+      why: b.why ? `${b.why}; ${kind}` : `${kind} — nothing in prioritisation names what it blocks`,
+      means: k.means,
+      goes: `${f.location} — ${k.goes}`,
+      score: k.perish + b.score,
+      work: k.desk ? "fix" : "ask",
       source: "chain",
       id: f.id,
     });
   }
 
-  for (const [kind, group] of merged) {
-    const ids = group.map((f) => f.id).sort();
-    const who = cleanRole(OWNER_ROLE[kind] ?? "Operator");
+  for (const [kindId, group] of merged) {
+    const k = KINDS[kindId];
+    const kind = kindId.replace(/-/g, " ");
     // The merged item inherits the strongest block score in the group — one of
     // these blocking the top workflow is enough to make the conversation worth
     // having.
-    let bestScore = 0;
-    let bestWhy: string | null = null;
-    let bestBlocks = "";
+    let best: { score: number; why: string | null; blocks: string } = { score: 0, why: null, blocks: "" };
     for (const f of group) {
       const blocks = blocksById.get(f.id) ?? "";
       const b = blockScore(blocks, prio);
-      if (b.score > bestScore) { bestScore = b.score; bestWhy = b.why; bestBlocks = blocks; }
+      if (b.score > best.score) best = { ...b, blocks };
     }
-    const phrase = MERGED_PHRASING[kind];
     out.push({
-      key: `${kind}:merged`,
-      ask: phrase ? phrase(ids) : `${ids.length} ${kind.replace(/-/g, " ")} findings: ${ids.join(", ")}`,
-      who,
-      whoName: names.get(who.toLowerCase()) ?? null,
-      blocks: bestBlocks,
+      key: `${kindId}:merged`,
+      ask: k.merged!(group.map((f) => f.id).sort()),
+      who: k.owner,
+      whoName: names.get(k.owner.toLowerCase()) ?? null,
+      blocks: best.blocks,
       location: group[0]!.location,
-      why: bestWhy
-        ? `${bestWhy}; ${group.length} ${kind.replace(/-/g, " ")} findings`
-        : `${group.length} ${kind.replace(/-/g, " ")} findings, merged into one conversation`,
-      means: MEANS[kind] ?? `${group.length} findings of the same kind, best walked through in one sitting.`,
-      goes: `${group[0]!.location} — ${GOES[kind] ?? "one row per id"}`,
-      score: (PERISHABILITY[kind] ?? 10) + bestScore,
+      why: best.why
+        ? `${best.why}; ${group.length} ${kind} findings`
+        : `${group.length} ${kind} findings, merged into one conversation`,
+      means: k.means,
+      goes: `${group[0]!.location} — ${k.goes}`,
+      score: k.perish + best.score,
       work: "ask",
       source: "chain",
       id: null,
@@ -660,8 +620,8 @@ function openQuestions(
   const out: CoachQuestion[] = [];
   for (const r of rowsOf(tables, "open-questions.rows")) {
     const id = cell(r, "Id");
-    if (!has(id)) continue;
-    if (has(cell(r, "Answered")) || has(cell(r, "Answer"))) continue;
+    if (!hasValue(id)) continue;
+    if (hasValue(cell(r, "Answered")) || hasValue(cell(r, "Answer"))) continue;
     const who = cleanRole(cell(r, "Who can answer"));
     const blocks = cell(r, "Blocks");
     const b = blockScore(blocks, prio);
@@ -673,18 +633,18 @@ function openQuestions(
     out.push({
       key: `open-question:${id}`,
       ask: `${id}: ${setup?.ask ?? cell(r, "Question")}`,
-      who: has(who) ? who : "Unassigned",
-      whoName: has(who) ? (names.get(who.toLowerCase()) ?? null) : null,
+      who: hasValue(who) ? who : "Unassigned",
+      whoName: hasValue(who) ? (names.get(who.toLowerCase()) ?? null) : null,
       blocks,
       location: "02-Workflow/open-questions.md",
       why: b.why
         ? `${b.why}; open since ${cell(r, "Raised") || "unrecorded"}`
-        : has(blocks)
+        : hasValue(blocks)
           ? `blocks "${blocks}", which prioritisation does not rank`
           : "open question with nothing recorded as blocked — say what it blocks or close it",
       means: setup
         ? `${setup.means} Left as TBD at /init-engagement.`
-        : has(whyMatters)
+        : hasValue(whyMatters)
           ? `${whyMatters.replace(/\.?$/, ".")} A good answer is specific enough to become a register row.`
           : "A question you wrote and have not answered. A good answer is specific enough to become a register row; if it cannot be, say what would make it so.",
       goes: setup
@@ -692,7 +652,7 @@ function openQuestions(
         : `02-Workflow/open-questions.md — Answer and Answered columns for ${id}; then the row it unblocks`,
       // An unanswered question nobody can answer is the worst kind: it will
       // sit there through the whole engagement unless someone is named.
-      score: 20 + b.score + (has(who) ? 0 : 15),
+      score: 20 + b.score + (hasValue(who) ? 0 : 15),
       work: "ask",
       source: "open-question",
       id,
@@ -711,7 +671,7 @@ function stakeholderQuestions(tables: readonly ParsedTable[], names: Map<string,
   const out: CoachQuestion[] = [];
   for (const r of rowsOf(tables, "stakeholder-map.five-roles")) {
     const raw = cell(r, "Role");
-    if (!has(raw) || has(cell(r, "Name"))) continue;
+    if (!hasValue(raw) || hasValue(cell(r, "Name"))) continue;
     const role = cleanRole(raw);
     out.push({
       key: `stakeholder:${role}`,
@@ -787,11 +747,11 @@ export function coach(input: CoachInput): CoachQuestion[] {
   // look like it is not reading what they wrote.
   const alreadyAsked = new Set<string>();
   for (const r of rowsOf(input.tables, "open-questions.rows")) {
-    const answered = has(cell(r, "Answered")) || has(cell(r, "Answer"));
+    const answered = hasValue(cell(r, "Answered")) || hasValue(cell(r, "Answer"));
     const blocks = cell(r, "Blocks");
     const text = `${cell(r, "Question")} ${cell(r, "Why it matters")} ${blocks}`;
     for (const m of text.matchAll(idPattern())) {
-      if (has(blocks) && !blocksById.has(m[1]!)) blocksById.set(m[1]!, blocks);
+      if (hasValue(blocks) && !blocksById.has(m[1]!)) blocksById.set(m[1]!, blocks);
       if (!answered) alreadyAsked.add(m[1]!);
     }
   }

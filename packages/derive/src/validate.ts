@@ -8,6 +8,7 @@
  * tampering and arithmetic that cannot be true.
  */
 
+import { AUDIT_COUNTS } from "./chain.ts";
 import type { State } from "./state.ts";
 
 export interface Violation {
@@ -79,23 +80,13 @@ export function validateState(s: State): Violation[] {
   );
 
   // Audit counts must match the findings they summarise.
-  const byKind = (k: string) => c.audit.findings.filter((f) => f.kind === k).length;
-  const pairs: [keyof typeof c.audit, string][] = [
-    ["unsourcedRequirements", "unsourced-requirement"],
-    ["orphanEvidence", "orphan-evidence"],
-    ["danglingCitations", "dangling-citation"],
-    ["unverifiedInPlacement", "unverified-in-placement"],
-    ["gapsWithoutQuestion", "gap-without-question"],
-    ["unownedAssumptions", "unowned-assumption"],
-    ["allocationsWithoutReason", "allocation-without-reason"],
-    ["exceptionsWithoutRuleHolder", "exception-without-rule-holder"],
-  ];
-  for (const [field, kind] of pairs) {
+  for (const [kind, field] of Object.entries(AUDIT_COUNTS)) {
     const declared = c.audit[field];
-    if (typeof declared === "number" && declared !== byKind(kind)) {
+    const listed = c.audit.findings.filter((f) => f.kind === kind).length;
+    if (declared !== listed) {
       bad(
         "audit-count-matches-findings",
-        `audit.${String(field)} says ${declared} but ${byKind(kind)} findings of kind ${kind} are listed`,
+        `audit.${field} says ${declared} but ${listed} findings of kind ${kind} are listed`,
         "tampered",
       );
     }

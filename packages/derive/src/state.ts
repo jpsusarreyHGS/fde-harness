@@ -8,23 +8,19 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, sep } from "node:path";
 import {
-  answeredRows, dataRows, findTable, parseAnchoredTables, type ParsedTable,
+  answeredRows, cell, dataRows, findTable, parseAnchoredTables, rowsOf, type ParsedTable,
 } from "./anchors.ts";
 import { deriveChain, filled, type ChainCounts } from "./chain.ts";
 import { scanIntake, placementWarnings } from "./intake.ts";
 import { coach, type CoachQuestion } from "./coach.ts";
-import { CONTRACT_SCHEMA } from "./instruments.ts";
 import { checkContract, readContract } from "./contract.ts";
 import { computeRoi, type RoiModel } from "./roi.ts";
 import { pendingProposals } from "./proposals.ts";
 import {
-  INSTRUMENTS, instrumentStatus, STAGES, type StageId,
+  CONTRACT_SCHEMA, INSTRUMENTS, instrumentStatus, STAGES, type StageId,
 } from "./instruments.ts";
 
 export const SCHEMA_VERSION = 2 as const;
-
-/** Re-exported so one import gets both versions a consumer cares about. */
-export { CONTRACT_SCHEMA } from "./instruments.ts";
 
 export interface State {
   schemaVersion: 2;
@@ -153,15 +149,6 @@ async function mtime(p: string): Promise<string | null> {
 function pct(a: number, b: number): number {
   return b > 0 ? Math.round((a / b) * 100) : 0;
 }
-function col(r: Record<string, string>, ...names: string[]): string {
-  for (const n of names) if (r[n] !== undefined) return r[n]!;
-  return "";
-}
-
-/** Map an anchor's instrument segment back to a registry id. */
-function anchorInstrumentToId(seg: string): string {
-  return seg;
-}
 
 function parseGate(id: Gate["id"], md: string | null): Gate {
   const meta = GATE_META[id];
@@ -178,8 +165,8 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
   const decision = findTable(tables, `${prefix}.decision`);
   if (decision) {
     for (const r of decision.rows) {
-      const k = (col(r, "Item") || "").toLowerCase();
-      const v = col(r, "Value").trim();
+      const k = (cell(r, "Item") || "").toLowerCase();
+      const v = cell(r, "Value").trim();
       if (k === "recommendation" && filled(v)) {
         const n = v.toLowerCase();
         if (n.includes("not ready")) base.status = "not-ready";
@@ -194,14 +181,14 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
   const crit = findTable(tables, `${prefix}.criteria`);
   if (crit) {
     for (const r of crit.rows) {
-      const name = col(r, "Criterion");
+      const name = cell(r, "Criterion");
       if (!filled(name)) continue;
       base.criteria.push({
         name,
-        status: col(r, "Status").trim() || "unmet",
-        evidence: col(r, "Evidence"),
-        toClose: col(r, "To close"),
-        owner: col(r, "Owner"),
+        status: cell(r, "Status").trim() || "unmet",
+        evidence: cell(r, "Evidence"),
+        toClose: cell(r, "To close"),
+        owner: cell(r, "Owner"),
       });
     }
   }
@@ -209,15 +196,15 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
   const beh = findTable(tables, `${prefix}.behaviours`);
   if (beh) {
     for (const r of beh.rows) {
-      const name = col(r, "Behaviour");
+      const name = cell(r, "Behaviour");
       if (!filled(name)) continue;
       // `filled("no")` is true, so a presence check marked "no" as observed.
       // Parse the affirmative explicitly and treat anything else as not yet.
-      const raw = col(r, "Observed").trim().toLowerCase();
+      const raw = cell(r, "Observed").trim().toLowerCase();
       base.behaviours.push({
         name,
         observed: /^(y|yes|true|done|observed|✓|x)$/.test(raw),
-        where: col(r, "Where"),
+        where: cell(r, "Where"),
       });
     }
   }
@@ -225,9 +212,9 @@ function parseGate(id: Gate["id"], md: string | null): Gate {
   const anti = findTable(tables, `${prefix}.anti-patterns`);
   if (anti) {
     for (const r of anti.rows) {
-      const name = col(r, "Check");
+      const name = cell(r, "Check");
       if (!filled(name)) continue;
-      const raw = col(r, "Confirmed").trim().toLowerCase();
+      const raw = cell(r, "Confirmed").trim().toLowerCase();
       base.antiPatterns.push({
         name,
         confirmed: /^(y|yes|true|done|✓|x)$/.test(raw),
@@ -261,13 +248,10 @@ export async function deriveState(opts: {
     const tables = md ? parseAnchoredTables(md) : [];
 
     for (const t of tables) {
-      const key = anchorInstrumentToId(t.anchor.instrument);
-      const list = tablesByInstrument.get(key) ?? [];
-      list.push(t);
-      tablesByInstrument.set(key, list);
+      const key = t.anchor.instrument;
+      tablesByInstrument.set(key, [...(tablesByInstrument.get(key) ?? []), t]);
     }
 
-    const registerTables = tables.filter((t) => t.anchor.role === "register");
     let rows: number;
     if (def.coverageMode === "fields") {
       // Not row-shaped. Coverage is the number of answered labels rows — the
@@ -276,10 +260,11 @@ export async function deriveState(opts: {
         .filter((t) => t.anchor.role === "labels" && t.anchor.answerColumn)
         .reduce((n, t) => n + answeredRows(t).length, 0);
     } else if (def.primaryTable) {
-      const pt = findTable(tables, def.primaryTable);
-      rows = pt ? dataRows(pt).length : 0;
+      rows = rowsOf(tables, def.primaryTable).length;
     } else {
-      rows = registerTables.reduce((n, t) => n + dataRows(t).length, 0);
+      rows = tables
+        .filter((t) => t.anchor.role === "register")
+        .reduce((n, t) => n + dataRows(t).length, 0);
     }
 
     instruments.push({
@@ -305,12 +290,12 @@ export async function deriveState(opts: {
       if (t.anchor.role === "register") evalTotal += dataRows(t).length;
     }
   }
-  const reportTables = tablesByInstrument.get("eval-report") ?? [];
-  const failureRows = (() => {
-    const t = findTable(reportTables, "eval-report.failures");
-    return t ? dataRows(t) : [];
-  })();
-  const p0 = failureRows.filter((r) => /p0/i.test(col(r, "Severity"))).length;
+  /** Data rows of one table, from the instruments already parsed above. */
+  const tableRows = (instrument: string, table: string) =>
+    rowsOf(tablesByInstrument.get(instrument) ?? [], table);
+
+  const failureRows = tableRows("eval-report", "eval-report.failures");
+  const p0 = failureRows.filter((r) => /p0/i.test(cell(r, "Severity"))).length;
 
   const chain = deriveChain({
     tables: tablesByInstrument,
@@ -332,15 +317,6 @@ export async function deriveState(opts: {
   }
 
   // ---- stages ------------------------------------------------------------
-  // Reads that the stage computation needs are hoisted: the map below is
-  // synchronous, and an await inside it would yield an array of promises.
-  const roiMd = await readIf(join(engagementDir, "08-ROI", "roi-model.md"));
-  const roiInputsFilled = (() => {
-    if (!roiMd) return 0;
-    const t = findTable(parseAnchoredTables(roiMd), "roi-model.inputs");
-    return t ? t.rows.filter((r) => filled(col(r, "Actual (measured)"))).length : 0;
-  })();
-
   const stages: State["stages"] = STAGES.map((s) => {
     const own = instruments.filter((i) => i.stage === s.id);
     let p = 0;
@@ -348,25 +324,21 @@ export async function deriveState(opts: {
       const cov = own.filter((i) => INSTRUMENTS.find((d) => d.id === i.id)?.coverage);
       p = pct(cov.filter((i) => i.status !== "empty").length, cov.length);
     } else if (s.id === "04") {
-      const steps = (() => {
-        const t = findTable(tablesByInstrument.get("operating-map") ?? [], "operating-map.steps");
-        return t ? dataRows(t).length : 0;
-      })();
-      p = pct(chain.allocations.total, steps);
+      p = pct(chain.allocations.total, tableRows("operating-map", "operating-map.steps").length);
     } else if (s.id === "05") {
       p = pct(0, chain.requirements.total); // implemented-marking lands with the build loop
     } else if (s.id === "06") {
       p = pct(chain.evalCases.passing, chain.evalCases.total);
     } else if (s.id === "07") {
-      const rungs = (tablesByInstrument.get("autonomy-ledger") ?? []);
-      const t = findTable(rungs, "autonomy-ledger.measurements");
-      const measured = t ? dataRows(t).filter((r) => filled(col(r, "Agreement"))).length : 0;
+      const measured = tableRows("autonomy-ledger", "autonomy-ledger.measurements")
+        .filter((r) => filled(cell(r, "Agreement"))).length;
       p = pct(Math.min(measured, 5), 5);
     } else if (s.id === "08") {
-      p = pct(roiInputsFilled, 9);
+      const measured = tableRows("roi-model", "roi-model.inputs")
+        .filter((r) => filled(cell(r, "Actual (measured)"))).length;
+      p = pct(measured, 9);
     } else {
-      const t = findTable(tablesByInstrument.get("library-contribution") ?? [], "library-contribution.rows");
-      p = t && dataRows(t).length > 0 ? 100 : 0;
+      p = tableRows("library-contribution", "library-contribution.rows").length > 0 ? 100 : 0;
     }
 
     const status: State["stages"][number]["status"] =
@@ -375,31 +347,22 @@ export async function deriveState(opts: {
   });
 
   // ---- registers the dashboard renders directly --------------------------
-  const tableRows = (instrument: string, table: string) => {
-    const t = findTable(tablesByInstrument.get(instrument) ?? [], table);
-    return t ? dataRows(t) : [];
-  };
-
   const openQuestions = tableRows("open-questions", "open-questions.rows")
-    .filter((r) => !filled(col(r, "Answered")));
+    .filter((r) => !filled(cell(r, "Answered")));
 
-  const raid = [
-    ...tableRows("raid-log", "raid-log.risks"),
-    ...tableRows("raid-log", "raid-log.assumptions"),
-    ...tableRows("raid-log", "raid-log.issues"),
-    ...tableRows("raid-log", "raid-log.dependencies"),
-  ];
+  const raid = ["risks", "assumptions", "issues", "dependencies"]
+    .flatMap((t) => tableRows("raid-log", `raid-log.${t}`));
 
   const autonomy = tableRows("autonomy-ledger", "autonomy-ledger.measurements").map((r) => ({
-    workflow: col(r, "Workflow"),
-    rung: col(r, "Rung"),
-    exitCriterion: col(r, "Exit criterion"),
-    agreement: filled(col(r, "Agreement")) ? col(r, "Agreement") : null,
-    sample: col(r, "Sample") || null,
-    window: col(r, "Window"),
-    disagreementPattern: col(r, "Disagreement pattern") || null,
-    understood: /^y|true/i.test(col(r, "Understood?")),
-    decidedBy: col(r, "Decided by") || null,
+    workflow: cell(r, "Workflow"),
+    rung: cell(r, "Rung"),
+    exitCriterion: cell(r, "Exit criterion"),
+    agreement: filled(cell(r, "Agreement")) ? cell(r, "Agreement") : null,
+    sample: cell(r, "Sample") || null,
+    window: cell(r, "Window"),
+    disagreementPattern: cell(r, "Disagreement pattern") || null,
+    understood: /^y|true/i.test(cell(r, "Understood?")),
+    decidedBy: cell(r, "Decided by") || null,
   }));
 
   const prioritisation = tableRows("prioritisation", "prioritisation.rows");
@@ -493,7 +456,7 @@ export async function deriveState(opts: {
   if (overview) {
     for (const t of parseAnchoredTables(overview)) {
       for (const r of t.rows) {
-        const k = col(r, "Item"); const v = col(r, "Value");
+        const k = cell(r, "Item"); const v = cell(r, "Value");
         if (filled(k) && usable(v)) engagement[k.toLowerCase().replace(/\s+/g, "-")] = v;
       }
     }

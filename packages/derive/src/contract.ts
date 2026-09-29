@@ -20,7 +20,9 @@
  * unanswered question about who decides.
  */
 
-import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { dataRows, findTable, parseAnchoredTables, rowsOf, type ParsedTable } from "./anchors.ts";
 import { knownIds, idPattern, type IdPrefix } from "./ids.ts";
 
 /** The contract instruments, and whether a compile is meaningless without one. */
@@ -118,11 +120,6 @@ function cell(r: Record<string, string>, ...names: string[]): string {
   return "";
 }
 
-function rowsOf(tables: readonly ParsedTable[], anchor: string): Record<string, string>[] {
-  const t = findTable(tables as ParsedTable[], anchor);
-  return t ? dataRows(t) : [];
-}
-
 export interface ContractInput {
   /** Every parsed table across the contract instruments. */
   tables: readonly ParsedTable[];
@@ -144,6 +141,16 @@ export function checkContract(input: ContractInput): ContractFinding[] {
   const out: ContractFinding[] = [];
   const { tables, present, known } = input;
 
+  /** A finding when `column` of `row` is blank, as the compiler counts blank. */
+  const need = (
+    row: Record<string, string>,
+    column: string,
+    at: { where: string; location: string },
+    f: Omit<ContractFinding, "where" | "location">,
+  ) => {
+    if (blank(cell(row, column))) out.push({ ...f, ...at });
+  };
+
   // ---- the files ----------------------------------------------------------
   for (const inst of CONTRACT_INSTRUMENTS) {
     if (present.has(inst.file)) continue;
@@ -160,7 +167,7 @@ export function checkContract(input: ContractInput): ContractFinding[] {
 
   // ---- the anchors --------------------------------------------------------
   for (const anchor of REQUIRED_TABLES) {
-    if (findTable(tables as ParsedTable[], anchor)) continue;
+    if (findTable(tables, anchor)) continue;
     out.push({
       severity: "refuse",
       code: "table-missing",
@@ -175,34 +182,23 @@ export function checkContract(input: ContractInput): ContractFinding[] {
   for (const r of rowsOf(tables, "glossary.terms")) {
     const term = cell(r, "Term");
     if (!term) continue;
-    const where = `glossary.terms · ${term}`;
-    if (blank(cell(r, "Owner"))) {
-      out.push({
-        severity: "refuse", code: "term-no-owner", where,
-        detail: `"${term}" has no owner. A term nobody owns is an unanswered question about who decides what it means.`,
-        who: "Process owner",
-        location: "03-Systems/ontology/glossary.md",
-      });
-    }
-    if (blank(cell(r, "Grain"))) {
-      out.push({
-        severity: "refuse", code: "term-no-grain", where,
-        detail: `"${term}" has no grain. One row is one what?`,
-        who: "Process owner",
-        location: "03-Systems/ontology/glossary.md",
-      });
-    }
-    if (blank(cell(r, "Worked example"))) {
-      out.push({
-        severity: "warn", code: "term-no-example", where,
-        detail: `"${term}" has no worked example — the fastest way to find out two people mean different things.`,
-        who: "Operator",
-        location: "03-Systems/ontology/glossary.md",
-      });
-    }
+    const at = { where: `glossary.terms · ${term}`, location: "03-Systems/ontology/glossary.md" };
+    need(r, "Owner", at, {
+      severity: "refuse", code: "term-no-owner", who: "Process owner",
+      detail: `"${term}" has no owner. A term nobody owns is an unanswered question about who decides what it means.`,
+    });
+    need(r, "Grain", at, {
+      severity: "refuse", code: "term-no-grain", who: "Process owner",
+      detail: `"${term}" has no grain. One row is one what?`,
+    });
+    need(r, "Worked example", at, {
+      severity: "warn", code: "term-no-example", who: "Operator",
+      detail: `"${term}" has no worked example — the fastest way to find out two people mean different things.`,
+    });
   }
 
   // ---- competency questions ----------------------------------------------
+  const cqFile = "03-Systems/ontology/competency-questions.md";
   const cqRows = rowsOf(tables, "competency-questions.rows");
   if (!cqRows.length) {
     out.push({
@@ -212,165 +208,113 @@ export function checkContract(input: ContractInput): ContractFinding[] {
         "none recorded. The competency questions are the ontology's acceptance " +
         "test; without them there is nothing to compile against.",
       who: "Process owner",
-      location: "03-Systems/ontology/competency-questions.md",
+      location: cqFile,
     });
   }
   const seenCq = new Set<string>();
   for (const r of cqRows) {
     const id = cell(r, "Id");
-    const where = `competency-questions.rows · ${id || "(unnamed)"}`;
+    const at = { where: `competency-questions.rows · ${id || "(unnamed)"}`, location: cqFile };
+    const self = id || "this question";
     if (!CQ_ID.test(id)) {
       out.push({
-        severity: "refuse", code: "cq-bad-id", where,
+        severity: "refuse", code: "cq-bad-id", ...at,
         detail: `${JSON.stringify(id)} is not CQ-NN. Ids are the join key across templates, evals and reports.`,
-        location: "03-Systems/ontology/competency-questions.md",
       });
     } else if (seenCq.has(id)) {
       out.push({
-        severity: "refuse", code: "cq-duplicate-id", where,
+        severity: "refuse", code: "cq-duplicate-id", ...at,
         detail: `${id} appears twice. Two questions cannot share a template name.`,
-        location: "03-Systems/ontology/competency-questions.md",
       });
     } else {
       seenCq.add(id);
     }
-    if (blank(cell(r, "Question"))) {
-      out.push({
-        severity: "refuse", code: "cq-no-question", where,
-        detail: "no question text.",
-        location: "03-Systems/ontology/competency-questions.md",
-      });
-    }
-    if (blank(cell(r, "Asked by"))) {
-      out.push({
-        severity: "refuse", code: "cq-no-persona", where,
-        detail: `${id || "this question"} names nobody who asks it. A question nobody asked is a query we wrote for ourselves.`,
-        who: "Process owner",
-        location: "03-Systems/ontology/competency-questions.md",
-      });
-    }
-    if (blank(cell(r, "Evidence they ask it"))) {
-      out.push({
-        severity: "refuse", code: "cq-no-evidence", where,
-        detail: `${id || "this question"} has no evidence that anyone asks it. Cite the observation, or cut it.`,
-        who: "Operator",
-        location: "03-Systems/ontology/competency-questions.md",
-      });
-    }
-    if (blank(cell(r, "Template"))) {
-      out.push({
-        severity: "warn", code: "cq-no-template", where,
-        detail: `${id || "this question"} has no template yet — visible progress, not a defect.`,
-        location: "03-Systems/ontology/competency-questions.md",
-      });
-    }
+    need(r, "Question", at, { severity: "refuse", code: "cq-no-question", detail: "no question text." });
+    need(r, "Asked by", at, {
+      severity: "refuse", code: "cq-no-persona", who: "Process owner",
+      detail: `${self} names nobody who asks it. A question nobody asked is a query we wrote for ourselves.`,
+    });
+    need(r, "Evidence they ask it", at, {
+      severity: "refuse", code: "cq-no-evidence", who: "Operator",
+      detail: `${self} has no evidence that anyone asks it. Cite the observation, or cut it.`,
+    });
+    need(r, "Template", at, {
+      severity: "warn", code: "cq-no-template",
+      detail: `${self} has no template yet — visible progress, not a defect.`,
+    });
   }
 
   // ---- the write allow-list ----------------------------------------------
+  const personasFile = "03-Systems/ontology/personas.md";
+  const bare = (s: string) => s.replace(/[*_`]/g, "").trim().toLowerCase();
   const perms = rowsOf(tables, "personas.permissions");
-  const roleVocab = new Set(
-    perms.map((r) => cell(r, "Role").replace(/[*_`]/g, "").trim().toLowerCase()).filter(Boolean),
-  );
+  const roleVocab = new Set(perms.map((r) => bare(cell(r, "Role"))).filter(Boolean));
   if (!perms.length) {
     out.push({
       severity: "refuse", code: "no-permission-matrix",
       where: "personas.permissions",
       detail: "no permission matrix. The matrix is the role vocabulary every write is checked against.",
       who: "Security owner",
-      location: "03-Systems/ontology/personas.md",
+      location: personasFile,
     });
   }
   for (const r of rowsOf(tables, "personas.write-allow-list")) {
     const name = cell(r, "Write");
     const id = cell(r, "Id");
-    const where = `personas.write-allow-list · ${id || name || "(unnamed)"}`;
-    if (blank(name)) {
-      out.push({
-        severity: "refuse", code: "write-no-name", where,
-        detail: "a write with no name cannot become a template.",
-        location: "03-Systems/ontology/personas.md",
-      });
-    }
+    const at = { where: `personas.write-allow-list · ${id || name || "(unnamed)"}`, location: personasFile };
+    need(r, "Write", at, {
+      severity: "refuse", code: "write-no-name",
+      detail: "a write with no name cannot become a template.",
+    });
     const approver = cell(r, "Approver");
     if (blank(approver)) {
       out.push({
-        severity: "refuse", code: "write-no-approver", where,
+        severity: "refuse", code: "write-no-approver", ...at, who: "Security owner",
         detail: `"${name || id}" has no approver. Nothing writes because it seemed reasonable at runtime.`,
-        who: "Security owner",
-        location: "03-Systems/ontology/personas.md",
       });
-    } else if (
-      roleVocab.size &&
-      !roleVocab.has(approver.replace(/[*_`]/g, "").trim().toLowerCase()) &&
-      !/^requesting role$/i.test(approver.trim())
-    ) {
+    } else if (roleVocab.size && !roleVocab.has(bare(approver)) && !/^requesting role$/i.test(approver)) {
       out.push({
-        severity: "warn", code: "approver-unknown-role", where,
+        severity: "warn", code: "approver-unknown-role", ...at, who: "Security owner",
         detail: `approver "${approver}" is not in the permission matrix, which is the role vocabulary.`,
-        who: "Security owner",
-        location: "03-Systems/ontology/personas.md",
       });
     }
-    if (blank(cell(r, "Object"))) {
-      out.push({
-        severity: "warn", code: "write-no-object", where,
-        detail: `"${name || id}" does not say what it writes to.`,
-        location: "03-Systems/ontology/personas.md",
-      });
-    }
+    need(r, "Object", at, {
+      severity: "warn", code: "write-no-object",
+      detail: `"${name || id}" does not say what it writes to.`,
+    });
   }
 
   // ---- entities: a minting system, and a grain ----------------------------
   for (const r of rowsOf(tables, "entities.rows")) {
     const name = cell(r, "Name");
     if (!name) continue;
-    const where = `entities.rows · ${name}`;
-    if (blank(cell(r, "Minted by"))) {
-      out.push({
-        severity: "refuse", code: "entity-no-minting-system", where,
-        detail: `${name} has no minting system. Which system creates it decides every join built on it.`,
-        who: "Systems gatekeeper",
-        location: "03-Systems/ontology/entities.md",
-      });
-    }
-    if (blank(cell(r, "Grain"))) {
-      out.push({
-        severity: "refuse", code: "entity-no-grain", where,
-        detail: `${name} has no grain. If it needs an "or", it is two entities.`,
-        who: "Process owner",
-        location: "03-Systems/ontology/entities.md",
-      });
-    }
-    if (blank(cell(r, "Requirements"))) {
-      out.push({
-        severity: "warn", code: "entity-no-requirement", where,
-        detail: `no requirement cites ${name} — never model from precedent.`,
-        who: "Process owner",
-        location: "03-Systems/ontology/entities.md",
-      });
-    }
+    const at = { where: `entities.rows · ${name}`, location: "03-Systems/ontology/entities.md" };
+    need(r, "Minted by", at, {
+      severity: "refuse", code: "entity-no-minting-system", who: "Systems gatekeeper",
+      detail: `${name} has no minting system. Which system creates it decides every join built on it.`,
+    });
+    need(r, "Grain", at, {
+      severity: "refuse", code: "entity-no-grain", who: "Process owner",
+      detail: `${name} has no grain. If it needs an "or", it is two entities.`,
+    });
+    need(r, "Requirements", at, {
+      severity: "warn", code: "entity-no-requirement", who: "Process owner",
+      detail: `no requirement cites ${name} — never model from precedent.`,
+    });
   }
 
   for (const r of rowsOf(tables, "source-systems.identity-rules")) {
     const entity = cell(r, "Entity");
     if (!entity) continue;
-    const where = `source-systems.identity-rules · ${entity}`;
-    if (blank(cell(r, "Minted by"))) {
-      out.push({
-        severity: "refuse", code: "identity-no-minting-system", where,
-        detail: `${entity} has no minting system — ingestion runs in identity order and cannot be derived without it.`,
-        who: "Systems gatekeeper",
-        location: "03-Systems/ontology/source-systems.md",
-      });
-    }
-    if (blank(cell(r, "Key"))) {
-      out.push({
-        severity: "refuse", code: "identity-no-key", where,
-        detail: `${entity} has no key.`,
-        who: "Systems gatekeeper",
-        location: "03-Systems/ontology/source-systems.md",
-      });
-    }
+    const at = { where: `source-systems.identity-rules · ${entity}`, location: "03-Systems/ontology/source-systems.md" };
+    need(r, "Minted by", at, {
+      severity: "refuse", code: "identity-no-minting-system", who: "Systems gatekeeper",
+      detail: `${entity} has no minting system — ingestion runs in identity order and cannot be derived without it.`,
+    });
+    need(r, "Key", at, {
+      severity: "refuse", code: "identity-no-key", who: "Systems gatekeeper",
+      detail: `${entity} has no key.`,
+    });
   }
 
   // ---- citations ----------------------------------------------------------
@@ -405,10 +349,6 @@ export function checkContract(input: ContractInput): ContractFinding[] {
 
 /** Load what `checkContract` needs from an engagement on disk. */
 export async function readContract(engagementDir: string): Promise<ContractInput> {
-  const { readFile } = await import("node:fs/promises");
-  const { join } = await import("node:path");
-  const { parseAnchoredTables } = await import("./anchors.ts");
-
   const tables: ParsedTable[] = [];
   const present = new Set<string>();
   for (const inst of CONTRACT_INSTRUMENTS) {
