@@ -10,24 +10,6 @@
 
 import { NextResponse } from "next/server";
 
-/**
- * CSRF defence: same-origin check, **fail-closed**.
- *
- * A request with neither Origin nor Referer is rejected. That breaks
- * cross-origin clients by design — this app is same-origin only.
- */
-export function sameOrigin(req: Request): boolean {
-  const origin = req.headers.get("origin") ?? req.headers.get("referer");
-  if (!origin) return false;
-  const host = req.headers.get("host");
-  if (!host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
-
 /** Public message to the client; detail to the server log only. */
 export function safeError(status: number, publicMessage: string, detail?: unknown) {
   if (detail !== undefined) console.error(`[${status}] ${publicMessage}`, detail);

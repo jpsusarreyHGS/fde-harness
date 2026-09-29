@@ -9,23 +9,23 @@
 
 import type { Sql } from "postgres";
 
-let client: Sql | null = null;
-let attempted = false;
+// The promise, not the client, is cached: a second caller arriving while the
+// first is still importing `postgres` waits for the same client rather than
+// seeing none and falling back to the filesystem.
+let client: Promise<Sql> | null = null;
 
 export async function getDb(): Promise<Sql | null> {
   const url = process.env.DATABASE_URL;
   if (!url) return null;
-  if (client) return client;
-  if (attempted) return client;
-  attempted = true;
-  const { default: postgres } = await import("postgres");
-  client = postgres(url, {
-    // Serverless: one connection per lambda, short idle life.
-    max: 1,
-    idle_timeout: 20,
-    connect_timeout: 10,
-    prepare: false,
-  });
+  client ??= import("postgres").then(({ default: postgres }) =>
+    postgres(url, {
+      // Serverless: one connection per lambda, short idle life.
+      max: 1,
+      idle_timeout: 20,
+      connect_timeout: 10,
+      prepare: false,
+    }),
+  );
   return client;
 }
 
