@@ -232,26 +232,6 @@ export async function placementWarnings(
   return out;
 }
 
-/** Readable text for an item, or null when it needs a service first. */
-export async function readIntake(
-  engagementDir: string,
-  item: IntakeItem,
-): Promise<string | null> {
-  const dir = join(engagementDir, ...EVIDENCE_ROOT.split("/"), item.evidenceClass);
-  if (item.handling === "text") {
-    return readFile(join(dir, item.file), "utf8");
-  }
-  // A conversion is written beside the source by the convert step.
-  for (const candidate of [`${item.file}.md`, item.file.replace(/\.[^.]+$/, ".md")]) {
-    try {
-      return await readFile(join(dir, candidate), "utf8");
-    } catch {
-      /* try the next candidate */
-    }
-  }
-  return null;
-}
-
 /**
  * Strip a WebVTT or SRT transcript to plain speech.
  *

@@ -7,9 +7,6 @@
   "engines": {
     "node": ">=24"
   },
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "derive": "node src/cli.ts",

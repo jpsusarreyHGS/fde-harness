@@ -35,7 +35,7 @@
  */
 
 import { readFile, stat, writeFile } from "node:fs/promises";
-import { basename, isAbsolute, relative, resolve, sep } from "node:path";
+import { basename, relative, resolve, sep } from "node:path";
 import { deriveState } from "./state.ts";
 import { tampered, validateState } from "./validate.ts";
 import { ID_ALTERNATION, mintIds, prefixMintedBy, type IdPrefix } from "./ids.ts";
@@ -50,7 +50,7 @@ import {
   type ProposalSpec,
 } from "./proposals.ts";
 import { INSTRUMENTS } from "./instruments.ts";
-import { dataRows, findTable, parseAnchoredTables } from "./anchors.ts";
+import { cell, parseAnchoredTables, rowsOf } from "./anchors.ts";
 import { deskWork, nextConversations, verifyFirst } from "./coach.ts";
 import { initEngagement, InitRefused, validateVars } from "./init.ts";
 import { checkContract, readContract } from "./contract.ts";
@@ -60,25 +60,48 @@ import { recordAnswer, type AnswerClass } from "./answer.ts";
 import { renderSketch } from "./sketch.ts";
 import { logMockup, planMockup, WATERMARK } from "./mockup.ts";
 import { formatCommands, readCommands, suggestNext } from "./commands.ts";
-import { dirname, fileURLToPath as toPath } from "./cli-paths.ts";
 
-const argv = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "intake", "pending", "accept", "reject", "mint", "anchors", "propose", "next",
   "scaffold", "contract-check", "roi", "sweep", "answer", "sketch", "mockup", "commands",
 ]);
+/** Flags that take a value. Every other `--flag` is a boolean. */
+const VALUE_FLAGS = new Set([
+  "out", "json", "against", "from", "class", "assumptions", "shown-to", "reaction", "evidence",
+]);
+
+const argv = process.argv.slice(2);
 const sub = argv[0] && SUBCOMMANDS.has(argv[0]) ? argv[0] : null;
-const args = sub ? argv.slice(1) : argv;
+
+// One parse for every subcommand: `--flag value` for VALUE_FLAGS, a bare
+// `--flag` for the rest, and everything else positional. `pos[0]` is the
+// engagement directory.
+const flags = new Map<string, string | true>();
+const pos: string[] = [];
+const rest = sub ? argv.slice(1) : argv;
+for (let i = 0; i < rest.length; i++) {
+  const a = rest[i]!;
+  if (!a.startsWith("--")) { pos.push(a); continue; }
+  const name = a.slice(2);
+  if (!VALUE_FLAGS.has(name)) flags.set(name, true);
+  else if (rest[i + 1] !== undefined) flags.set(name, rest[++i]!);
+}
+const flag = (name: string): string | undefined => {
+  const v = flags.get(name);
+  return typeof v === "string" ? v : undefined;
+};
+
+/** The harness checkout this script lives in — where the command files are. */
+const codeRoot = resolve(import.meta.dirname, "..", "..", "..");
 
 // `commands` works with no engagement: it lists what is available. With one,
 // it also says where you are and what to run next.
-if (sub === "commands" && !args.find((a) => !a.startsWith("--"))) {
-  const root = resolve(dirname(toPath(import.meta.url)), "..", "..", "..");
-  console.log(formatCommands(await readCommands(root)));
+if (sub === "commands" && !pos.length) {
+  console.log(formatCommands(await readCommands(codeRoot)));
   process.exit(0);
 }
 
-const dirArg = args.find((a) => !a.startsWith("--"));
+const dirArg = pos[0];
 if (!dirArg) {
   console.error("usage: cli.ts [intake|pending|accept|mint|…|commands] <engagement-dir> [...]");
   process.exit(2);
@@ -87,6 +110,22 @@ const engagementDir = resolve(dirArg);
 const harnessRoot = resolve(engagementDir, "..", "..");
 
 // ------------------------------------------------------------------ helpers
+
+/**
+ * Run something that may refuse. A refusal is an exit code and a sentence,
+ * not a stack trace: 2 for a scaffold the vars cannot support, 1 otherwise.
+ */
+async function refusable<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err instanceof WriteRefused || err instanceof InitRefused) {
+      console.error(`Refused: ${err.message}`);
+      process.exit(err instanceof InitRefused ? 2 : 1);
+    }
+    throw err;
+  }
+}
 
 async function isFile(p: string): Promise<boolean> {
   try { return (await stat(p)).isFile(); } catch { return false; }
@@ -102,7 +141,7 @@ async function resolveSource(name: string): Promise<{
   path: string; text: string; evidenceClass: string | null;
 } | null> {
   const candidates = [
-    isAbsolute(name) ? name : resolve(name),
+    resolve(name),
     resolve(engagementDir, name),
     ...EVIDENCE_CLASSES.map((c) => resolve(engagementDir, ...EVIDENCE_ROOT.split("/"), c, basename(name))),
   ];
@@ -126,9 +165,9 @@ async function resolveSource(name: string): Promise<{
 async function sponsorName(): Promise<string | undefined> {
   try {
     const md = await readFile(resolve(engagementDir, "01-Organisation", "stakeholder-map.md"), "utf8");
-    const t = findTable(parseAnchoredTables(md), "stakeholder-map.five-roles");
-    const row = t?.rows.find((r) => /sponsor/i.test(r["Role"] ?? ""));
-    const name = row?.["Name"]?.trim();
+    const row = rowsOf(parseAnchoredTables(md), "stakeholder-map.five-roles")
+      .find((r) => /sponsor/i.test(cell(r, "Role")));
+    const name = row ? cell(row, "Name") : "";
     return name && !/\{\{/.test(name) ? name : undefined;
   } catch {
     return undefined;
@@ -138,10 +177,7 @@ async function sponsorName(): Promise<string | undefined> {
 // --------------------------------------------------------------- subcommands
 
 if (sub === "mockup") {
-  const flag = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
-  const consumed = new Set(["--assumptions", "--shown-to", "--reaction", "--evidence"].map((f) => args.indexOf(f) + 1).filter((i) => i > 0));
-  const positional = args.filter((a, i) => !a.startsWith("--") && !consumed.has(i));
-  const action = positional[1];
+  const action = pos[1];
   const slug = basename(engagementDir);
   const deliverablesDir = resolve(harnessRoot, "deliverables");
 
@@ -165,28 +201,23 @@ if (sub === "mockup") {
   }
 
   if (action === "log") {
-    const file = positional[2];
+    const file = pos[2];
     if (!file) {
       console.error("usage: cli.ts mockup <engagement-dir> log <mockup-vN-YYYY-MM-DD.html> [--assumptions ..] [--shown-to ..] [--reaction ..] [--evidence ..]");
       process.exit(2);
     }
-    try {
-      const r = await logMockup({
-        engagementDir, slug, deliverablesDir, file,
-        assumptions: flag("--assumptions"), shownTo: flag("--shown-to"), reaction: flag("--reaction"), evidence: flag("--evidence"),
-      });
-      console.log(`${r.created ? "Logged" : "Updated"} v${r.version} in 05-Build/mockup-ledger.md — built from: ${r.builtFrom.join(", ") || "nothing accepted yet"}`);
-      if (!flag("--shown-to")) {
-        console.log("");
-        console.log("After the showing, record who saw it and what they said — the buy-in is evidence:");
-        console.log(`  node packages/derive/src/cli.ts answer ${dirArg} "Reaction to mockup v${r.version}" "<what they said, verbatim>" --from "<who>"`);
-        console.log(`  node packages/derive/src/cli.ts mockup ${dirArg} log ${file} --shown-to "<who, date>" --reaction "<confirmed direction | corrected: ...>" --evidence "02-Workflow/evidence/stated/<date>-answers.md"`);
-      }
-      process.exit(0);
-    } catch (err) {
-      if (err instanceof WriteRefused) { console.error(`Refused: ${err.message}`); process.exit(1); }
-      throw err;
+    const r = await refusable(() => logMockup({
+      engagementDir, slug, deliverablesDir, file,
+      assumptions: flag("assumptions"), shownTo: flag("shown-to"), reaction: flag("reaction"), evidence: flag("evidence"),
+    }));
+    console.log(`${r.created ? "Logged" : "Updated"} v${r.version} in 05-Build/mockup-ledger.md — built from: ${r.builtFrom.join(", ") || "nothing accepted yet"}`);
+    if (!flag("shown-to")) {
+      console.log("");
+      console.log("After the showing, record who saw it and what they said — the buy-in is evidence:");
+      console.log(`  node packages/derive/src/cli.ts answer ${dirArg} "Reaction to mockup v${r.version}" "<what they said, verbatim>" --from "<who>"`);
+      console.log(`  node packages/derive/src/cli.ts mockup ${dirArg} log ${file} --shown-to "<who, date>" --reaction "<confirmed direction | corrected: ...>" --evidence "02-Workflow/evidence/stated/<date>-answers.md"`);
     }
+    process.exit(0);
   }
 
   console.error("usage: cli.ts mockup <engagement-dir> next | log <file> [flags]");
@@ -218,15 +249,9 @@ if (sub === "sketch") {
 }
 
 if (sub === "answer") {
-  const fromAt = args.indexOf("--from");
-  const classAt = args.indexOf("--class");
-  const from = fromAt >= 0 ? args[fromAt + 1] : undefined;
-  const cls = classAt >= 0 ? args[classAt + 1] : undefined;
-  // Positional arguments, minus the flag values.
-  const consumed = new Set([fromAt + 1, classAt + 1].filter((i) => i > 0));
-  const positional = args.filter((a, i) => !a.startsWith("--") && !consumed.has(i));
-  const question = positional[1];
-  const answer = positional[2];
+  const from = flag("from");
+  const cls = flag("class");
+  const [, question, answer] = pos;
   if (!question || !answer || !from) {
     console.error('usage: cli.ts answer <engagement-dir> "<Q-id or question>" "<answer>" --from "<who said it>" [--class stated|documented]');
     console.error("");
@@ -240,30 +265,20 @@ if (sub === "answer") {
     console.error(`--class must be stated or documented, not ${JSON.stringify(cls)}. An answer cannot be observed or system evidence.`);
     process.exit(2);
   }
-  try {
-    const res = await recordAnswer(engagementDir, {
-      question, answer, from, evidenceClass: cls as AnswerClass | undefined,
-    });
-    console.log(`${res.created ? "Created" : "Appended to"} ${res.path} (${res.evidenceClass}${res.questionId ? `, answers ${res.questionId}` : ""})`);
-    console.log("");
-    console.log("Nothing has reached a register. Propose it with:");
-    console.log("");
-    console.log(`  /capture ${res.path}`);
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof WriteRefused) {
-      console.error(`Refused: ${err.message}`);
-      process.exit(1);
-    }
-    throw err;
-  }
+  const res = await refusable(() => recordAnswer(engagementDir, {
+    question, answer, from, evidenceClass: cls as AnswerClass | undefined,
+  }));
+  console.log(`${res.created ? "Created" : "Appended to"} ${res.path} (${res.evidenceClass}${res.questionId ? `, answers ${res.questionId}` : ""})`);
+  console.log("");
+  console.log("Nothing has reached a register. Propose it with:");
+  console.log("");
+  console.log(`  /capture ${res.path}`);
+  process.exit(0);
 }
 
 if (sub === "sweep") {
-  const rest = args.filter((a) => !a.startsWith("--"));
-  const sourceArg = rest[1];
-  const againstAt = args.indexOf("--against");
-  const against = againstAt >= 0 ? args[againstAt + 1] : undefined;
+  const sourceArg = pos[1];
+  const against = flag("against");
   if (!sourceArg) {
     console.error("usage: cli.ts sweep <engagement-dir> <source-file> [--against <proposal.md>]");
     console.error("");
@@ -297,8 +312,7 @@ if (sub === "sweep") {
 }
 
 if (sub === "scaffold") {
-  const jsonAt = args.indexOf("--json");
-  const specPath = jsonAt >= 0 ? args[jsonAt + 1] : undefined;
+  const specPath = flag("json");
   if (!specPath) {
     console.error("usage: cli.ts scaffold <engagement-dir> --json vars.json [--dry-run]");
     console.error("");
@@ -320,47 +334,39 @@ if (sub === "scaffold") {
     console.error(`Cannot read vars: ${(err as Error).message}`);
     process.exit(2);
   }
-  try {
-    const vars = validateVars(raw, basename(engagementDir));
-    const res = await initEngagement({
-      engagementDir,
-      harnessRoot,
-      vars,
-      dryRun: args.includes("--dry-run"),
-    });
+  const dryRun = flags.has("dry-run");
+  const res = await refusable(async () => initEngagement({
+    engagementDir,
+    harnessRoot,
+    vars: validateVars(raw, basename(engagementDir)),
+    dryRun,
+  }));
 
-    if (args.includes("--dry-run")) {
-      console.log(`${res.slug} — dry run (${res.backfill ? "backfill" : "new"})`);
-      for (const f of res.backfilled) console.log(`  would create  ${f}`);
-      if (!res.backfilled.length) console.log("  nothing to create — already complete");
-    } else {
-      console.log(`${res.slug} — ${res.backfill ? "brought forward" : "created"}`);
-      console.log(`  ${res.directories} directories`);
-      console.log(`  ${res.created.length} file(s) written, ${res.skipped.length} already present`);
-      if (res.questionsRaised.length) {
-        console.log(`  ${res.questionsRaised.join(", ")} raised for values left as TBD`);
-      }
-      console.log("  state.json derived");
+  if (dryRun) {
+    console.log(`${res.slug} — dry run (${res.backfill ? "backfill" : "new"})`);
+    for (const f of res.backfilled) console.log(`  would create  ${f}`);
+    if (!res.backfilled.length) console.log("  nothing to create — already complete");
+  } else {
+    console.log(`${res.slug} — ${res.backfill ? "brought forward" : "created"}`);
+    console.log(`  ${res.directories} directories`);
+    console.log(`  ${res.created.length} file(s) written, ${res.skipped.length} already present`);
+    if (res.questionsRaised.length) {
+      console.log(`  ${res.questionsRaised.join(", ")} raised for values left as TBD`);
     }
-
-    if (res.survivingPlaceholders.length) {
-      console.error("");
-      console.error("Unresolved placeholders still on disk:");
-      for (const s of res.survivingPlaceholders) {
-        console.error(`  ${s.file}: ${s.keys.map((k) => `{{${k}}}`).join(" ")}`);
-      }
-      console.error("");
-      console.error("Each one is a value nobody has supplied. Fill it or raise a Q-.");
-      process.exit(1);
-    }
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof InitRefused) {
-      console.error(`Refused: ${err.message}`);
-      process.exit(2);
-    }
-    throw err;
+    console.log("  state.json derived");
   }
+
+  if (res.survivingPlaceholders.length) {
+    console.error("");
+    console.error("Unresolved placeholders still on disk:");
+    for (const s of res.survivingPlaceholders) {
+      console.error(`  ${s.file}: ${s.keys.map((k) => `{{${k}}}`).join(" ")}`);
+    }
+    console.error("");
+    console.error("Each one is a value nobody has supplied. Fill it or raise a Q-.");
+    process.exit(1);
+  }
+  process.exit(0);
 }
 
 if (sub === "contract-check") {
@@ -453,41 +459,33 @@ if (sub === "pending") {
 }
 
 if (sub === "accept") {
-  const name = args.filter((a) => !a.startsWith("--"))[1];
+  const name = pos[1];
   if (!name) {
     console.error("usage: cli.ts accept <engagement-dir> <proposal.md>");
     process.exit(2);
   }
-  try {
-    const res = await acceptProposal(engagementDir, name);
-    if (res.danglingCitations.length) {
-      console.error("Refused — the proposal cites ids that do not exist:");
-      for (const d of res.danglingCitations) {
-        console.error(`  ${d.anchor} row ${d.row}: ${d.cited}`);
-      }
-      console.error("");
-      console.error("Nothing was written. Fix the citations, or delete those rows.");
-      process.exit(1);
+  const res = await refusable(() => acceptProposal(engagementDir, name));
+  if (res.danglingCitations.length) {
+    console.error("Refused — the proposal cites ids that do not exist:");
+    for (const d of res.danglingCitations) {
+      console.error(`  ${d.anchor} row ${d.row}: ${d.cited}`);
     }
-    for (const w of res.written) {
-      const range = w.ids.length ? ` (${w.ids[0]}\u2013${w.ids.at(-1)})` : "";
-      console.log(`${w.anchor}: ${w.rows} row(s)${range}`);
-    }
-    console.log(`\n${res.totalRows} row(s) written. Run --audit to see what they need.`);
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof WriteRefused) {
-      console.error(`Refused: ${err.message}`);
-      process.exit(1);
-    }
-    throw err;
+    console.error("");
+    console.error("Nothing was written. Fix the citations, or delete those rows.");
+    process.exit(1);
   }
+  for (const w of res.written) {
+    const range = w.ids.length ? ` (${w.ids[0]}\u2013${w.ids.at(-1)})` : "";
+    console.log(`${w.anchor}: ${w.rows} row(s)${range}`);
+  }
+  console.log(`\n${res.totalRows} row(s) written. Run --audit to see what they need.`);
+  process.exit(0);
 }
 
 if (sub === "anchors") {
   // An agent building a proposal needs the real column names. Making it grep
   // HTML comments out of 41 instruments is how a typo silently drops a cell.
-  const filter = args.filter((a) => !a.startsWith("--"))[1]?.toLowerCase();
+  const filter = pos[1]?.toLowerCase();
   let shown = 0;
   for (const inst of INSTRUMENTS) {
     let md: string;
@@ -531,9 +529,8 @@ if (sub === "anchors") {
         // the primary one — `exception-register.promoted` records what EX-004
         // became without creating EX-005, and `personas.rows` keys on a role.
         const prefix = prefixMintedBy(inst.path, t.anchor.name);
-        const minted = prefix !== null;
         console.log(
-          minted
+          prefix
             ? `  idColumn=${t.anchor.idColumn} — leave it blank; code mints ${prefix}- at accept`
             : `  key column=${t.anchor.idColumn} — you supply it (an existing id, or a value)`,
         );
@@ -550,7 +547,7 @@ if (sub === "anchors") {
 }
 
 if (sub === "propose") {
-  const specPath = args.filter((a) => !a.startsWith("--"))[1];
+  const specPath = pos[1];
   if (!specPath) {
     console.error("usage: cli.ts propose <engagement-dir> <spec.json>");
     console.error("");
@@ -570,56 +567,38 @@ if (sub === "propose") {
     console.error(`Cannot read spec: ${(err as Error).message}`);
     process.exit(2);
   }
-  try {
-    const { name, rows } = await proposeFromSpec(engagementDir, spec);
-    console.log(name);
-    console.error(`${rows} row(s) proposed — review, fix any cell, then accept. Nothing written to a register yet.`);
-    // Coverage, when the source can be found: under-extraction is visible at
-    // the moment it happens, not at the gate.
-    const src = await resolveSource(spec.source);
-    if (src) {
-      const result = sweepText(src.text, { sponsorName: await sponsorName() });
-      const blocks = spec.blocks.map((b) => ({ instrument: b.instrument, rows: b.rows?.length ?? 0 }));
-      console.error("");
-      console.error(formatCoverage(coverage(blocks, result), name, src.path));
-      console.error("");
-    }
-    console.error(`Accept with: cli.ts accept ${dirArg} ${name}`);
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof WriteRefused) {
-      console.error(`Refused: ${err.message}`);
-      process.exit(1);
-    }
-    throw err;
+  const { name, rows } = await refusable(() => proposeFromSpec(engagementDir, spec));
+  console.log(name);
+  console.error(`${rows} row(s) proposed — review, fix any cell, then accept. Nothing written to a register yet.`);
+  // Coverage, when the source can be found: under-extraction is visible at
+  // the moment it happens, not at the gate.
+  const src = await resolveSource(spec.source);
+  if (src) {
+    const result = sweepText(src.text, { sponsorName: await sponsorName() });
+    const blocks = spec.blocks.map((b) => ({ instrument: b.instrument, rows: b.rows?.length ?? 0 }));
+    console.error("");
+    console.error(formatCoverage(coverage(blocks, result), name, src.path));
+    console.error("");
   }
+  console.error(`Accept with: cli.ts accept ${dirArg} ${name}`);
+  process.exit(0);
 }
 
 if (sub === "reject") {
-  const rest = args.filter((a) => !a.startsWith("--"));
-  const name = rest[1];
-  const reason = rest.slice(2).join(" ");
+  const name = pos[1];
+  const reason = pos.slice(2).join(" ");
   if (!name || !reason) {
     console.error("usage: cli.ts reject <engagement-dir> <proposal.md> <reason>");
     process.exit(2);
   }
-  try {
-    await rejectProposal(engagementDir, name, reason);
-    console.log(`${name} declined: ${reason}`);
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof WriteRefused) {
-      console.error(`Refused: ${err.message}`);
-      process.exit(1);
-    }
-    throw err;
-  }
+  await refusable(() => rejectProposal(engagementDir, name, reason));
+  console.log(`${name} declined: ${reason}`);
+  process.exit(0);
 }
 
 if (sub === "mint") {
-  const rest = args.filter((a) => !a.startsWith("--"));
-  const prefix = rest[1] as IdPrefix | undefined;
-  const n = Number(rest[2] ?? "1");
+  const prefix = pos[1] as IdPrefix | undefined;
+  const n = Number(pos[2] ?? "1");
   if (!prefix) {
     console.error(`usage: cli.ts mint <engagement-dir> <${ID_ALTERNATION}> [count]`);
     process.exit(2);
@@ -631,8 +610,6 @@ if (sub === "mint") {
 }
 
 // ------------------------------------------------------------------- derive
-
-const out = args.includes("--out") ? args[args.indexOf("--out") + 1] : undefined;
 
 const state = await deriveState({
   engagementDir,
@@ -657,13 +634,12 @@ for (const v of violations) console.error(`warn  ${v.rule}  ${v.detail}`);
 if (sub === "commands") {
   const { where, next } = suggestNext(state);
   // The command files live with this script, not with the engagement.
-  const root = resolve(dirname(toPath(import.meta.url)), "..", "..", "..");
-  console.log(formatCommands(await readCommands(root), { slug: basename(engagementDir), where, next }));
+  console.log(formatCommands(await readCommands(codeRoot), { slug: basename(engagementDir), where, next }));
   process.exit(0);
 }
 
 if (sub === "next") {
-  const n = Number(args.filter((a) => !a.startsWith("--"))[1] ?? "3");
+  const n = Number(pos[1] ?? "3");
   const groups = nextConversations(state.coach, Number.isFinite(n) ? n : 3);
   const verify = verifyFirst(state.coach);
   if (!groups.length && !verify.length) {
@@ -754,7 +730,7 @@ if (sub === "roi") {
   process.exit(unusable ? 1 : 0);
 }
 
-if (args.includes("--audit")) {
+if (flags.has("audit")) {
   const a = state.chain.audit;
   for (const f of a.findings) {
     console.log(`${f.kind}  ${f.id}  ${f.location}  ${f.detail}`);
@@ -769,6 +745,7 @@ if (args.includes("--audit")) {
 }
 
 const json = JSON.stringify(state, null, 2) + "\n";
+const out = flag("out");
 if (out) {
   await writeFile(out, json, "utf8");
   console.log(out);

@@ -154,14 +154,6 @@ export const INSTRUMENTS: readonly InstrumentDef[] = [
   { id: "scope-changes",          label: "Scope changes",          stage: "00", path: "engagement-management/scope-changes.md", primaryTable: "scope-changes.rows" },
 ] as const;
 
-export function instrumentById(id: string): InstrumentDef | undefined {
-  return INSTRUMENTS.find((i) => i.id === id);
-}
-
-export function instrumentsForStage(stage: StageId): InstrumentDef[] {
-  return INSTRUMENTS.filter((i) => i.stage === stage);
-}
-
 /** Instrument status thresholds, per `state-schema.md`. */
 export function instrumentStatus(rows: number): "empty" | "thin" | "populated" {
   if (rows === 0) return "empty";

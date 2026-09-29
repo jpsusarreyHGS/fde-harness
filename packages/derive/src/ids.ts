@@ -152,11 +152,6 @@ export async function knownIds(
   return out;
 }
 
-/** The file that owns a prefix's sequence. */
-export function homeOf(prefix: IdPrefix): string {
-  return HOME[prefix].path;
-}
-
 /**
  * The prefix an instrument mints, if it mints one.
  *

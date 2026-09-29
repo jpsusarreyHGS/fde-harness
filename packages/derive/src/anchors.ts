@@ -49,8 +49,6 @@ export interface ParsedTable {
 const ANCHOR_RE =
   /^[ \t]*<!--[ \t]*table:([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)[ \t]+role=(register|kv|labels)([^>]*?)-->[ \t]*$/;
 
-const ROLES: ReadonlySet<string> = new Set(["register", "kv", "labels"]);
-
 /** A markdown table separator, e.g. `|---|---|` or `| :--- | ---: |` */
 function isSeparator(line: string): boolean {
   const t = line.trim();
@@ -121,17 +119,13 @@ export function parseAnchoredTables(markdown: string): ParsedTable[] {
 
     const instrument = m[1]!;
     const table = m[2]!;
-    const role = m[3]!;
-    const rest = m[4] ?? "";
-    if (!ROLES.has(role)) continue;
-
     const anchor: TableAnchor = {
       name: `${instrument}.${table}`,
       instrument,
       table,
-      role: role as TableRole,
+      role: m[3] as TableRole,
       line: i + 1,
-      ...parseAttrs(rest),
+      ...parseAttrs(m[4] ?? ""),
     };
 
     // Walk forward past blank lines and prose to the next table header.
@@ -174,13 +168,7 @@ export function parseAnchoredTables(markdown: string): ParsedTable[] {
  * count. This is the safeguard behind "a fresh engagement derives all-zero".
  */
 export function dataRows(t: ParsedTable): Record<string, string>[] {
-  return t.rows.filter((r) => {
-    if (isRetired(t, r)) return false;
-    return Object.values(r).some((v) => {
-      const s = v.trim();
-      return s !== "" && s !== "-" && s !== "—" && s !== "n/a";
-    });
-  });
+  return t.rows.filter((r) => !isRetired(t, r) && Object.values(r).some((v) => !isBlank(v)));
 }
 
 /**
@@ -197,19 +185,38 @@ export function isRetired(t: ParsedTable, row: Record<string, string>): boolean 
   return /^~~.*~~$/.test((row[key] ?? "").trim());
 }
 
-/** Register rows only — what derived counts are allowed to see. */
-export function registerRows(tables: ParsedTable[]): Record<string, string>[] {
-  return tables
-    .filter((t) => t.anchor.role === "register")
-    .flatMap((t) => dataRows(t));
-}
-
 /** Look up one anchored table by its full name. */
 export function findTable(
-  tables: ParsedTable[],
+  tables: readonly ParsedTable[],
   name: string,
 ): ParsedTable | undefined {
   return tables.find((t) => t.anchor.name === name);
+}
+
+/** Data rows of one anchored table, or none when it is absent. */
+export function rowsOf(tables: readonly ParsedTable[], name: string): Record<string, string>[] {
+  const t = findTable(tables, name);
+  return t ? dataRows(t) : [];
+}
+
+/** The first of `names` the row has, trimmed. Templates have renamed columns over time. */
+export function cell(row: Record<string, string>, ...names: string[]): string {
+  for (const n of names) {
+    const v = row[n];
+    if (v !== undefined) return v.trim();
+  }
+  return "";
+}
+
+/** A cell with nothing in it: empty, a dash, or `n/a`. */
+export function isBlank(v: string | undefined): boolean {
+  const s = (v ?? "").trim();
+  return s === "" || s === "-" || s === "—" || s === "n/a";
+}
+
+/** A cell holding a value — not blank, and not a `TBD` nobody replaced. */
+export function hasValue(v: string | undefined): boolean {
+  return !isBlank(v) && !/^tbd$/i.test((v ?? "").trim());
 }
 
 /**
@@ -221,8 +228,5 @@ export function findTable(
 export function answeredRows(t: ParsedTable): Record<string, string>[] {
   const col = t.anchor.answerColumn;
   if (!col) return [];
-  return t.rows.filter((r) => {
-    const v = (r[col] ?? "").trim();
-    return v !== "" && v !== "-" && v !== "\u2014" && v !== "n/a";
-  });
+  return t.rows.filter((r) => !isBlank(r[col]));
 }

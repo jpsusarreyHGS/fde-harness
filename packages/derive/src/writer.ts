@@ -12,7 +12,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { parseAnchoredTables, splitRow } from "./anchors.ts";
+import { isBlank, parseAnchoredTables, splitRow, type ParsedTable } from "./anchors.ts";
 
 export interface AppendResult {
   written: number;
@@ -52,6 +52,72 @@ export function escapeCell(value: string): string {
 }
 
 /**
+ * Templates write keys as `**The exception holder**`. A fill written as
+ * "Exception holder" must still land on that row, so both sides are compared
+ * without markup, without the article, and without case.
+ */
+export function cleanKey(raw: string): string {
+  return raw.replace(/[*_`]/g, "").trim().replace(/^the\s+/i, "").toLowerCase();
+}
+
+/** Read an instrument and find one anchored table in it, or refuse. */
+async function readTable(
+  engagementDir: string,
+  instrumentPath: string,
+  anchorName: string,
+): Promise<{ abs: string; md: string; table: ParsedTable }> {
+  const abs = join(engagementDir, ...instrumentPath.split("/"));
+  let md: string;
+  try {
+    md = await readFile(abs, "utf8");
+  } catch {
+    throw new WriteRefused(
+      `${instrumentPath} does not exist. Run /init-engagement before writing to it.`,
+      { anchor: anchorName },
+    );
+  }
+  const table = parseAnchoredTables(md).find((t) => t.anchor.name === anchorName);
+  if (!table) {
+    throw new WriteRefused(
+      `no anchored table ${anchorName} in ${instrumentPath}. Anchors are the schema — do not write to an unanchored table.`,
+      { anchor: anchorName },
+    );
+  }
+  return { abs, md, table };
+}
+
+/**
+ * The lines of the file and the index of the table's header line.
+ *
+ * Refuses when the header on disk no longer matches what the parser saw —
+ * writing into a table that moved under us would put cells in wrong columns.
+ */
+function locateHeader(md: string, table: ParsedTable): { lines: string[]; headerLine: number } {
+  const lines = md.split(/\r?\n/);
+  let i = table.anchor.line - 1;
+  while (i < lines.length && !lines[i]!.trim().startsWith("|")) i++;
+  if (splitRow(lines[i] ?? "").join("|") !== table.headers.join("|")) {
+    throw new WriteRefused(
+      `${table.anchor.name}: header on disk does not match the parsed header. Refusing to write into a table that moved under us.`,
+      { anchor: table.anchor.name },
+    );
+  }
+  return { lines, headerLine: i };
+}
+
+/** Every key must be a real column. A typo landing in the wrong cell is refused. */
+function assertColumns(row: Record<string, string>, table: ParsedTable, label: string, rowNum: number): void {
+  for (const k of Object.keys(row)) {
+    if (!table.headers.includes(k)) {
+      throw new WriteRefused(
+        `${label}: "${k}" is not a column of ${table.anchor.name}. Columns are: ${table.headers.join(", ")}`,
+        { anchor: table.anchor.name, column: k, row: rowNum },
+      );
+    }
+  }
+}
+
+/**
  * Append rows to an anchored table.
  *
  * `rows` are objects keyed by column header. Every key must be a real column;
@@ -67,82 +133,28 @@ export async function appendRows(
   anchorName: string,
   rows: Record<string, string>[],
 ): Promise<AppendResult> {
-  if (rows.length === 0) {
-    return { written: 0, anchor: anchorName, atLine: 0 };
-  }
+  if (rows.length === 0) return { written: 0, anchor: anchorName, atLine: 0 };
 
-  const abs = join(engagementDir, ...instrumentPath.split("/"));
-  let md: string;
-  try {
-    md = await readFile(abs, "utf8");
-  } catch {
-    throw new WriteRefused(
-      `${instrumentPath} does not exist. Run /init-engagement before writing to it.`,
-      { anchor: anchorName },
-    );
-  }
-
-  const table = parseAnchoredTables(md).find((t) => t.anchor.name === anchorName);
-  if (!table) {
-    throw new WriteRefused(
-      `no anchored table ${anchorName} in ${instrumentPath}. Anchors are the schema — do not write to an unanchored table.`,
-      { anchor: anchorName },
-    );
-  }
+  const { abs, md, table } = await readTable(engagementDir, instrumentPath, anchorName);
   if (table.anchor.role !== "register") {
     throw new WriteRefused(
       `${anchorName} is role=${table.anchor.role}. Only register tables take appended rows; a labels table's rows are schema.`,
       { anchor: anchorName },
     );
   }
+  rows.forEach((r, i) => assertColumns(r, table, `row ${i + 1}`, i + 1));
 
-  const headers = table.headers;
-  rows.forEach((r, i) => {
-    for (const k of Object.keys(r)) {
-      if (!headers.includes(k)) {
-        throw new WriteRefused(
-          `row ${i + 1}: "${k}" is not a column of ${anchorName}. Columns are: ${headers.join(", ")}`,
-          { anchor: anchorName, column: k, row: i + 1 },
-        );
-      }
-    }
-  });
-
-  // Locate the table in the source so the insert point is exact. The parser
-  // gives us the anchor's line; walk to the separator, then past any rows.
-  const lines = md.split(/\r?\n/);
-  let i = table.anchor.line - 1;
-  while (i < lines.length && !lines[i]!.trim().startsWith("|")) i++;
-  const headerLine = i;
-  let j = headerLine + 2; // past header and separator
-  while (j < lines.length && lines[j]!.trim().startsWith("|")) j++;
-
-  // Guard against a header that has drifted from what the parser saw.
-  const onDisk = splitRow(lines[headerLine] ?? "");
-  if (onDisk.join("|") !== headers.join("|")) {
-    throw new WriteRefused(
-      `${anchorName}: header on disk does not match the parsed header. Refusing to write into a table that moved under us.`,
-      { anchor: anchorName },
-    );
-  }
+  const { lines, headerLine } = locateHeader(md, table);
+  let end = headerLine + 2; // past header and separator
+  while (end < lines.length && lines[end]!.trim().startsWith("|")) end++;
 
   const rendered = rows.map(
-    (r) => `| ${headers.map((h) => escapeCell(r[h] ?? "")).join(" | ")} |`,
+    (r) => `| ${table.headers.map((h) => escapeCell(r[h] ?? "")).join(" | ")} |`,
   );
-
-  lines.splice(j, 0, ...rendered);
+  lines.splice(end, 0, ...rendered);
   await writeFile(abs, lines.join("\n"), "utf8");
 
-  return { written: rows.length, anchor: anchorName, atLine: j + 1 };
-}
-
-/** The columns an anchored table expects, for a caller building rows. */
-export async function tableColumns(
-  engagementDir: string,
-  instrumentPath: string,
-  anchorName: string,
-): Promise<string[]> {
-  return (await tableInfo(engagementDir, instrumentPath, anchorName)).headers;
+  return { written: rows.length, anchor: anchorName, atLine: end + 1 };
 }
 
 export interface TableInfo {
@@ -159,19 +171,16 @@ export interface TableInfo {
 /**
  * Everything a caller needs to build a row — or a fill — for an anchored table.
  *
- * `tableColumns` was enough while only register tables were writable. A fill
- * against a labels table also needs the key column and the keys that exist,
- * because a fill keyed on a role the template does not have is a row that
- * silently goes nowhere.
+ * A fill against a labels table needs the key column and the keys that
+ * exist, because a fill keyed on a role the template does not have is a row
+ * that silently goes nowhere.
  */
 export async function tableInfo(
   engagementDir: string,
   instrumentPath: string,
   anchorName: string,
 ): Promise<TableInfo> {
-  const md = await readFile(join(engagementDir, ...instrumentPath.split("/")), "utf8");
-  const t = parseAnchoredTables(md).find((x) => x.anchor.name === anchorName);
-  if (!t) throw new WriteRefused(`no anchored table ${anchorName} in ${instrumentPath}`);
+  const { table: t } = await readTable(engagementDir, instrumentPath, anchorName);
   const keyColumn = t.anchor.keyColumn ?? t.headers[0] ?? "";
   const answerColumn =
     t.anchor.answerColumn ?? (t.anchor.role === "kv" ? (t.headers[1] ?? null) : null);
@@ -182,20 +191,6 @@ export async function tableInfo(
     answerColumn,
     keys: t.rows.map((r) => cleanKey(r[keyColumn] ?? "")).filter(Boolean),
   };
-}
-
-/**
- * Templates write keys as `**The exception holder**`. A fill written as
- * "Exception holder" must still land on that row, so both sides are compared
- * without markup, without the article, and without case.
- */
-export function cleanKey(raw: string): string {
-  return raw.replace(/[*_`]/g, "").trim().replace(/^the\s+/i, "").toLowerCase();
-}
-
-function blankCell(v: string): boolean {
-  const s = v.trim();
-  return s === "" || s === "-" || s === "—" || s === "n/a";
 }
 
 /**
@@ -220,23 +215,7 @@ export async function fillCells(
 ): Promise<AppendResult> {
   if (rows.length === 0) return { written: 0, anchor: anchorName, atLine: 0 };
 
-  const abs = join(engagementDir, ...instrumentPath.split("/"));
-  let md: string;
-  try {
-    md = await readFile(abs, "utf8");
-  } catch {
-    throw new WriteRefused(
-      `${instrumentPath} does not exist. Run /init-engagement before writing to it.`,
-      { anchor: anchorName },
-    );
-  }
-  const table = parseAnchoredTables(md).find((t) => t.anchor.name === anchorName);
-  if (!table) {
-    throw new WriteRefused(
-      `no anchored table ${anchorName} in ${instrumentPath}. Anchors are the schema — do not write to an unanchored table.`,
-      { anchor: anchorName },
-    );
-  }
+  const { abs, md, table } = await readTable(engagementDir, instrumentPath, anchorName);
   if (table.anchor.role === "register") {
     throw new WriteRefused(
       `${anchorName} is role=register. A fill is for labels and kv tables; append rows to a register instead.`,
@@ -246,49 +225,32 @@ export async function fillCells(
 
   const headers = table.headers;
   const keyColumn = table.anchor.keyColumn ?? headers[0]!;
-  const lines = md.split(/\r?\n/);
-  let i = table.anchor.line - 1;
-  while (i < lines.length && !lines[i]!.trim().startsWith("|")) i++;
-  const headerLine = i;
-  const onDisk = splitRow(lines[headerLine] ?? "");
-  if (onDisk.join("|") !== headers.join("|")) {
-    throw new WriteRefused(
-      `${anchorName}: header on disk does not match the parsed header. Refusing to write into a table that moved under us.`,
-      { anchor: anchorName },
-    );
-  }
+  const { lines, headerLine } = locateHeader(md, table);
 
   // Row line numbers, keyed on the cleaned key — the same normalisation the
   // caller's key will get, so `Exception holder` finds `**The exception holder**`.
   const lineOfKey = new Map<string, number>();
   for (let j = headerLine + 2; j < lines.length && lines[j]!.trim().startsWith("|"); j++) {
-    const cells = splitRow(lines[j]!);
-    const k = cleanKey(cells[headers.indexOf(keyColumn)] ?? "");
+    const k = cleanKey(splitRow(lines[j]!)[headers.indexOf(keyColumn)] ?? "");
     if (k && !lineOfKey.has(k)) lineOfKey.set(k, j);
   }
 
   let touched = 0;
   let firstLine = 0;
   rows.forEach((r, idx) => {
-    for (const k of Object.keys(r)) {
-      if (!headers.includes(k)) {
-        throw new WriteRefused(
-          `fill ${idx + 1}: "${k}" is not a column of ${anchorName}. Columns are: ${headers.join(", ")}`,
-          { anchor: anchorName, column: k, row: idx + 1 },
-        );
-      }
-    }
+    const label = `fill ${idx + 1}`;
+    assertColumns(r, table, label, idx + 1);
     const key = cleanKey(r[keyColumn] ?? "");
     if (!key) {
       throw new WriteRefused(
-        `fill ${idx + 1}: no "${keyColumn}" — a fill names the row it lands on.`,
+        `${label}: no "${keyColumn}" — a fill names the row it lands on.`,
         { anchor: anchorName, column: keyColumn, row: idx + 1 },
       );
     }
     const at = lineOfKey.get(key);
     if (at === undefined) {
       throw new WriteRefused(
-        `fill ${idx + 1}: ${anchorName} has no row "${r[keyColumn]}". A fill never adds a row. Its keys are: ${[...lineOfKey.keys()].join(" | ")}`,
+        `${label}: ${anchorName} has no row "${r[keyColumn]}". A fill never adds a row. Its keys are: ${[...lineOfKey.keys()].join(" | ")}`,
         { anchor: anchorName, column: keyColumn, row: idx + 1 },
       );
     }
@@ -301,12 +263,12 @@ export async function fillCells(
       if (value === "") continue;
       const ci = headers.indexOf(col);
       const current = cells[ci] ?? "";
-      if (blankCell(current)) {
+      if (isBlank(current)) {
         cells[ci] = value;
         changed = true;
       } else if (current.trim() !== value) {
         throw new WriteRefused(
-          `fill ${idx + 1}: ${anchorName} "${r[keyColumn]}" already holds "${current.trim()}" in ${col}. ` +
+          `${label}: ${anchorName} "${r[keyColumn]}" already holds "${current.trim()}" in ${col}. ` +
             "A fill never overwrites — if that value is wrong, change it in the file deliberately.",
           { anchor: anchorName, column: col, row: idx + 1 },
         );

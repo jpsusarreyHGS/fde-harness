@@ -16,7 +16,7 @@
 
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { parseAnchoredTables, splitRow } from "./anchors.ts";
+import { splitRow } from "./anchors.ts";
 import { idPattern, knownIds, mintIds, type IdPrefix } from "./ids.ts";
 import {
   appendRows, cleanKey, escapeCell, fillCells, tableInfo, WriteRefused,
@@ -324,21 +324,6 @@ export async function pendingProposals(engagementDir: string): Promise<string[]>
     const md = await readFile(join(dir, f), "utf8");
     if (!/<!--\s*accepted /.test(md) && !/<!--\s*rejected /.test(md)) out.push(f);
   }
-  return out;
-}
-
-/** Rows a proposal would write, without writing them. */
-export async function previewProposal(
-  engagementDir: string,
-  proposalName: string,
-): Promise<{ anchor: string; rows: number }[]> {
-  const md = await readFile(
-    join(engagementDir, ...PROPOSALS_DIR.split("/"), proposalName),
-    "utf8",
-  );
-  const out: { anchor: string; rows: number }[] = [];
-  for (const t of parseAnchoredTables(md)) out.push({ anchor: t.anchor.name, rows: t.rows.length });
-  for (const b of parseProposalBlocks(md)) out.push({ anchor: b.target.anchor, rows: b.rows.length });
   return out;
 }
 
