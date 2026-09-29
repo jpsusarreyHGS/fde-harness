@@ -18,7 +18,7 @@
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { dataRows, findTable, parseAnchoredTables, type ParsedTable } from "./anchors.ts";
+import { cell, hasValue, parseAnchoredTables, rowsOf, type ParsedTable } from "./anchors.ts";
 import { idPattern } from "./ids.ts";
 import { INSTRUMENTS } from "./instruments.ts";
 import { deriveState } from "./state.ts";
@@ -54,19 +54,6 @@ const CLASSES = new Set(["observed", "system", "documented", "stated"]);
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-function cell(r: Record<string, string>, ...names: string[]): string {
-  for (const n of names) {
-    const v = r[n];
-    if (v !== undefined) return v.trim();
-  }
-  return "";
-}
-
-function has(v: string): boolean {
-  const s = v.trim();
-  return s !== "" && s !== "—" && s !== "-" && s !== "n/a" && !/^tbd$/i.test(s);
 }
 
 /** Markdown emphasis out; the sketch sets its own type. */
@@ -112,11 +99,6 @@ async function readTables(engagementDir: string, id: string): Promise<ParsedTabl
   }
 }
 
-function rows(tables: ParsedTable[], anchor: string): Record<string, string>[] {
-  const t = findTable(tables, anchor);
-  return t ? dataRows(t) : [];
-}
-
 export async function renderSketch(opts: SketchOptions): Promise<SketchResult> {
   const { engagementDir, slug } = opts;
   const now = opts.now ?? new Date();
@@ -140,43 +122,43 @@ export async function renderSketch(opts: SketchOptions): Promise<SketchResult> {
   } catch { /* slug it is */ }
 
   const classById = new Map<string, string>();
-  for (const r of rows(obs, "observation-log.rows")) {
+  for (const r of rowsOf(obs, "observation-log.rows")) {
     const id = cell(r, "Id");
     const c = cell(r, "Class").toLowerCase();
-    if (has(id) && CLASSES.has(c)) classById.set(id, c);
+    if (hasValue(id) && CLASSES.has(c)) classById.set(id, c);
   }
 
   // 1. What we heard
-  const restatement = rows(sponsor, "sponsor-brief.restatement").find((r) => /real problem/i.test(cell(r, "Item")));
-  const goal = rows(sponsor, "sponsor-brief.questions").find((r) => /trying to accomplish/i.test(cell(r, "Question")));
-  const sentence = restatement && has(cell(restatement, "Value"))
+  const restatement = rowsOf(sponsor, "sponsor-brief.restatement").find((r) => /real problem/i.test(cell(r, "Item")));
+  const goal = rowsOf(sponsor, "sponsor-brief.questions").find((r) => /trying to accomplish/i.test(cell(r, "Question")));
+  const sentence = restatement && hasValue(cell(restatement, "Value"))
     ? { text: cell(restatement, "Value"), label: "the problem, in the sponsor's words" }
-    : goal && has(cell(goal, "Answer"))
+    : goal && hasValue(cell(goal, "Answer"))
       ? { text: cell(goal, "Answer"), label: "what the sponsor said they are trying to accomplish" }
       : null;
-  const steps = rows(map, "operating-map.steps").map((r) => ({
+  const steps = rowsOf(map, "operating-map.steps").map((r) => ({
     n: cell(r, "#"),
     step: noIds(plain(cell(r, "Step"))),
     actor: plain(cell(r, "Actor")),
     system: plain(cell(r, "System")),
     cls: classOf(cell(r, "Source"), classById),
-  })).filter((s) => has(s.step));
+  })).filter((s) => hasValue(s.step));
 
   // 2. Where the work is lost
-  const exs = rows(exceptions, "exception-register.rows").map((r) => ({
+  const exs = rowsOf(exceptions, "exception-register.rows").map((r) => ({
     trigger: noIds(plain(cell(r, "Trigger"))),
     frequency: plain(cell(r, "Frequency")),
     handling: noIds(plain(cell(r, "Current handling"))),
     holder: plain(cell(r, "Rule holder (role)")),
     cls: classOf(cell(r, "Source"), classById),
-  })).filter((e) => has(e.trigger));
-  const deadEnds = rows(map, "operating-map.dead-ends").map((r) => ({
+  })).filter((e) => hasValue(e.trigger));
+  const deadEnds = rowsOf(map, "operating-map.dead-ends").map((r) => ({
     output: noIds(plain(cell(r, "Output"))),
     producedBy: plain(cell(r, "Produced by")),
     consumer: plain(cell(r, "Believed consumer")),
     confirmed: /^y/i.test(cell(r, "Confirmed?")),
     cls: classOf(cell(r, "Source"), classById),
-  })).filter((d) => has(d.output));
+  })).filter((d) => hasValue(d.output));
 
   // 3. What we do not yet know — straight from the coach, grouped by who can
   // answer. Only questions about the client's work: their open questions,
@@ -192,12 +174,12 @@ export async function renderSketch(opts: SketchOptions): Promise<SketchResult> {
 
   // 4. Constraints already found
   const constraints = [
-    ...rows(readiness, "readiness-scorecard.rows")
-      .filter((r) => has(cell(r, "Blocker")))
+    ...rowsOf(readiness, "readiness-scorecard.rows")
+      .filter((r) => hasValue(cell(r, "Blocker")))
       .map((r) => ({ what: `${plain(cell(r, "Source"))}: ${noIds(plain(cell(r, "Blocker")))}`, owner: plain(cell(r, "Blocker owner")), when: plain(cell(r, "Target date")) })),
-    ...rows(readiness, "readiness-scorecard.blockers")
+    ...rowsOf(readiness, "readiness-scorecard.blockers")
       .map((r) => ({ what: noIds(plain(cell(r, "Blocker"))), owner: plain(cell(r, "Owner")), when: plain(cell(r, "Mitigation")) })),
-  ].filter((c) => has(c.what));
+  ].filter((c) => hasValue(c.what));
 
   // The client-safe pass, over every string that reaches the page. Ids are
   // already stripped by construction; this is the names. Roles come from the
@@ -286,7 +268,7 @@ footer{background:var(--hgs-blue-900);color:rgba(255,255,255,.55);padding:18px 0
 <section>
   <h2>Where the work is lost</h2>
   <p class="sub">Exceptions and dead ends we have seen or been told about. <em>unquantified</em> means nobody has counted it yet.</p>
-  ${exs.length ? `<ul>${exs.map((e) => `<li><strong>${esc(e.trigger)}</strong>${e.handling ? ` <span class="meta">— today: ${esc(e.handling)}</span>` : ""} ${has(e.frequency) && !/unquantified/i.test(e.frequency) ? `<span class="meta">· ${esc(e.frequency)}</span>` : `<span class="badge unquantified">unquantified</span>`}${e.holder ? ` <span class="meta">· decided by the ${esc(e.holder.toLowerCase())}</span>` : ""}${badge(e.cls)}</li>`).join("")}</ul>` : empty("no exceptions")}
+  ${exs.length ? `<ul>${exs.map((e) => `<li><strong>${esc(e.trigger)}</strong>${e.handling ? ` <span class="meta">— today: ${esc(e.handling)}</span>` : ""} ${hasValue(e.frequency) && !/unquantified/i.test(e.frequency) ? `<span class="meta">· ${esc(e.frequency)}</span>` : `<span class="badge unquantified">unquantified</span>`}${e.holder ? ` <span class="meta">· decided by the ${esc(e.holder.toLowerCase())}</span>` : ""}${badge(e.cls)}</li>`).join("")}</ul>` : empty("no exceptions")}
   ${deadEnds.length ? `<p class="who">Outputs nobody may be reading</p><ul>${deadEnds.map((d) => `<li><strong>${esc(d.output)}</strong>${d.producedBy ? ` <span class="meta">— produced by ${esc(d.producedBy)}</span>` : ""}${d.consumer ? ` <span class="meta">· believed consumer: ${esc(d.consumer)}${d.confirmed ? " (confirmed)" : " (not yet confirmed)"}</span>` : ""}${badge(d.cls)}</li>`).join("")}</ul>` : ""}
 </section>
 

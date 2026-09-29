@@ -22,12 +22,13 @@
  * files are never touched.
  */
 
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, sep } from "node:path";
 import { scaffoldEngagement, type EngagementVars, type ScaffoldResult } from "./scaffold.ts";
 import { deriveState } from "./state.ts";
 import { mintIds } from "./ids.ts";
 import { appendRows } from "./writer.ts";
+import { exists, listFiles } from "./util.ts";
 
 const RESIDENCY = ["client-tenant", "hgs-tenant", "tbd"] as const;
 const LABOUR = ["works-council", "union", "none", "unknown"] as const;
@@ -103,22 +104,6 @@ export function validateVars(raw: unknown, slug: string): EngagementVars {
   return { ...(v as unknown as EngagementVars), SLUG: slug };
 }
 
-async function exists(p: string): Promise<boolean> {
-  try { await stat(p); return true; } catch { return false; }
-}
-
-async function walk(dir: string): Promise<string[]> {
-  const out: string[] = [];
-  let entries;
-  try { entries = await readdir(dir, { withFileTypes: true }); } catch { return out; }
-  for (const e of entries) {
-    const full = join(dir, e.name);
-    if (e.isDirectory()) out.push(...(await walk(full)));
-    else out.push(full);
-  }
-  return out;
-}
-
 /**
  * Placeholders still on disk after the run.
  *
@@ -129,7 +114,7 @@ async function walk(dir: string): Promise<string[]> {
  */
 async function scanPlaceholders(root: string): Promise<{ file: string; keys: string[] }[]> {
   const out: { file: string; keys: string[] }[] = [];
-  for (const f of await walk(root)) {
+  for (const f of await listFiles(root)) {
     if (!f.endsWith(".md")) continue;
     const body = await readFile(f, "utf8");
     const keys = [...new Set([...body.matchAll(/\{\{([A-Z_]+)\}\}/g)].map((m) => m[1]!))];
@@ -173,7 +158,7 @@ async function raiseTbdQuestions(
       blocks: "03-Systems/systems-inventory.md",
     });
   }
-  if (tbd(vars.RESIDENCY) || vars.RESIDENCY === "tbd") {
+  if (tbd(vars.RESIDENCY)) {
     gaps.push({
       field: "RESIDENCY",
       question: "Where does captured evidence live — client tenant or HGS tenant?",
@@ -199,9 +184,6 @@ async function raiseTbdQuestions(
       blocks: "03-Systems/ontology/ promotion",
     });
   }
-  // The one field the ontology compiler reads to pick a target. Left blank it
-  // is not a default — it is a decision nobody has made, and the compiler will
-  // pick jena for them.
   // The scope line is the baseline every later scope decision is judged
   // against. "recollection" is an honest answer and still a gap — it means
   // nobody can check the baseline against what the client agreed to buy.
@@ -214,6 +196,9 @@ async function raiseTbdQuestions(
       blocks: "every scope decision — scope-changes.md is adjudicated against this line",
     });
   }
+  // The one field the ontology compiler reads to pick a target. Left blank it
+  // is not a default — it is a decision nobody has made, and the compiler will
+  // pick jena for them.
   if (tbd(vars.TARGET_PLATFORM)) {
     gaps.push({
       field: "TARGET_PLATFORM",
@@ -274,12 +259,12 @@ export async function initEngagement(opts: InitOptions): Promise<InitResult> {
   const slug = basename(engagementDir);
   const engagementsRoot = dirname(engagementDir);
 
-  const backfill = (await walk(engagementDir)).length > 0;
+  const backfill = (await listFiles(engagementDir)).length > 0;
 
   if (opts.dryRun) {
     const templates = join(harnessRoot, ".claude", "templates", "engagement-init");
     const would: string[] = [];
-    for (const src of await walk(templates)) {
+    for (const src of await listFiles(templates)) {
       if (!src.endsWith(".template")) continue;
       const rel = relative(templates, src).split(sep).join("/").replace(/\.template$/, "");
       if (!(await exists(join(engagementDir, ...rel.split("/"))))) would.push(rel);
@@ -344,17 +329,9 @@ export async function initEngagement(opts: InitOptions): Promise<InitResult> {
  * needs to assert the tree without reaching into the module.
  */
 export async function engagementSubdirs(engagementDir: string): Promise<string[]> {
-  const out: string[] = [];
-  const walkDirs = async (dir: string, prefix: string) => {
-    let entries;
-    try { entries = await readdir(dir, { withFileTypes: true }); } catch { return; }
-    for (const e of entries) {
-      if (!e.isDirectory()) continue;
-      const rel = prefix ? `${prefix}/${e.name}` : e.name;
-      out.push(rel);
-      await walkDirs(join(dir, e.name), rel);
-    }
-  };
-  await walkDirs(engagementDir, "");
-  return out.sort();
+  const entries = await readdir(engagementDir, { recursive: true, withFileTypes: true }).catch(() => []);
+  return entries
+    .filter((e) => e.isDirectory())
+    .map((e) => relative(engagementDir, join(e.parentPath, e.name)).split(sep).join("/"))
+    .sort();
 }

@@ -19,7 +19,7 @@
 
 import { appendFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { dataRows, findTable, parseAnchoredTables } from "./anchors.ts";
+import { cell, parseAnchoredTables, rowsOf } from "./anchors.ts";
 import { EVIDENCE_ROOT } from "./intake.ts";
 import { WriteRefused } from "./writer.ts";
 
@@ -88,14 +88,14 @@ export async function recordAnswer(
     } catch {
       throw new WriteRefused("02-Workflow/open-questions.md is missing — run /init-engagement");
     }
-    const t = findTable(parseAnchoredTables(md), "open-questions.rows");
-    const row = t ? dataRows(t).find((r) => (r["Id"] ?? "").trim().toUpperCase() === questionId) : undefined;
+    const row = rowsOf(parseAnchoredTables(md), "open-questions.rows")
+      .find((r) => cell(r, "Id").toUpperCase() === questionId);
     if (!row) {
       throw new WriteRefused(
         `${questionId} is not in open-questions.md. Give the question in words instead, or check the id.`,
       );
     }
-    questionText = (row["Question"] ?? "").trim() || questionId;
+    questionText = cell(row, "Question") || questionId;
   }
 
   const now = opts.now ?? new Date();

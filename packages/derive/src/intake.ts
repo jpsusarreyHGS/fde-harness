@@ -191,7 +191,7 @@ export async function placementWarnings(
     if (i.evidenceClass === "observed") {
       let why: string | null = null;
       if ([".vtt", ".srt", ".eml"].includes(ext)) {
-        why = `is a ${ext === ".eml" ? "n email" : " transcript"}`.replace(/^is a n/, "is an").replace(/^is a  /, "is a ");
+        why = ext === ".eml" ? "is an email" : "is a transcript";
       } else if (i.handling === "text") {
         try {
           const head = (await readFile(join(root, i.evidenceClass, i.file), "utf8"))

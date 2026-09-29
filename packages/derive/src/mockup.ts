@@ -24,10 +24,11 @@
  * share one.
  */
 
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { answeredRows, dataRows, findTable, parseAnchoredTables, splitRow } from "./anchors.ts";
 import { appendRows, escapeCell, WriteRefused } from "./writer.ts";
+import { escapeRegExp } from "./util.ts";
 import { loadNames } from "./clientsafe.ts";
 import { INSTRUMENTS } from "./instruments.ts";
 import { deriveState } from "./state.ts";
@@ -148,7 +149,6 @@ export async function logMockup(opts: LogMockupOptions): Promise<LogMockupResult
   const abs = join(opts.deliverablesDir, opts.slug, MOCKUP_DIR, opts.file);
   let html: string;
   try {
-    await stat(abs);
     html = await readFile(abs, "utf8");
   } catch {
     throw new WriteRefused(`deliverables/${opts.slug}/${MOCKUP_DIR}/${opts.file} does not exist. Write the page first; the ledger records what exists.`);
@@ -164,7 +164,7 @@ export async function logMockup(opts: LogMockupOptions): Promise<LogMockupResult
   // Synthetic means synthetic. A stakeholder's name in a mockup is the
   // client-safe failure in a new costume.
   const { roles, allow } = await loadNames(opts.engagementDir);
-  const named = [...roles.keys()].filter((n) => !allow.has(n) && new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(html));
+  const named = [...roles.keys()].filter((n) => !allow.has(n) && new RegExp(`\\b${escapeRegExp(n)}\\b`).test(html));
   if (named.length) {
     throw new WriteRefused(
       `${opts.file} names ${named.join(", ")} — a mockup is synthetic and client-facing. Use the role, or approve the name in 00-Setup/client-safe-names.md.`,

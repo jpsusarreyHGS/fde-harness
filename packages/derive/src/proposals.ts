@@ -249,44 +249,27 @@ export async function acceptProposal(
   for (const b of blocks) {
     if (b.rows.length === 0) continue;
 
-    const realColumns = (await tableInfo(
-      engagementDir,
-      b.target.instrument,
-      b.target.anchor,
-    )).headers;
+    const { instrument, anchor, prefix, idColumn } = b.target;
+    const realColumns = (await tableInfo(engagementDir, instrument, anchor)).headers;
+    // Cells keyed by column, dropping any column the table does not have.
+    const rows = b.rows.map((cells) =>
+      Object.fromEntries(
+        b.columns.flatMap((c, ci) => (realColumns.includes(c) ? [[c, cells[ci] ?? ""]] : [])),
+      ) as Record<string, string>,
+    );
 
     if (b.target.mode === "fill") {
-      const fills: Record<string, string>[] = b.rows.map((cells) => {
-        const row: Record<string, string> = {};
-        b.columns.forEach((c, ci) => {
-          if (!realColumns.includes(c)) return;
-          row[c] = cells[ci] ?? "";
-        });
-        return row;
-      });
-      const res = await fillCells(engagementDir, b.target.instrument, b.target.anchor, fills);
-      written.push({ anchor: b.target.anchor, rows: res.written, ids: [] });
+      const res = await fillCells(engagementDir, instrument, anchor, rows);
+      written.push({ anchor, rows: res.written, ids: [] });
       continue;
     }
 
-    let ids: string[] = [];
-    if (b.target.prefix) {
-      ({ ids } = await mintIds(engagementDir, b.target.prefix, b.rows.length));
-    }
+    const ids = prefix ? (await mintIds(engagementDir, prefix, rows.length)).ids : [];
+    const idCol = idColumn ?? realColumns[0];
+    if (prefix && idCol) rows.forEach((r, i) => { r[idCol] = ids[i]!; });
 
-    const rows: Record<string, string>[] = b.rows.map((cells, idx) => {
-      const row: Record<string, string> = {};
-      b.columns.forEach((c, ci) => {
-        if (!realColumns.includes(c)) return; // proposal carried a stray column
-        row[c] = cells[ci] ?? "";
-      });
-      const idCol = b.target.idColumn ?? realColumns[0];
-      if (b.target.prefix && idCol) row[idCol] = ids[idx]!;
-      return row;
-    });
-
-    const res = await appendRows(engagementDir, b.target.instrument, b.target.anchor, rows);
-    written.push({ anchor: b.target.anchor, rows: res.written, ids });
+    const res = await appendRows(engagementDir, instrument, anchor, rows);
+    written.push({ anchor, rows: res.written, ids });
   }
 
   const marked =

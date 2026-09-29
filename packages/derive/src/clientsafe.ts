@@ -26,6 +26,7 @@ import { join } from "node:path";
 import { dataRows, findTable, parseAnchoredTables, splitRow } from "./anchors.ts";
 import { idPattern } from "./ids.ts";
 import { EVIDENCE_ROOT } from "./intake.ts";
+import { escapeRegExp } from "./util.ts";
 
 export interface Redaction {
   kind: "source-line" | "source-column" | "citation" | "name" | "observed-quote";
@@ -62,9 +63,8 @@ const WHY = {
   "observed-quote": "quoted verbatim from a shadowing session — confirm the operator consented before it leaves",
 } as const;
 
-function esc(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+/** A markdown table separator row, e.g. `|---|:---:|`. */
+const SEPARATOR = /^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/;
 
 function cleanRole(raw: string): string {
   const r = raw.replace(/[*_`]/g, "").trim().replace(/^the\s+/i, "").toLowerCase();
@@ -159,9 +159,9 @@ export function clientSafe(markdown: string, o: ClientSafeOptions): ClientSafeRe
   const nameRules: { re: RegExp; role: string; name: string }[] = [];
   for (const [name, role] of [...o.roles.entries()].sort((a, b) => b[0].length - a[0].length)) {
     if (o.allow.has(name)) continue;
-    nameRules.push({ re: new RegExp(`\\b${esc(name)}\\b`, "g"), role, name });
+    nameRules.push({ re: new RegExp(`\\b${escapeRegExp(name)}\\b`, "g"), role, name });
     for (const tok of name.split(/\s+/)) {
-      if (tok.length >= 4 && !o.allow.has(tok)) nameRules.push({ re: new RegExp(`\\b${esc(tok)}\\b`, "g"), role, name });
+      if (tok.length >= 4 && !o.allow.has(tok)) nameRules.push({ re: new RegExp(`\\b${escapeRegExp(tok)}\\b`, "g"), role, name });
     }
   }
 
@@ -196,12 +196,12 @@ export function clientSafe(markdown: string, o: ClientSafeOptions): ClientSafeRe
     // Tables: a Source column is cleared, the table kept.
     if (isRow) {
       const cells = splitRow(line);
-      const isHeader = out.length === 0 || !/^\s*\|/.test(out[out.length - 1] ?? "") || /^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/.test(lines[idx + 1] ?? "");
-      if (isHeader && /^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/.test(lines[idx + 1] ?? "")) {
+      // A row followed by a separator is a header: a new table starts here.
+      if (SEPARATOR.test(lines[idx + 1] ?? "")) {
         flushSourceCol();
         sourceCol = cells.findIndex((c) => /^source$/i.test(c.replace(/[*_`]/g, "").trim()));
         sourceColLine = n;
-      } else if (sourceCol >= 0 && !/^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/.test(line)) {
+      } else if (sourceCol >= 0 && !SEPARATOR.test(line)) {
         if ((cells[sourceCol] ?? "").trim()) {
           cells[sourceCol] = "";
           sourceColRows++;

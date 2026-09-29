@@ -19,6 +19,7 @@
  */
 
 import { INSTRUMENTS } from "./instruments.ts";
+import { escapeRegExp } from "./util.ts";
 
 export interface SweptPerson {
   name: string;
@@ -96,11 +97,7 @@ const FULL_NAME = `${NAME}(?:\\s+${NAME}){0,2}`;
 // not at a single line wrap, which is what a note-taker's Enter key produces.
 const PHRASE = "[^,.;:()|\\n]";
 
-function esc(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-const ROLE_RE = new RegExp(`\\b(?:${ROLE_WORDS.map(esc).join("|")})\\b`, "i");
+const ROLE_RE = new RegExp(`\\b(?:${ROLE_WORDS.map(escapeRegExp).join("|")})\\b`, "i");
 
 /**
  * Speech only: voice tags and speaker labels come out first, timing goes.
@@ -197,8 +194,8 @@ export function sweepText(raw: string, opts: { sponsorName?: string } = {}): Swe
     const lw = w.toLowerCase();
     if (NOT_A_NAME.has(lw) || systemWords.has(lw)) continue;
     // Take the capitalised mentions out, then look for the word in lower case.
-    const rest = text.replace(new RegExp(`\\b${esc(w)}\\b`, "g"), "").toLowerCase();
-    if (new RegExp(`(?<![A-Za-z])${esc(lw)}(?![A-Za-z])`).test(rest)) continue;
+    const rest = text.replace(new RegExp(`\\b${escapeRegExp(w)}\\b`, "g"), "").toLowerCase();
+    if (new RegExp(`(?<![A-Za-z])${escapeRegExp(lw)}(?![A-Za-z])`).test(rest)) continue;
     remember(w, null);
   }
 
@@ -207,7 +204,7 @@ export function sweepText(raw: string, opts: { sponsorName?: string } = {}): Swe
     // Product names that are also ordinary words only count when capitalised:
     // "access to SAP" is not Microsoft Access, and "the teams" is not Teams.
     const flags = CASE_SENSITIVE.has(s) ? "" : "i";
-    if (new RegExp(`(?<![A-Za-z0-9])${esc(s)}(?![A-Za-z0-9])`, flags).test(text)) systems.push(s);
+    if (new RegExp(`(?<![A-Za-z0-9])${escapeRegExp(s)}(?![A-Za-z0-9])`, flags).test(text)) systems.push(s);
   }
   const foundSystems = new Set(systems.map((s) => s.toUpperCase()));
 
@@ -244,7 +241,7 @@ export function sweepText(raw: string, opts: { sponsorName?: string } = {}): Swe
     const tokens = opts.sponsorName
       .split(/[\s,()]+/)
       .filter((t) => t.length >= 3 && !ROLE_RE.test(t) && !/^(?:and|the|of)$/i.test(t));
-    sponsorMentioned = tokens.some((t) => new RegExp(`\\b${esc(t)}\\b`, "i").test(haystack));
+    sponsorMentioned = tokens.some((t) => new RegExp(`\\b${escapeRegExp(t)}\\b`, "i").test(haystack));
   }
 
   return {

@@ -23,7 +23,7 @@
  *     structurally unreportable.
  */
 
-import { dataRows, findTable, type ParsedTable } from "./anchors.ts";
+import { cell, hasValue, rowsOf, type ParsedTable } from "./anchors.ts";
 
 /** The nine, in the runbook's order. */
 export const ROI_INPUTS = [
@@ -83,14 +83,6 @@ function provenanceOf(raw: string): Provenance {
   return "unstated";
 }
 
-function cell(r: Record<string, string>, ...names: string[]): string {
-  for (const n of names) {
-    const v = r[n];
-    if (v !== undefined) return v.trim();
-  }
-  return "";
-}
-
 function money(n: number): string {
   return n.toLocaleString("en-GB", { maximumFractionDigits: 0 });
 }
@@ -112,8 +104,7 @@ function money(n: number): string {
  * counter-metric finding, and the model should not absorb it.
  */
 export function computeRoi(tables: readonly ParsedTable[]): RoiModel {
-  const t = findTable(tables as ParsedTable[], "roi-model.inputs");
-  const rows = t ? dataRows(t) : [];
+  const rows = rowsOf(tables, "roi-model.inputs");
 
   const inputs: RoiInput[] = ROI_INPUTS.map((label) => {
     const row = rows.find((r) => cell(r, "Input").toLowerCase().startsWith(label.slice(0, 14).toLowerCase()));
@@ -178,14 +169,9 @@ export function computeRoi(tables: readonly ParsedTable[]): RoiModel {
   }
 
   // The three the runbook says every deployed system is measured against.
-  const bt = findTable(tables as ParsedTable[], "roi-model.buckets");
-  const bucketRows = bt ? dataRows(bt) : [];
+  const bucketRows = rowsOf(tables, "roi-model.buckets");
   const addressed = (name: string) =>
-    bucketRows.some(
-      (r) =>
-        cell(r, "Bucket").toLowerCase().includes(name) &&
-        !["", "-", "—", "n/a", "tbd"].includes(cell(r, "Effect").toLowerCase()),
-    );
+    bucketRows.some((r) => cell(r, "Bucket").toLowerCase().includes(name) && hasValue(cell(r, "Effect")));
 
   return {
     inputs,

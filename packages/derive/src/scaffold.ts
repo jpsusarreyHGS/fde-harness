@@ -13,9 +13,10 @@
  *     instrument carries no anchors and derived state cannot read it.
  */
 
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
 import { STAGES } from "./instruments.ts";
+import { exists, listFiles } from "./util.ts";
 
 export interface EngagementVars {
   CLIENT_NAME: string;
@@ -60,20 +61,6 @@ const SUBDIRS = [
   "chronicle/run-events", "harness-improver/feedback",
   "harness-improver/improvements", "engagement-management",
 ];
-
-async function exists(p: string): Promise<boolean> {
-  try { await stat(p); return true; } catch { return false; }
-}
-
-async function walk(dir: string): Promise<string[]> {
-  const out: string[] = [];
-  for (const e of await readdir(dir, { withFileTypes: true })) {
-    const full = join(dir, e.name);
-    if (e.isDirectory()) out.push(...(await walk(full)));
-    else out.push(full);
-  }
-  return out;
-}
 
 function substitute(text: string, vars: EngagementVars): string {
   const table: Record<string, string> = {
@@ -132,8 +119,7 @@ export async function scaffoldEngagement(opts: {
   }
 
   const seed = async (srcDir: string, dstBase: string) => {
-    if (!(await exists(srcDir))) return;
-    for (const src of await walk(srcDir)) {
+    for (const src of await listFiles(srcDir)) {
       if (!src.endsWith(".template")) continue;
       const rel = relative(srcDir, src).split(sep).join("/");
       const dst = join(dstBase, ...rel.replace(/\.template$/, "").split("/"));

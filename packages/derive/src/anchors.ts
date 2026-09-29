@@ -210,7 +210,7 @@ export function cell(row: Record<string, string>, ...names: string[]): string {
 
 /** A cell with nothing in it: empty, a dash, or `n/a`. */
 export function isBlank(v: string | undefined): boolean {
-  const s = (v ?? "").trim();
+  const s = (v ?? "").trim().toLowerCase();
   return s === "" || s === "-" || s === "—" || s === "n/a";
 }
 
