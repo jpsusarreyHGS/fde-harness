@@ -72,7 +72,7 @@ All of it lives in `engagements/<slug>/03-Systems/ontology/`, except the flows, 
 | | **G3 — Production gate** | `/gate 3` |
 | `09` | Run the loop again | `/harness-improver close` |
 
-Plus `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/mockup` (what it could look like, synthetic, assumptions listed), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
+Plus `/ask` (ask anything and get a cited answer with nothing changed), `/next` (the three conversations to have tomorrow, with names attached), `/sketch` (the pre-G1 alignment page — what we heard, not what we will build), `/mockup` (what it could look like, synthetic, assumptions listed), `/dashboard` (rebuild state and render the GUI), `/render` (client deliverables) and `/chronicle` (log the session).
 
 **Not sure which command comes next? `/commands`.** It is the harness's `git --help`: every command in stage order with what it is for — read from the command files themselves, so it cannot go stale — and, for your engagement, *where you are* and the next one to three commands to run, each with the reason:
 
@@ -109,7 +109,7 @@ Two kinds of artefact. **Accepted rows** come out of `/capture` as proposed rows
 | **G3** | Memo, as G1 | `engagement-management/stage-gate-3-readiness.md` | `/gate 3` | prose |
 | `09` | Retrospective; a library contribution **accepted by the library owner** | `09-Loop/retrospective.md` · `library-contribution.md` | `/harness-improver close` | prose + rows |
 
-Any time: `/sketch` (before G1), `/mockup` (whenever you can name what the screen is for — logged in `05-Build/mockup-ledger.md`), `/dashboard`, `/render` (after G1), `/next`, `/chronicle`.
+Any time: `/ask` (a question, answered from the files, with nothing changed), `/sketch` (before G1), `/mockup` (whenever you can name what the screen is for — logged in `05-Build/mockup-ledger.md`), `/dashboard`, `/render` (after G1), `/next`, `/chronicle`.
 
 ### Compressed engagements and simulations
 
@@ -126,7 +126,7 @@ If you have one day of discovery — a training simulation, a two-hour call, a c
 | | |
 |---|---|
 | **9 specialist agents** | discovery-analyst, ontology-engineer, solution-architect, engagement-manager, builder, evaluator, concept-mockup, chronicle, harness-improver |
-| **18 slash commands** | the stage pipeline plus sketch, mockup, dashboard, render, the improvement loop — and `/commands`, which lists them all in stage order and says what to run next |
+| **19 slash commands** | the stage pipeline plus sketch, mockup, dashboard, render, the improvement loop — `/commands`, which lists them all in stage order and says what to run next, and `/ask`, which answers a question and changes nothing |
 | **A house UI** | `hgs-app-ui` — the HGS app design system (navy chrome, Geist, tokens, page patterns) behind every concept mockup and every MVP surface |
 | **9 practice skills** | observation protocol, requirements elicitation, allocation grid, ontology-first delivery, evidence handling, the four tests, the autonomy ladder, stage gates, ROI and readout |
 | **50 templates** | every stage instrument, with machine-readable table anchors |
@@ -473,6 +473,7 @@ Read what it would create, then drop the flag. Existing files are never overwrit
 | `/capture` says nothing is waiting | Your files are outside a class folder. Run `node packages/derive/src/cli.ts intake engagements/<slug>` and it will name them |
 | `intake` says my notes "look like an interview" | They are in `observed/` and read as something someone told you. If a person told you, move the file to `stated/`. If you genuinely watched it, leave it — the warning never moves anything, and the folder decides |
 | The dashboard shows an instrument as empty that you filled | It has no table anchor, or you wrote outside the anchored table. Report it — that is a defect, not your mistake |
+| I asked a question and Claude started editing files or running an agent | Ask with `/ask <your question>` — it answers from the files, cites them, and changes nothing. For a hard guarantee, switch the session to Plan mode first |
 | I want to ask "what should I do next?" without interrupting a running `/capture` | Type `/btw <your question>` in Claude Code. It answers on the side and the running command continues; nothing in the harness changes |
 | The dashboard is "empty" on a new engagement | It is not — it is in early state. Look at the strip at the top: material waiting, rows pending, the G1 checklist. The coverage grid appears after your first accept. If the page is genuinely blank, open the browser console and report the error |
 | An accept is refused | It cites an id that does not exist. The message names it |

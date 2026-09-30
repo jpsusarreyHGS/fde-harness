@@ -97,3 +97,18 @@ test("material waiting outranks everything else in the suggestion", async () => 
     await rm(tmp, { recursive: true, force: true });
   }
 });
+
+test("/ask can only read, receives the question, and CLAUDE.md carries the same rule", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const md = await readFile(join(HARNESS, ".claude", "commands", "ask.md"), "utf8");
+  const tools = /^allowed-tools:\s*(.+)$/m.exec(md)?.[1]?.split(/[\s,]+/).filter(Boolean) ?? [];
+  assert.deepEqual(tools.sort(), ["Glob", "Grep", "Read"], "a question must not pre-approve a tool that writes, runs or dispatches");
+  assert.match(md, /\$ARGUMENTS/, "the question has to reach the command");
+  assert.match(md, /changes nothing/i);
+
+  const claude = await readFile(join(HARNESS, "CLAUDE.md"), "utf8");
+  assert.match(claude, /A question is not a task/, "the orchestrator rule behind /ask");
+
+  const text = formatCommands(await readCommands(HARNESS));
+  assert.match(text, /^ {2}\/ask\s+Ask a question and get an answer with nothing changed/m);
+});

@@ -42,7 +42,7 @@ export const COMMAND_ORDER: readonly { group: string; commands: readonly string[
   { group: "08 · Calculate the ROI", commands: ["roi"] },
   { group: "Any time", commands: ["render", "chronicle"] },
   { group: "09 · Run the loop again", commands: ["harness-improver"] },
-  { group: "Meta", commands: ["commands"] },
+  { group: "Meta", commands: ["commands", "ask"] },
 ] as const;
 
 /** Read every command file's frontmatter. */

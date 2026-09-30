@@ -82,6 +82,8 @@ The harness is a **team of specialist subagents**. The session you are in is the
 
 **Delegate by default.** The method lives in the agent files, and only the agent that owns a task carries those instructions. The main thread **does not run discovery, model, architect, build or evaluate directly.**
 
+**A question is not a task.** When the FDE asks something — "what did the sponsor say about scope?", "why does G1 want the hypotheses closed?" — answer it from the files, cite the file and row, and stop. Do not dispatch an agent, edit a file or run a writing command to answer a question. If the answer shows something that needs doing, name the command that would do it and let the FDE choose. `/ask` is this rule as a command; Plan mode is the hard guarantee.
+
 | Agent | Owns | Stages |
 |---|---|---|
 | **discovery-analyst** | Observation, operating map, exception inventory, requirements, open questions | `01`–`03` |
